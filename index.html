@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>문을 찾아라! - 두근두근 수학 나라</title>
+<style>
+  :root{
+    --pink:#FFD3E0;
+    --pink-deep:#FF9EB8;
+    --peach:#FFE3C2;
+    --sky:#CFEFFF;
+    --mint:#CFF6E4;
+    --lavender:#E6DEFF;
+    --sun:#FFF3B0;
+    --text:#5B4B7A;
+    --text-soft:#8578A8;
+    --accent:#FF7FA6;
+    --accent-2:#7EC8E3;
+    --white:#FFFFFF;
+    --shadow: 0 8px 0 rgba(91,75,122,0.15);
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{
+    margin:0; padding:0; width:100%; height:100%;
+    font-family:'Apple SD Gothic Neo','Malgun Gothic','Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;
+    color:var(--text);
+    background:linear-gradient(160deg,var(--sky) 0%,var(--mint) 45%,var(--lavender) 100%);
+    overflow:hidden;
+    touch-action:manipulation;
+    -webkit-user-select:none; user-select:none;
+  }
+  button{ font-family:inherit; cursor:pointer; }
+  #app{ position:relative; width:100vw; height:100vh; height:100dvh; overflow:hidden; }
+
+  .screen{ display:none; width:100%; height:100%; flex-direction:column; align-items:center; position:relative; }
+  .screen.active{ display:flex; }
+
+  /* ---------- decorative background blobs ---------- */
+  .bg-deco{ position:absolute; inset:0; overflow:hidden; z-index:0; pointer-events:none; }
+  .bg-deco span{ position:absolute; border-radius:50%; opacity:0.55; filter:blur(1px); }
+  .bg-deco span:nth-child(1){ width:140px; height:140px; background:var(--pink); top:-30px; left:-30px; }
+  .bg-deco span:nth-child(2){ width:90px; height:90px; background:var(--sun); top:10%; right:8%; }
+  .bg-deco span:nth-child(3){ width:60px; height:60px; background:var(--accent-2); bottom:12%; left:6%; }
+  .bg-deco span:nth-child(4){ width:120px; height:120px; background:var(--lavender); bottom:-40px; right:-20px; }
+
+  /* ---------- LOBBY ---------- */
+  #screen-lobby{ padding:5vh 5vw; justify-content:flex-start; }
+  .lobby-header{ text-align:center; margin-top:2vh; z-index:1; }
+  .lobby-header h1{ font-size:clamp(28px,6vw,44px); margin:0; color:var(--accent); text-shadow:2px 3px 0 rgba(255,255,255,0.7); }
+  .lobby-header p{ margin:8px 0 0; font-size:clamp(14px,2.4vw,18px); color:var(--text-soft); }
+
+  .game-grid{
+    z-index:1; margin-top:4vh; display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:clamp(14px,3vw,28px);
+    width:min(920px,92vw);
+  }
+  .game-card{
+    border:none; border-radius:28px; padding:clamp(16px,3vw,26px) 10px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    background:var(--white); box-shadow:var(--shadow);
+    transform:translateY(0); transition:transform .15s ease, box-shadow .15s ease;
+    aspect-ratio:1/1;
+  }
+  .game-card.main-card{ background:linear-gradient(160deg,#FFF0F5,#FFFFFF); }
+  .game-card:not(.locked):active{ transform:translateY(6px); box-shadow:0 2px 0 rgba(91,75,122,0.15); }
+  .game-card .card-icon{ font-size:clamp(34px,7vw,56px); }
+  .game-card h2{ margin:0; font-size:clamp(14px,2.6vw,20px); color:var(--text); }
+  .game-card p{ margin:0; font-size:clamp(11px,1.8vw,13px); color:var(--text-soft); text-align:center; }
+  .game-card.locked{ opacity:0.55; }
+  .game-card.locked h2{ font-size:clamp(12px,2vw,15px); }
+
+  /* ---------- BACK BUTTON ---------- */
+  .back-btn{
+    position:absolute; top:18px; left:18px; z-index:5;
+    background:var(--white); border:none; border-radius:20px; padding:10px 18px;
+    font-size:15px; font-weight:700; color:var(--accent); box-shadow:var(--shadow);
+  }
+  .back-btn:active{ transform:translateY(4px); box-shadow:0 2px 0 rgba(91,75,122,0.15); }
+
+  /* ---------- DIFFICULTY ---------- */
+  #screen-difficulty{ justify-content:center; align-items:center; gap:4vh; }
+  #screen-difficulty h2{ z-index:1; font-size:clamp(22px,4vw,32px); color:var(--accent); margin:0; }
+  .diff-grid{ z-index:1; display:flex; gap:clamp(14px,3vw,26px); flex-wrap:wrap; justify-content:center; width:min(760px,92vw); }
+  .diff-card{
+    border:none; border-radius:26px; width:min(210px,28vw); min-width:150px; padding:22px 14px;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    background:var(--white); box-shadow:var(--shadow); transition:transform .15s ease;
+  }
+  .diff-card:active{ transform:translateY(6px); box-shadow:0 2px 0 rgba(91,75,122,0.15); }
+  .diff-card .diff-emoji{ font-size:clamp(30px,5vw,44px); }
+  .diff-card b{ font-size:clamp(16px,2.6vw,20px); color:var(--text); }
+  .diff-card small{ font-size:clamp(11px,1.8vw,12.5px); color:var(--text-soft); text-align:center; line-height:1.4; }
+  .diff-card.easy{ background:linear-gradient(160deg,#FFF9E0,#fff); }
+  .diff-card.normal{ background:linear-gradient(160deg,#E4FFF3,#fff); }
+  .diff-card.hard{ background:linear-gradient(160deg,#F0E9FF,#fff); }
+
+  /* ---------- GAME ---------- */
+  #screen-game{ justify-content:flex-start; }
+  .game-topbar{
+    z-index:6; width:100%; display:flex; align-items:center; justify-content:center;
+    padding:14px 0 6px; position:relative;
+  }
+  .stage-indicator{ font-weight:800; font-size:clamp(14px,2.4vw,18px); color:var(--text); background:var(--white); padding:8px 18px; border-radius:18px; box-shadow:var(--shadow); }
+  .progress-dots{ position:absolute; bottom:-14px; left:50%; transform:translateX(-50%); display:flex; gap:5px; z-index:5; }
+  .progress-dots span{ width:8px; height:8px; border-radius:50%; background:rgba(91,75,122,0.2); }
+  .progress-dots span.done{ background:var(--accent); }
+  .progress-dots span.current{ background:var(--accent-2); transform:scale(1.3); }
+
+  .equation-banner{
+    z-index:5; margin:20px auto 4px; padding:14px 26px; background:var(--white); border-radius:22px;
+    font-size:clamp(24px,5.4vw,40px); font-weight:800; color:var(--text); box-shadow:var(--shadow);
+    letter-spacing:2px; text-align:center;
+  }
+  .feedback-msg{ z-index:5; min-height:22px; font-size:clamp(12px,2vw,15px); color:var(--accent); font-weight:700; margin-bottom:4px; }
+
+  .stage-wrap{
+    position:relative; flex:1; width:100%; overflow:hidden;
+  }
+  .sky-deco{ position:absolute; top:4%; left:0; width:100%; z-index:0; display:flex; justify-content:space-between; padding:0 6%; pointer-events:none; }
+  .cloud{ width:clamp(50px,8vw,80px); height:clamp(24px,4vw,40px); background:#fff; border-radius:40px; opacity:0.85; position:relative; }
+  .cloud::before,.cloud::after{ content:''; position:absolute; background:#fff; border-radius:50%; }
+  .cloud::before{ width:55%; height:130%; top:-50%; left:8%; }
+  .cloud::after{ width:45%; height:100%; top:-35%; right:10%; }
+  .cloud.c2{ margin-top:26px; opacity:0.6; }
+
+  .ground{ position:absolute; bottom:0; left:0; width:100%; height:14%; background:linear-gradient(180deg,#BFF0C9,#9FE0AE); border-radius:50% 50% 0 0/30px 30px 0 0; z-index:0; }
+
+  .doors-row{
+    position:absolute; bottom:12%; left:50%; transform:translateX(-50%);
+    display:flex; gap:clamp(14px,4vw,48px); z-index:2; perspective:1300px;
+    width:min(880px,94vw); justify-content:center;
+  }
+  .door-slot{ display:flex; flex-direction:column; align-items:center; gap:8px; width:clamp(78px,20vw,150px); }
+  .nameplate{
+    background:#FFF3D6; border:3px solid #E8C97A; border-radius:12px; padding:4px 14px;
+    font-weight:800; font-size:clamp(18px,3.6vw,28px); color:#8A6A1F; box-shadow:0 3px 0 rgba(0,0,0,0.08);
+  }
+  .door-btn{ border:none; background:none; padding:0; width:100%; }
+  .door-frame{
+    position:relative; width:100%; aspect-ratio:3/5; background:#C99A6B; border-radius:14px 14px 4px 4px;
+    box-shadow:inset 0 0 0 6px #A9784C, 0 8px 0 rgba(91,75,122,0.15);
+    overflow:hidden; transform-style:preserve-3d;
+  }
+  .door-slot:nth-child(1) .door-frame{ background:#E8A6B8; box-shadow:inset 0 0 0 6px #D480A0,0 8px 0 rgba(91,75,122,0.15); }
+  .door-slot:nth-child(2) .door-frame{ background:#8FCBE0; box-shadow:inset 0 0 0 6px #63AECB,0 8px 0 rgba(91,75,122,0.15); }
+  .door-slot:nth-child(3) .door-frame{ background:#B7A6E8; box-shadow:inset 0 0 0 6px #9483D4,0 8px 0 rgba(91,75,122,0.15); }
+
+  .door-inside{ position:absolute; inset:6px; background:#3B2A22; border-radius:10px; }
+  .door-light{ position:absolute; inset:6px; background:radial-gradient(circle,#fff 0%,#fff 60%,rgba(255,255,255,0) 100%); opacity:0; border-radius:10px; }
+  .door-slot.correct-open .door-light{ animation:doorGlow .5s ease forwards; }
+  @keyframes doorGlow{ from{opacity:0;} to{opacity:1; box-shadow:0 0 40px 18px rgba(255,255,255,0.85);} }
+
+  .monster-pop{ position:absolute; bottom:0; left:50%; width:70%; transform:translate(-50%,30px) scale(0.4); opacity:0; z-index:3; }
+  .door-slot.wrong .monster-pop{ animation:monsterPop .6s ease forwards; }
+  @keyframes monsterPop{
+    0%{ transform:translate(-50%,30px) scale(0.3); opacity:0; }
+    45%{ transform:translate(-50%,-8px) scale(1.05); opacity:1; }
+    65%{ transform:translate(-50%,2px) scale(0.98); }
+    100%{ transform:translate(-50%,0) scale(1); opacity:1; }
+  }
+
+  .door-panel{
+    position:absolute; inset:6px; background:linear-gradient(160deg,#D9A566,#B87F44);
+    border-radius:8px; transform-origin:left center; transition:transform .5s ease; z-index:4;
+    box-shadow:inset 0 0 0 3px rgba(0,0,0,0.08);
+  }
+  .door-panel::after{ content:''; position:absolute; top:50%; right:10%; width:10px; height:10px; background:#F5D98A; border-radius:50%; transform:translateY(-50%); box-shadow:0 0 0 2px rgba(0,0,0,0.1); }
+  .door-panel .panel-line{ position:absolute; left:14%; right:14%; top:12%; bottom:12%; border:2px solid rgba(0,0,0,0.08); border-radius:6px; }
+  .door-slot.correct-open .door-panel{ transform:rotateY(-112deg); }
+  .door-slot.wrong .door-panel{ transform:rotateY(-78deg); }
+
+  .stage-wrap.shake{ animation:screenShake .5s; }
+  @keyframes screenShake{
+    0%,100%{ transform:translateX(0); }
+    20%{ transform:translateX(-10px); }
+    40%{ transform:translateX(9px); }
+    60%{ transform:translateX(-7px); }
+    80%{ transform:translateX(6px); }
+  }
+
+  .child-wrap{
+    position:absolute; left:50%; bottom:6%; width:clamp(60px,11vw,96px); z-index:3;
+    transform:translate(-50%,0) scale(1);
+    transition:transform .9s cubic-bezier(.4,0,.2,1), opacity .5s ease .3s;
+  }
+  .child-wrap.walking{
+    transform:translate(calc(-50% + var(--dx,0px)), var(--dy,0px)) scale(0.32);
+    opacity:0;
+  }
+  .child-wrap svg, .monster-pop svg, .reunion-stage svg{ width:100%; height:100%; display:block; }
+
+  .fade-overlay{
+    position:absolute; inset:0; background:#2E2440; opacity:0; pointer-events:none;
+    transition:opacity .45s ease; z-index:20;
+  }
+  .fade-overlay.active{ opacity:1; }
+
+  /* ---------- ENDING ---------- */
+  #screen-ending{ justify-content:center; align-items:center; }
+  .ending-content{ z-index:2; text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px; width:100%; height:100%; justify-content:center; }
+  .reunion-stage{ position:relative; width:min(420px,80vw); height:clamp(160px,28vh,240px); margin-bottom:6px; }
+  .parents{ position:absolute; right:16%; bottom:6%; width:44%; }
+  .child-reunion{ position:absolute; left:8%; bottom:6%; width:26%; transition:left 1.1s cubic-bezier(.4,0,.2,1), transform 1.1s ease; }
+  .reunion-stage.hug .child-reunion{ left:42%; transform:scale(0.94); }
+  .ending-content h2{ font-size:clamp(24px,5vw,36px); color:var(--accent); margin:4px 0 0; }
+  .ending-content p{ font-size:clamp(13px,2.4vw,17px); color:var(--text-soft); margin:0 0 10px; }
+  #ending-home-btn{
+    border:none; border-radius:22px; padding:14px 34px; background:var(--accent); color:#fff;
+    font-weight:800; font-size:clamp(14px,2.4vw,17px); box-shadow:0 6px 0 #D45C82;
+  }
+  #ending-home-btn:active{ transform:translateY(5px); box-shadow:0 1px 0 #D45C82; }
+
+  .confetti-layer{ position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:10; }
+  .confetti-piece{ position:absolute; top:-12px; border-radius:2px; animation:confettiFall linear forwards; }
+  @keyframes confettiFall{
+    0%{ transform:translateY(-10vh) rotate(0deg); opacity:1; }
+    100%{ transform:translateY(108vh) rotate(360deg); opacity:0.9; }
+  }
+
+  @media (max-width:480px){
+    .doors-row{ gap:10px; }
+    .equation-banner{ padding:10px 16px; letter-spacing:1px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- LOBBY -->
+  <section class="screen active" id="screen-lobby">
+    <div class="bg-deco"><span></span><span></span><span></span><span></span></div>
+    <div class="lobby-header">
+      <h1>🌈 두근두근 수학 나라</h1>
+      <p>재미있는 게임으로 숫자와 친해져요!</p>
+    </div>
+    <div class="game-grid">
+      <button class="game-card main-card" id="card-door-game">
+        <div class="card-icon">🚪</div>
+        <h2>문을 찾아라!</h2>
+        <p>정답의 문을 찾아 떠나는 모험</p>
+      </button>
+      <div class="game-card locked"><div class="card-icon">🧩</div><h2>준비중</h2></div>
+      <div class="game-card locked"><div class="card-icon">🎨</div><h2>준비중</h2></div>
+    </div>
+  </section>
+
+  <!-- DIFFICULTY -->
+  <section class="screen" id="screen-difficulty">
+    <div class="bg-deco"><span></span><span></span><span></span><span></span></div>
+    <button class="back-btn" id="diff-back">← 돌아가기</button>
+    <h2>난이도를 골라주세요</h2>
+    <div class="diff-grid">
+      <button class="diff-card easy" data-diff="easy">
+        <span class="diff-emoji">🐣</span><b>초급</b>
+        <small>한 자릿수<br>덧셈 · 뺄셈</small>
+      </button>
+      <button class="diff-card normal" data-diff="normal">
+        <span class="diff-emoji">🐥</span><b>중급</b>
+        <small>두 자릿수(10~20)<br>+ 한 자릿수</small>
+      </button>
+      <button class="diff-card hard" data-diff="hard">
+        <span class="diff-emoji">🦉</span><b>상급</b>
+        <small>두 자릿수 + 두 자릿수<br>(합 50 이하)</small>
+      </button>
+    </div>
+  </section>
+
+  <!-- GAME -->
+  <section class="screen" id="screen-game">
+    <button class="back-btn" id="game-back">← 나가기</button>
+    <div class="game-topbar">
+      <div class="stage-indicator">스테이지 <span id="stage-num">1</span> / 10</div>
+      <div class="progress-dots" id="progress-dots"></div>
+    </div>
+    <div class="equation-banner" id="equation-banner">3 + 4 = ⬜</div>
+    <div class="feedback-msg" id="feedback-msg"></div>
+
+    <div class="stage-wrap" id="stage-wrap">
+      <div class="sky-deco"><div class="cloud"></div><div class="cloud c2"></div><div class="cloud"></div></div>
+      <div class="ground"></div>
+
+      <div class="doors-row" id="doors-row">
+        <div class="door-slot" data-index="0">
+          <div class="nameplate"><span class="plate-number">1</span></div>
+          <button class="door-btn" data-index="0">
+            <div class="door-frame">
+              <div class="door-inside"></div>
+              <div class="door-light"></div>
+              <div class="monster-pop" data-monster></div>
+              <div class="door-panel"><div class="panel-line"></div></div>
+            </div>
+          </button>
+        </div>
+        <div class="door-slot" data-index="1">
+          <div class="nameplate"><span class="plate-number">2</span></div>
+          <button class="door-btn" data-index="1">
+            <div class="door-frame">
+              <div class="door-inside"></div>
+              <div class="door-light"></div>
+              <div class="monster-pop" data-monster></div>
+              <div class="door-panel"><div class="panel-line"></div></div>
+            </div>
+          </button>
+        </div>
+        <div class="door-slot" data-index="2">
+          <div class="nameplate"><span class="plate-number">3</span></div>
+          <button class="door-btn" data-index="2">
+            <div class="door-frame">
+              <div class="door-inside"></div>
+              <div class="door-light"></div>
+              <div class="monster-pop" data-monster></div>
+              <div class="door-panel"><div class="panel-line"></div></div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div class="child-wrap" id="child-wrap"></div>
+      <div class="fade-overlay" id="fade-overlay"></div>
+    </div>
+  </section>
+
+  <!-- ENDING -->
+  <section class="screen" id="screen-ending">
+    <div class="bg-deco"><span></span><span></span><span></span><span></span></div>
+    <div class="ending-content">
+      <div class="reunion-stage" id="reunion-stage">
+        <div class="parents" id="parents-figure"></div>
+        <div class="child-reunion" id="child-reunion"></div>
+      </div>
+      <h2>🎉 축하합니다! 🎉</h2>
+      <p>10개의 문을 모두 통과해서 엄마 아빠를 만났어요!</p>
+      <button id="ending-home-btn">메인으로 돌아가기</button>
+    </div>
+    <div class="confetti-layer" id="confetti-layer"></div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ SVG assets ============ */
+  function childSVG(){
+    return '<svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg">'
+      + '<ellipse cx="50" cy="132" rx="26" ry="6" fill="#000" opacity="0.08"/>'
+      + '<rect x="30" y="86" width="16" height="40" rx="7" fill="#6C5CE7"/>'
+      + '<rect x="54" y="86" width="16" height="40" rx="7" fill="#6C5CE7"/>'
+      + '<path d="M25 55 Q50 40 75 55 L75 100 Q50 116 25 100 Z" fill="#FF9EB8"/>'
+      + '<rect x="14" y="58" width="14" height="34" rx="7" fill="#FF9EB8"/>'
+      + '<rect x="72" y="58" width="14" height="34" rx="7" fill="#FF9EB8"/>'
+      + '<circle cx="50" cy="30" r="24" fill="#4A3728"/>'
+      + '<circle cx="50" cy="34" r="19" fill="#5C4433"/>'
+      + '<path d="M28 20 Q50 2 72 20 Q74 34 68 30 Q50 16 32 30 Q26 34 28 20Z" fill="#4A3728"/>'
+      + '<circle cx="50" cy="10" r="5" fill="#4A3728"/>'
+      + '</svg>';
+  }
+
+  function monsterSVG(){
+    return '<svg viewBox="0 0 100 90" xmlns="http://www.w3.org/2000/svg">'
+      + '<ellipse cx="50" cy="80" rx="34" ry="7" fill="#000" opacity="0.1"/>'
+      + '<path d="M25 30 Q10 10 22 6 Q30 4 32 18 Z" fill="#8E6FE0"/>'
+      + '<path d="M75 30 Q90 10 78 6 Q70 4 68 18 Z" fill="#8E6FE0"/>'
+      + '<circle cx="50" cy="45" r="34" fill="#A98CF0"/>'
+      + '<circle cx="37" cy="40" r="9" fill="#fff"/>'
+      + '<circle cx="63" cy="40" r="9" fill="#fff"/>'
+      + '<circle cx="38" cy="41" r="4.5" fill="#3B2A55"/>'
+      + '<circle cx="64" cy="41" r="4.5" fill="#3B2A55"/>'
+      + '<path d="M32 58 Q50 74 68 58 Q64 68 50 68 Q36 68 32 58Z" fill="#3B2A55"/>'
+      + '<path d="M36 58 L40 64 L44 58 M48 60 L52 66 L56 60 M60 58 L64 64 L68 58" stroke="#fff" stroke-width="2" fill="none"/>'
+      + '<circle cx="24" cy="50" r="7" fill="#A98CF0"/>'
+      + '<circle cx="76" cy="50" r="7" fill="#A98CF0"/>'
+      + '</svg>';
+  }
+
+  function parentsSVG(){
+    return '<svg viewBox="0 0 140 150" xmlns="http://www.w3.org/2000/svg">'
+      + '<ellipse cx="70" cy="144" rx="55" ry="6" fill="#000" opacity="0.08"/>'
+      + '<rect x="14" y="70" width="40" height="66" rx="18" fill="#F6A8C1"/>'
+      + '<circle cx="34" cy="42" r="26" fill="#3B2A22"/>'
+      + '<circle cx="34" cy="46" r="21" fill="#5C4433"/>'
+      + '<path d="M10 40 Q34 68 58 40 L58 30 Q34 10 10 30 Z" fill="#3B2A22"/>'
+      + '<circle cx="27" cy="47" r="3" fill="#3B2A22"/>'
+      + '<circle cx="41" cy="47" r="3" fill="#3B2A22"/>'
+      + '<path d="M27 56 Q34 61 41 56" stroke="#3B2A22" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
+      + '<rect x="86" y="70" width="40" height="66" rx="16" fill="#7EC8E3"/>'
+      + '<circle cx="106" cy="42" r="24" fill="#4A3728"/>'
+      + '<path d="M84 34 Q106 14 128 34 Q128 22 106 18 Q84 22 84 34Z" fill="#4A3728"/>'
+      + '<circle cx="99" cy="46" r="3" fill="#3B2A22"/>'
+      + '<circle cx="113" cy="46" r="3" fill="#3B2A22"/>'
+      + '<path d="M99 55 Q106 60 113 55" stroke="#3B2A22" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
+      + '</svg>';
+  }
+
+  document.getElementById('child-wrap').innerHTML = childSVG();
+  document.querySelectorAll('[data-monster]').forEach(function(el){ el.innerHTML = monsterSVG(); });
+  document.getElementById('parents-figure').innerHTML = parentsSVG();
+  document.getElementById('child-reunion').innerHTML = childSVG();
+
+  /* ============ screen management ============ */
+  function showScreen(name){
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    document.getElementById('screen-' + name).classList.add('active');
+  }
+
+  document.getElementById('card-door-game').addEventListener('click', function(){ showScreen('difficulty'); });
+  document.getElementById('diff-back').addEventListener('click', function(){ showScreen('lobby'); });
+  document.getElementById('game-back').addEventListener('click', function(){
+    resetSceneForNextStage();
+    showScreen('lobby');
+  });
+  document.getElementById('ending-home-btn').addEventListener('click', function(){
+    document.getElementById('reunion-stage').classList.remove('hug');
+    document.getElementById('confetti-layer').innerHTML = '';
+    showScreen('lobby');
+  });
+
+  document.querySelectorAll('.diff-card').forEach(function(card){
+    card.addEventListener('click', function(){
+      startGame(card.dataset.diff);
+    });
+  });
+
+  /* ============ progress dots ============ */
+  var dotsWrap = document.getElementById('progress-dots');
+  for(var d=0; d<10; d++){
+    var dot = document.createElement('span');
+    dotsWrap.appendChild(dot);
+  }
+  function updateDots(){
+    var dots = dotsWrap.children;
+    for(var i=0;i<dots.length;i++){
+      dots[i].classList.toggle('done', i < state.stage);
+      dots[i].classList.toggle('current', i === state.stage);
+    }
+  }
+
+  /* ============ game state & logic ============ */
+  var state = { difficulty:'easy', stage:0, totalStages:10, used:null, current:null, locked:false };
+
+  function pick(min,max){ return Math.floor(Math.random()*(max-min+1)) + min; }
+
+  function generateFact(difficulty){
+    var guard = 0;
+    while(guard < 500){
+      guard++;
+      var op = Math.random() < 0.5 ? '+' : '-';
+      var A, B;
+      if(difficulty === 'easy'){
+        A = pick(0,9); B = pick(0,9);
+        if(op === '-' && A < B){ var t=A; A=B; B=t; }
+      } else if(difficulty === 'normal'){
+        var two = pick(10,20), one = pick(1,9);
+        if(op === '-'){ A = two; B = one; }
+        else { if(Math.random() < 0.5){ A = two; B = one; } else { A = one; B = two; } }
+      } else { // hard
+        if(op === '+'){
+          A = pick(10,40);
+          var maxB = Math.min(40, 50-A);
+          if(maxB < 10) continue;
+          B = pick(10, maxB);
+        } else {
+          A = pick(15,49);
+          B = pick(10, A);
+        }
+      }
+      var key = A + op + B;
+      if(state.used.has(key)) continue;
+      state.used.add(key);
+      var result = op === '+' ? A+B : A-B;
+      return { A:A, B:B, op:op, result:result };
+    }
+    // fallback (should not normally happen)
+    return { A:1, B:1, op:'+', result:2 };
+  }
+
+  function buildProblem(difficulty){
+    var fact = generateFact(difficulty);
+    var slot = pick(0,2); // 0=A hidden, 1=B hidden, 2=result hidden
+    var answer, dispA, dispB, dispR;
+    if(slot === 0){ answer = fact.A; dispA = '⬜'; dispB = fact.B; dispR = fact.result; }
+    else if(slot === 1){ answer = fact.B; dispA = fact.A; dispB = '⬜'; dispR = fact.result; }
+    else { answer = fact.result; dispA = fact.A; dispB = fact.B; dispR = '⬜'; }
+    var text = dispA + ' ' + fact.op + ' ' + dispB + ' = ' + dispR;
+    return { fact:fact, slot:slot, answer:answer, text:text };
+  }
+
+  function buildCandidates(answer){
+    var set = {}; set[answer] = true;
+    var list = [answer];
+    var guard = 0;
+    while(list.length < 3 && guard < 300){
+      guard++;
+      var delta = pick(1,3) * (Math.random() < 0.5 ? -1 : 1);
+      var val = answer + delta;
+      if(val < 0 || set[val]) continue;
+      set[val] = true; list.push(val);
+    }
+    guard = 0;
+    while(list.length < 3 && guard < 300){
+      guard++;
+      var val2 = pick(0, answer + 5);
+      if(set[val2]) continue;
+      set[val2] = true; list.push(val2);
+    }
+    // shuffle
+    for(var i=list.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var tmp = list[i]; list[i] = list[j]; list[j] = tmp;
+    }
+    return list;
+  }
+
+  var doorSlots = Array.prototype.slice.call(document.querySelectorAll('.door-slot'));
+  var doorBtns = Array.prototype.slice.call(document.querySelectorAll('.door-btn'));
+  var equationBanner = document.getElementById('equation-banner');
+  var feedbackMsg = document.getElementById('feedback-msg');
+  var stageNumEl = document.getElementById('stage-num');
+  var childWrap = document.getElementById('child-wrap');
+  var stageWrap = document.getElementById('stage-wrap');
+  var fadeOverlay = document.getElementById('fade-overlay');
+
+  function startGame(difficulty){
+    state.difficulty = difficulty;
+    state.stage = 0;
+    state.used = new Set();
+    state.locked = false;
+    showScreen('game');
+    resetSceneForNextStage();
+    renderStage();
+  }
+
+  function renderStage(){
+    var problem = buildProblem(state.difficulty);
+    var candidates = buildCandidates(problem.answer);
+    var answerIndex = candidates.indexOf(problem.answer);
+    state.current = { problem:problem, candidates:candidates, answerIndex:answerIndex };
+
+    equationBanner.textContent = problem.text;
+    feedbackMsg.textContent = '';
+    stageNumEl.textContent = state.stage + 1;
+    updateDots();
+
+    candidates.forEach(function(val, i){
+      doorSlots[i].querySelector('.plate-number').textContent = val;
+      doorSlots[i].dataset.value = val;
+    });
+    state.locked = false;
+  }
+
+  function resetSceneForNextStage(){
+    doorSlots.forEach(function(slot){
+      slot.classList.remove('correct-open','wrong');
+    });
+    childWrap.classList.remove('walking');
+    childWrap.style.removeProperty('--dx');
+    childWrap.style.removeProperty('--dy');
+    fadeOverlay.classList.remove('active');
+  }
+
+  doorBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var idx = Number(btn.dataset.index);
+      selectDoor(idx);
+    });
+  });
+
+  function selectDoor(idx){
+    if(state.locked) return;
+    var slot = doorSlots[idx];
+    var val = Number(slot.dataset.value);
+    if(val === state.current.problem.answer){
+      state.locked = true;
+      feedbackMsg.textContent = '';
+      playCorrect(idx);
+    } else {
+      playWrong(idx);
+    }
+  }
+
+  function playWrong(idx){
+    var slot = doorSlots[idx];
+    slot.classList.add('wrong');
+    stageWrap.classList.add('shake');
+    feedbackMsg.textContent = '다시 한번 생각해볼까요? 🙂';
+    setTimeout(function(){
+      stageWrap.classList.remove('shake');
+    }, 500);
+    setTimeout(function(){
+      slot.classList.remove('wrong');
+    }, 750);
+  }
+
+  function playCorrect(idx){
+    var slot = doorSlots[idx];
+    slot.classList.add('correct-open');
+
+    setTimeout(function(){
+      var doorRect = slot.getBoundingClientRect();
+      var childRect = childWrap.getBoundingClientRect();
+      var targetX = (doorRect.left + doorRect.width/2) - (childRect.left + childRect.width/2);
+      var targetY = (doorRect.top + doorRect.height*0.35) - (childRect.top + childRect.height/2);
+      childWrap.style.setProperty('--dx', targetX + 'px');
+      childWrap.style.setProperty('--dy', targetY + 'px');
+      childWrap.classList.add('walking');
+    }, 280);
+
+    setTimeout(function(){
+      fadeOverlay.classList.add('active');
+    }, 280 + 900);
+
+    setTimeout(function(){
+      advanceStage();
+    }, 280 + 900 + 450);
+  }
+
+  function advanceStage(){
+    state.stage++;
+    if(state.stage >= state.totalStages){
+      resetSceneForNextStage();
+      showEnding();
+      return;
+    }
+    resetSceneForNextStage();
+    renderStage();
+    requestAnimationFrame(function(){
+      fadeOverlay.classList.remove('active');
+    });
+  }
+
+  /* ============ ending ============ */
+  function showEnding(){
+    showScreen('ending');
+    var stageEl = document.getElementById('reunion-stage');
+    stageEl.classList.remove('hug');
+    setTimeout(function(){
+      stageEl.classList.add('hug');
+      spawnConfetti();
+    }, 250);
+  }
+
+  function spawnConfetti(){
+    var layer = document.getElementById('confetti-layer');
+    layer.innerHTML = '';
+    var colors = ['#FF9EB8','#7EC8E3','#FFE38A','#B7A6E8','#9EE6C0'];
+    for(var i=0;i<60;i++){
+      var piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      var size = 6 + Math.random()*6;
+      piece.style.width = size + 'px';
+      piece.style.height = (size*1.4) + 'px';
+      piece.style.left = (Math.random()*100) + '%';
+      piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+      piece.style.animationDuration = (2.2 + Math.random()*1.8) + 's';
+      piece.style.animationDelay = (Math.random()*0.6) + 's';
+      layer.appendChild(piece);
+    }
+  }
+
+})();
+</script>
+</body>
+</html>
