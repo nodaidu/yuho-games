@@ -73,7 +73,7 @@
 
   /* ---------- BACK BUTTON ---------- */
   .back-btn{
-    position:absolute; top:18px; left:18px; z-index:5;
+    position:absolute; top:18px; left:18px; z-index:10;
     background:var(--white); border:none; border-radius:20px; padding:10px 18px;
     font-size:15px; font-weight:700; color:var(--accent); box-shadow:var(--shadow);
   }
@@ -148,17 +148,22 @@
   .door-slot:nth-child(3) .door-frame{ background:#B7A6E8; box-shadow:inset 0 0 0 6px #9483D4,0 8px 0 rgba(91,75,122,0.15); }
 
   .door-inside{ position:absolute; inset:6px; background:#3B2A22; border-radius:10px; }
-  .door-light{ position:absolute; inset:6px; background:radial-gradient(circle,#fff 0%,#fff 60%,rgba(255,255,255,0) 100%); opacity:0; border-radius:10px; }
-  .door-slot.correct-open .door-light{ animation:doorGlow .5s ease forwards; }
-  @keyframes doorGlow{ from{opacity:0;} to{opacity:1; box-shadow:0 0 40px 18px rgba(255,255,255,0.85);} }
+  .door-light{ position:absolute; inset:6px; background:radial-gradient(circle,#fff 0%,#fff 60%,rgba(255,255,255,0) 100%); opacity:0; border-radius:10px; transform:scale(0.15); transform-origin:50% 55%; }
+  .door-slot.correct-open .door-light{ animation:doorGlowSpread .8s cubic-bezier(.2,.7,.3,1) forwards; }
+  @keyframes doorGlowSpread{
+    0%{ opacity:0; transform:scale(0.15); }
+    35%{ opacity:1; transform:scale(0.7); box-shadow:0 0 20px 6px rgba(255,255,255,0.7); }
+    100%{ opacity:1; transform:scale(1.25); box-shadow:0 0 50px 22px rgba(255,255,255,0.95); }
+  }
 
   .monster-pop{ position:absolute; bottom:0; left:50%; width:70%; transform:translate(-50%,30px) scale(0.4); opacity:0; z-index:3; }
-  .door-slot.wrong .monster-pop{ animation:monsterPop .6s ease forwards; }
-  @keyframes monsterPop{
+  .door-slot.wrong .monster-pop{ animation:monsterAttackSequence 1.1s ease-in-out forwards; }
+  @keyframes monsterAttackSequence{
     0%{ transform:translate(-50%,30px) scale(0.3); opacity:0; }
-    45%{ transform:translate(-50%,-8px) scale(1.05); opacity:1; }
-    65%{ transform:translate(-50%,2px) scale(0.98); }
-    100%{ transform:translate(-50%,0) scale(1); opacity:1; }
+    25%{ transform:translate(-50%,0) scale(1); opacity:1; }
+    45%{ transform:translate(-50%,-18px) scale(1.15); opacity:1; }
+    62%{ transform:translate(-50%,-16px) scale(1.12); opacity:1; }
+    100%{ transform:translate(-50%,32px) scale(0.25); opacity:0; }
   }
 
   .door-panel{
@@ -171,22 +176,38 @@
   .door-slot.correct-open .door-panel{ transform:rotateY(-112deg); }
   .door-slot.wrong .door-panel{ transform:rotateY(-78deg); }
 
-  .stage-wrap.shake{ animation:screenShake .5s; }
+  .stage-wrap.shake{ animation:screenShake .45s; }
   @keyframes screenShake{
     0%,100%{ transform:translateX(0); }
-    20%{ transform:translateX(-10px); }
-    40%{ transform:translateX(9px); }
-    60%{ transform:translateX(-7px); }
-    80%{ transform:translateX(6px); }
+    20%{ transform:translateX(-8px); }
+    40%{ transform:translateX(7px); }
+    60%{ transform:translateX(-5px); }
+    80%{ transform:translateX(4px); }
   }
 
   .child-wrap{
     position:absolute; left:50%; bottom:6%; width:clamp(60px,11vw,96px); z-index:3;
+    transform-origin:50% 100%;
     transform:translate(-50%,0) scale(1);
-    transition:transform .9s cubic-bezier(.4,0,.2,1), opacity .5s ease .3s;
+    transition:transform .35s ease;
   }
-  .child-wrap.walking{
-    transform:translate(calc(-50% + var(--dx,0px)), var(--dy,0px)) scale(0.32);
+  .child-wrap.hit{ animation:childShake .45s ease; }
+  @keyframes childShake{
+    0%,100%{ transform:translate(-50%,0) rotate(0deg); }
+    20%{ transform:translate(-58%,2px) rotate(-7deg); }
+    40%{ transform:translate(-42%,-2px) rotate(7deg); }
+    60%{ transform:translate(-58%,2px) rotate(-5deg); }
+    80%{ transform:translate(-42%,-2px) rotate(5deg); }
+  }
+  .child-wrap.walk-approach{
+    transition:transform .55s cubic-bezier(.45,.05,.4,1);
+    transform:translate(calc(-50% + var(--dx1,0px)), var(--dy1,0px)) scale(1);
+  }
+  .child-wrap.walk-approach svg{ animation:walkBob .3s ease-in-out infinite; }
+  @keyframes walkBob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-6px); } }
+  .child-wrap.walk-enter{
+    transition:transform .5s cubic-bezier(.4,0,.7,1), opacity .4s ease .2s;
+    transform:translate(calc(-50% + var(--dx2,0px)), var(--dy2,0px)) scale(0.2);
     opacity:0;
   }
   .child-wrap svg, .monster-pop svg, .reunion-stage svg{ width:100%; height:100%; display:block; }
@@ -201,9 +222,35 @@
   #screen-ending{ justify-content:center; align-items:center; }
   .ending-content{ z-index:2; text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px; width:100%; height:100%; justify-content:center; }
   .reunion-stage{ position:relative; width:min(420px,80vw); height:clamp(160px,28vh,240px); margin-bottom:6px; }
+  .reunion-glow{
+    position:absolute; left:60%; bottom:8%; width:70%; height:70%; transform:translateX(-50%);
+    background:radial-gradient(circle,rgba(255,255,255,0.9) 0%,rgba(255,241,176,0.5) 45%,rgba(255,241,176,0) 75%);
+    opacity:0; transition:opacity 1s ease; pointer-events:none;
+  }
+  .reunion-stage.arrived .reunion-glow{ opacity:1; }
   .parents{ position:absolute; right:16%; bottom:6%; width:44%; }
-  .child-reunion{ position:absolute; left:8%; bottom:6%; width:26%; transition:left 1.1s cubic-bezier(.4,0,.2,1), transform 1.1s ease; }
-  .reunion-stage.hug .child-reunion{ left:42%; transform:scale(0.94); }
+  .child-reunion{
+    position:absolute; left:-6%; bottom:6%; width:20%;
+    transition:left 1.3s cubic-bezier(.3,.65,.35,1), transform 1.3s ease;
+  }
+  .reunion-stage.hug .child-reunion{ left:47%; }
+  .child-reunion.running svg{ animation:runBob .32s ease-in-out infinite; }
+  @keyframes runBob{ 0%,100%{ transform:translateY(0) rotate(0deg); } 50%{ transform:translateY(-9px) rotate(-4deg); } }
+  .child-reunion.arrived svg{ animation:happyBounce .6s ease-in-out infinite; }
+  @keyframes happyBounce{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-7px); } }
+  .child-reunion .wave-arm{ transform-origin:50% 100%; }
+  .child-reunion.arrived .wave-arm{ animation:waveArm .55s ease-in-out infinite; }
+  @keyframes waveArm{ 0%,100%{ transform:rotate(0deg); } 50%{ transform:rotate(22deg); } }
+
+  .ending-content h2, .ending-content p, .ending-content button{
+    opacity:0; transform:translateY(12px);
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  .ending-content.reveal h2, .ending-content.reveal p, .ending-content.reveal button{
+    opacity:1; transform:translateY(0);
+  }
+  .ending-content.reveal p{ transition-delay:.1s; }
+  .ending-content.reveal button{ transition-delay:.2s; }
   .ending-content h2{ font-size:clamp(24px,5vw,36px); color:var(--accent); margin:4px 0 0; }
   .ending-content p{ font-size:clamp(13px,2.4vw,17px); color:var(--text-soft); margin:0 0 10px; }
   #ending-home-btn{
@@ -327,11 +374,12 @@
     <div class="bg-deco"><span></span><span></span><span></span><span></span></div>
     <div class="ending-content">
       <div class="reunion-stage" id="reunion-stage">
+        <div class="reunion-glow"></div>
         <div class="parents" id="parents-figure"></div>
         <div class="child-reunion" id="child-reunion"></div>
       </div>
-      <h2>🎉 축하합니다! 🎉</h2>
-      <p>10개의 문을 모두 통과해서 엄마 아빠를 만났어요!</p>
+      <h2>🎉 엄마 아빠를 만났어요! 🎉</h2>
+      <p>10개의 문을 모두 통과한 우리 친구, 정말 잘했어요!</p>
       <button id="ending-home-btn">메인으로 돌아가기</button>
     </div>
     <div class="confetti-layer" id="confetti-layer"></div>
@@ -380,25 +428,50 @@
     return '<svg viewBox="0 0 140 150" xmlns="http://www.w3.org/2000/svg">'
       + '<ellipse cx="70" cy="144" rx="55" ry="6" fill="#000" opacity="0.08"/>'
       + '<rect x="14" y="70" width="40" height="66" rx="18" fill="#F6A8C1"/>'
-      + '<circle cx="34" cy="42" r="26" fill="#3B2A22"/>'
-      + '<circle cx="34" cy="46" r="21" fill="#5C4433"/>'
-      + '<path d="M10 40 Q34 68 58 40 L58 30 Q34 10 10 30 Z" fill="#3B2A22"/>'
+      + '<circle cx="34" cy="44" r="24" fill="#FFDDBB"/>'
+      + '<path d="M9 42 Q34 66 59 42 L59 32 Q34 10 9 32 Z" fill="#6B4A2E"/>'
       + '<circle cx="27" cy="47" r="3" fill="#3B2A22"/>'
       + '<circle cx="41" cy="47" r="3" fill="#3B2A22"/>'
-      + '<path d="M27 56 Q34 61 41 56" stroke="#3B2A22" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
+      + '<circle cx="25" cy="53" r="4" fill="#FF9EB8" opacity="0.55"/>'
+      + '<circle cx="43" cy="53" r="4" fill="#FF9EB8" opacity="0.55"/>'
+      + '<path d="M26 57 Q34 63 42 57" stroke="#8A5A3A" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
       + '<rect x="86" y="70" width="40" height="66" rx="16" fill="#7EC8E3"/>'
-      + '<circle cx="106" cy="42" r="24" fill="#4A3728"/>'
-      + '<path d="M84 34 Q106 14 128 34 Q128 22 106 18 Q84 22 84 34Z" fill="#4A3728"/>'
-      + '<circle cx="99" cy="46" r="3" fill="#3B2A22"/>'
-      + '<circle cx="113" cy="46" r="3" fill="#3B2A22"/>'
-      + '<path d="M99 55 Q106 60 113 55" stroke="#3B2A22" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
+      + '<circle cx="106" cy="44" r="23" fill="#FFD9B3"/>'
+      + '<path d="M83 36 Q106 16 129 36 Q129 24 106 20 Q83 24 83 36Z" fill="#4A3728"/>'
+      + '<circle cx="99" cy="47" r="3" fill="#3B2A22"/>'
+      + '<circle cx="113" cy="47" r="3" fill="#3B2A22"/>'
+      + '<circle cx="97" cy="53" r="4" fill="#FF9EB8" opacity="0.5"/>'
+      + '<circle cx="115" cy="53" r="4" fill="#FF9EB8" opacity="0.5"/>'
+      + '<path d="M99 57 Q106 63 113 57" stroke="#8A5A3A" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
+      + '</svg>';
+  }
+
+  function childRunningSVG(){
+    return '<svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg">'
+      + '<ellipse cx="50" cy="134" rx="24" ry="6" fill="#000" opacity="0.08"/>'
+      + '<rect x="34" y="92" width="14" height="36" rx="7" fill="#6C5CE7" transform="rotate(18 41 92)"/>'
+      + '<rect x="50" y="92" width="14" height="36" rx="7" fill="#6C5CE7" transform="rotate(-24 57 92)"/>'
+      + '<rect x="22" y="58" width="13" height="32" rx="6" fill="#FF9EB8" transform="rotate(20 28 58)"/>'
+      + '<rect x="32" y="52" width="36" height="46" rx="15" fill="#FF9EB8"/>'
+      + '<g class="wave-arm">'
+      + '<rect x="66" y="28" width="13" height="34" rx="6" fill="#FF9EB8" transform="rotate(-42 72 60)"/>'
+      + '<circle cx="60" cy="24" r="7.5" fill="#FFD9B3"/>'
+      + '</g>'
+      + '<circle cx="50" cy="28" r="20" fill="#FFD9B3"/>'
+      + '<path d="M28 24 Q50 4 72 24 Q73 34 66 30 Q50 18 34 30 Q27 34 28 24Z" fill="#4A3728"/>'
+      + '<circle cx="70" cy="18" r="5" fill="#4A3728"/>'
+      + '<circle cx="43" cy="27" r="2.6" fill="#3B2A22"/>'
+      + '<circle cx="57" cy="27" r="2.6" fill="#3B2A22"/>'
+      + '<circle cx="38" cy="33" r="4" fill="#FF9EB8" opacity="0.6"/>'
+      + '<circle cx="62" cy="33" r="4" fill="#FF9EB8" opacity="0.6"/>'
+      + '<path d="M40 34 Q50 43 60 34" stroke="#3B2A22" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
       + '</svg>';
   }
 
   document.getElementById('child-wrap').innerHTML = childSVG();
   document.querySelectorAll('[data-monster]').forEach(function(el){ el.innerHTML = monsterSVG(); });
   document.getElementById('parents-figure').innerHTML = parentsSVG();
-  document.getElementById('child-reunion').innerHTML = childSVG();
+  document.getElementById('child-reunion').innerHTML = childRunningSVG();
 
   /* ============ screen management ============ */
   function showScreen(name){
@@ -413,7 +486,9 @@
     showScreen('lobby');
   });
   document.getElementById('ending-home-btn').addEventListener('click', function(){
-    document.getElementById('reunion-stage').classList.remove('hug');
+    document.getElementById('reunion-stage').classList.remove('hug','arrived');
+    document.getElementById('child-reunion').classList.remove('running','arrived');
+    document.querySelector('.ending-content').classList.remove('reveal');
     document.getElementById('confetti-layer').innerHTML = '';
     showScreen('lobby');
   });
@@ -478,8 +553,18 @@
   }
 
   function buildProblem(difficulty){
-    var fact = generateFact(difficulty);
-    var slot = pick(0,2); // 0=A hidden, 1=B hidden, 2=result hidden
+    var fact, validSlots;
+    var guard = 0;
+    do {
+      fact = generateFact(difficulty);
+      validSlots = [0,1,2].filter(function(s){
+        var v = s === 0 ? fact.A : s === 1 ? fact.B : fact.result;
+        return v !== 0;
+      });
+      guard++;
+    } while(validSlots.length === 0 && guard < 50);
+
+    var slot = validSlots[pick(0, validSlots.length - 1)];
     var answer, dispA, dispB, dispR;
     if(slot === 0){ answer = fact.A; dispA = '⬜'; dispB = fact.B; dispR = fact.result; }
     else if(slot === 1){ answer = fact.B; dispA = fact.A; dispB = '⬜'; dispR = fact.result; }
@@ -555,9 +640,11 @@
     doorSlots.forEach(function(slot){
       slot.classList.remove('correct-open','wrong');
     });
-    childWrap.classList.remove('walking');
-    childWrap.style.removeProperty('--dx');
-    childWrap.style.removeProperty('--dy');
+    childWrap.classList.remove('walk-approach','walk-enter','hit');
+    childWrap.style.removeProperty('--dx1');
+    childWrap.style.removeProperty('--dy1');
+    childWrap.style.removeProperty('--dx2');
+    childWrap.style.removeProperty('--dy2');
     fadeOverlay.classList.remove('active');
   }
 
@@ -584,37 +671,56 @@
   function playWrong(idx){
     var slot = doorSlots[idx];
     slot.classList.add('wrong');
-    stageWrap.classList.add('shake');
     feedbackMsg.textContent = '다시 한번 생각해볼까요? 🙂';
+
+    setTimeout(function(){
+      stageWrap.classList.add('shake');
+      childWrap.classList.add('hit');
+    }, 480);
     setTimeout(function(){
       stageWrap.classList.remove('shake');
-    }, 500);
+      childWrap.classList.remove('hit');
+    }, 930);
     setTimeout(function(){
       slot.classList.remove('wrong');
-    }, 750);
+    }, 1150);
   }
 
   function playCorrect(idx){
     var slot = doorSlots[idx];
     slot.classList.add('correct-open');
 
+    var doorRect = slot.getBoundingClientRect();
+    var childRect = childWrap.getBoundingClientRect();
+    var childAnchorX = childRect.left + childRect.width/2;
+    var childAnchorY = childRect.bottom;
+    var doorCenterX = doorRect.left + doorRect.width/2;
+    var thresholdY = doorRect.top + doorRect.height*0.88;
+    var deeperY = doorRect.top + doorRect.height*0.48;
+
+    childWrap.style.setProperty('--dx1', (doorCenterX - childAnchorX) + 'px');
+    childWrap.style.setProperty('--dy1', (thresholdY - childAnchorY) + 'px');
+    childWrap.style.setProperty('--dx2', (doorCenterX - childAnchorX) + 'px');
+    childWrap.style.setProperty('--dy2', (deeperY - childAnchorY) + 'px');
+
+    var APPROACH_DELAY = 300, APPROACH_DUR = 550, ENTER_DUR = 500, FADE_DUR = 450;
+
     setTimeout(function(){
-      var doorRect = slot.getBoundingClientRect();
-      var childRect = childWrap.getBoundingClientRect();
-      var targetX = (doorRect.left + doorRect.width/2) - (childRect.left + childRect.width/2);
-      var targetY = (doorRect.top + doorRect.height*0.35) - (childRect.top + childRect.height/2);
-      childWrap.style.setProperty('--dx', targetX + 'px');
-      childWrap.style.setProperty('--dy', targetY + 'px');
-      childWrap.classList.add('walking');
-    }, 280);
+      childWrap.classList.add('walk-approach');
+    }, APPROACH_DELAY);
+
+    setTimeout(function(){
+      childWrap.classList.remove('walk-approach');
+      childWrap.classList.add('walk-enter');
+    }, APPROACH_DELAY + APPROACH_DUR);
 
     setTimeout(function(){
       fadeOverlay.classList.add('active');
-    }, 280 + 900);
+    }, APPROACH_DELAY + APPROACH_DUR + ENTER_DUR);
 
     setTimeout(function(){
       advanceStage();
-    }, 280 + 900 + 450);
+    }, APPROACH_DELAY + APPROACH_DUR + ENTER_DUR + FADE_DUR);
   }
 
   function advanceStage(){
@@ -635,11 +741,26 @@
   function showEnding(){
     showScreen('ending');
     var stageEl = document.getElementById('reunion-stage');
-    stageEl.classList.remove('hug');
+    var childEl = document.getElementById('child-reunion');
+    var contentEl = document.querySelector('.ending-content');
+    stageEl.classList.remove('hug','arrived');
+    childEl.classList.remove('running','arrived');
+    contentEl.classList.remove('reveal');
+
+    var RUN_DELAY = 400, RUN_DUR = 1300;
+
     setTimeout(function(){
+      childEl.classList.add('running');
       stageEl.classList.add('hug');
+    }, RUN_DELAY);
+
+    setTimeout(function(){
+      childEl.classList.remove('running');
+      childEl.classList.add('arrived');
+      stageEl.classList.add('arrived');
+      contentEl.classList.add('reveal');
       spawnConfetti();
-    }, 250);
+    }, RUN_DELAY + RUN_DUR);
   }
 
   function spawnConfetti(){
