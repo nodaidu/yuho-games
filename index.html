@@ -95,6 +95,10 @@
   .diff-card.easy{ background:linear-gradient(160deg,#FFF9E0,#fff); }
   .diff-card.normal{ background:linear-gradient(160deg,#E4FFF3,#fff); }
   .diff-card.hard{ background:linear-gradient(160deg,#F0E9FF,#fff); }
+  .diff-card.lvl9{ background:linear-gradient(160deg,#FFE9E9,#fff); }
+  .diff-card.lvl8{ background:linear-gradient(160deg,#FFF3DC,#fff); }
+  .diff-card.lvl7{ background:linear-gradient(160deg,#E8F0FF,#fff); }
+  .diff-card .diff-hanja{ font-size:clamp(30px,5vw,44px); font-weight:800; color:var(--accent); }
 
   /* ---------- GAME ---------- */
   #screen-game{ justify-content:flex-start; }
@@ -113,6 +117,7 @@
     font-size:clamp(24px,5.4vw,40px); font-weight:800; color:var(--text); box-shadow:var(--shadow);
     letter-spacing:2px; text-align:center;
   }
+  .equation-banner.hanja-char{ font-size:clamp(48px,11vw,90px); padding:6px 34px; letter-spacing:0; }
   .feedback-msg{ z-index:5; min-height:22px; font-size:clamp(12px,2vw,15px); color:var(--accent); font-weight:700; margin-bottom:4px; }
 
   .stage-wrap{
@@ -136,7 +141,9 @@
   .nameplate{
     background:#FFF3D6; border:3px solid #E8C97A; border-radius:12px; padding:4px 14px;
     font-weight:800; font-size:clamp(18px,3.6vw,28px); color:#8A6A1F; box-shadow:0 3px 0 rgba(0,0,0,0.08);
+    white-space:nowrap;
   }
+  .nameplate.small-text{ font-size:clamp(13px,2.6vw,18px); padding:4px 10px; }
   .door-btn{ border:none; background:none; padding:0; width:100%; }
   .door-frame{
     position:relative; width:100%; aspect-ratio:3/5; background:#C99A6B; border-radius:14px 14px 4px 4px;
@@ -288,7 +295,11 @@
         <h2>문을 찾아라!</h2>
         <p>정답의 문을 찾아 떠나는 모험</p>
       </button>
-      <div class="game-card locked"><div class="card-icon">🧩</div><h2>준비중</h2></div>
+      <button class="game-card main-card" id="card-hanja-game">
+        <div class="card-icon">🈶</div>
+        <h2>한자를 찾아라!</h2>
+        <p>한자와 뜻을 맞혀요</p>
+      </button>
       <div class="game-card locked"><div class="card-icon">🎨</div><h2>준비중</h2></div>
     </div>
   </section>
@@ -310,6 +321,27 @@
       <button class="diff-card hard" data-diff="hard">
         <span class="diff-emoji">🦉</span><b>상급</b>
         <small>두 자릿수 + 두 자릿수<br>(합 50 이하)</small>
+      </button>
+    </div>
+  </section>
+
+  <!-- HANJA DIFFICULTY -->
+  <section class="screen" id="screen-difficulty-hanja">
+    <div class="bg-deco"><span></span><span></span><span></span><span></span></div>
+    <button class="back-btn" id="diff-hanja-back">← 돌아가기</button>
+    <h2>급수를 골라주세요</h2>
+    <div class="diff-grid">
+      <button class="diff-card lvl9" data-level="9">
+        <span class="diff-hanja">九</span><b>9급</b>
+        <small>숫자 한자<br>一 二 三 ...</small>
+      </button>
+      <button class="diff-card lvl8" data-level="8">
+        <span class="diff-hanja">八</span><b>8급</b>
+        <small>자연 · 가족 한자<br>山 水 父 母 ...</small>
+      </button>
+      <button class="diff-card lvl7" data-level="7">
+        <span class="diff-hanja">七</span><b>7급</b>
+        <small>방향 · 몸 한자<br>東 西 手 足 ...</small>
       </button>
     </div>
   </section>
@@ -481,6 +513,8 @@
 
   document.getElementById('card-door-game').addEventListener('click', function(){ showScreen('difficulty'); });
   document.getElementById('diff-back').addEventListener('click', function(){ showScreen('lobby'); });
+  document.getElementById('card-hanja-game').addEventListener('click', function(){ showScreen('difficulty-hanja'); });
+  document.getElementById('diff-hanja-back').addEventListener('click', function(){ showScreen('lobby'); });
   document.getElementById('game-back').addEventListener('click', function(){
     resetSceneForNextStage();
     showScreen('lobby');
@@ -493,9 +527,14 @@
     showScreen('lobby');
   });
 
-  document.querySelectorAll('.diff-card').forEach(function(card){
+  document.querySelectorAll('#screen-difficulty .diff-card').forEach(function(card){
     card.addEventListener('click', function(){
-      startGame(card.dataset.diff);
+      startGame('math', card.dataset.diff);
+    });
+  });
+  document.querySelectorAll('#screen-difficulty-hanja .diff-card').forEach(function(card){
+    card.addEventListener('click', function(){
+      startGame('hanja', card.dataset.level);
     });
   });
 
@@ -514,18 +553,27 @@
   }
 
   /* ============ game state & logic ============ */
-  var state = { difficulty:'easy', stage:0, totalStages:10, used:null, current:null, locked:false };
+  var state = { gameType:'math', difficulty:'easy', hanjaLevel:'9', opSequence:null, stage:0, totalStages:10, used:null, current:null, locked:false };
 
   function pick(min,max){ return Math.floor(Math.random()*(max-min+1)) + min; }
 
+  function buildOpSequence(){
+    var seq = ['+','+','+','+','+','-','-','-','-','-'];
+    for(var i=seq.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t = seq[i]; seq[i] = seq[j]; seq[j] = t;
+    }
+    return seq;
+  }
+
   function generateFact(difficulty){
     var guard = 0;
+    var op = state.opSequence[state.stage];
     while(guard < 500){
       guard++;
-      var op = Math.random() < 0.5 ? '+' : '-';
       var A, B;
       if(difficulty === 'easy'){
-        A = pick(0,9); B = pick(0,9);
+        A = pick(1,9); B = pick(1,9);
         if(op === '-' && A < B){ var t=A; A=B; B=t; }
       } else if(difficulty === 'normal'){
         var two = pick(10,20), one = pick(1,9);
@@ -542,29 +590,20 @@
           B = pick(10, A);
         }
       }
+      var result = op === '+' ? A+B : A-B;
+      if(A === 0 || B === 0 || result === 0) continue;
       var key = A + op + B;
       if(state.used.has(key)) continue;
       state.used.add(key);
-      var result = op === '+' ? A+B : A-B;
       return { A:A, B:B, op:op, result:result };
     }
-    // fallback (should not normally happen)
-    return { A:1, B:1, op:'+', result:2 };
+    // zero-free fallback (should not normally happen)
+    return { A:2, B:1, op:op, result: op === '+' ? 3 : 1 };
   }
 
   function buildProblem(difficulty){
-    var fact, validSlots;
-    var guard = 0;
-    do {
-      fact = generateFact(difficulty);
-      validSlots = [0,1,2].filter(function(s){
-        var v = s === 0 ? fact.A : s === 1 ? fact.B : fact.result;
-        return v !== 0;
-      });
-      guard++;
-    } while(validSlots.length === 0 && guard < 50);
-
-    var slot = validSlots[pick(0, validSlots.length - 1)];
+    var fact = generateFact(difficulty);
+    var slot = pick(0,2); // 0=A hidden, 1=B hidden, 2=result hidden
     var answer, dispA, dispB, dispR;
     if(slot === 0){ answer = fact.A; dispA = '⬜'; dispB = fact.B; dispR = fact.result; }
     else if(slot === 1){ answer = fact.B; dispA = fact.A; dispB = '⬜'; dispR = fact.result; }
@@ -599,6 +638,93 @@
     return list;
   }
 
+  /* ============ hanja data & logic ============ */
+  var HANJA_POOL = {
+    9: [
+      {ch:'一',hun:'한',eum:'일',cat:'num'}, {ch:'二',hun:'두',eum:'이',cat:'num'},
+      {ch:'三',hun:'석',eum:'삼',cat:'num'}, {ch:'四',hun:'넉',eum:'사',cat:'num'},
+      {ch:'五',hun:'다섯',eum:'오',cat:'num'}, {ch:'六',hun:'여섯',eum:'육',cat:'num'},
+      {ch:'七',hun:'일곱',eum:'칠',cat:'num'}, {ch:'八',hun:'여덟',eum:'팔',cat:'num'},
+      {ch:'九',hun:'아홉',eum:'구',cat:'num'}, {ch:'十',hun:'열',eum:'십',cat:'num'},
+      {ch:'大',hun:'큰',eum:'대',cat:'basic'}, {ch:'小',hun:'작을',eum:'소',cat:'basic'},
+      {ch:'人',hun:'사람',eum:'인',cat:'family'}, {ch:'女',hun:'계집',eum:'녀',cat:'family'},
+      {ch:'子',hun:'아들',eum:'자',cat:'family'}, {ch:'山',hun:'메',eum:'산',cat:'nature'},
+      {ch:'水',hun:'물',eum:'수',cat:'nature'}, {ch:'火',hun:'불',eum:'화',cat:'nature'},
+      {ch:'木',hun:'나무',eum:'목',cat:'nature'}, {ch:'土',hun:'흙',eum:'토',cat:'nature'}
+    ],
+    8: [
+      {ch:'金',hun:'쇠',eum:'금',cat:'nature'}, {ch:'日',hun:'날',eum:'일',cat:'basic'},
+      {ch:'月',hun:'달',eum:'월',cat:'basic'}, {ch:'年',hun:'해',eum:'년',cat:'basic'},
+      {ch:'王',hun:'임금',eum:'왕',cat:'basic'}, {ch:'父',hun:'아비',eum:'부',cat:'family'},
+      {ch:'母',hun:'어미',eum:'모',cat:'family'}, {ch:'兄',hun:'형',eum:'형',cat:'family'},
+      {ch:'弟',hun:'아우',eum:'제',cat:'family'}, {ch:'靑',hun:'푸를',eum:'청',cat:'color'},
+      {ch:'白',hun:'흰',eum:'백',cat:'color'}, {ch:'東',hun:'동녘',eum:'동',cat:'direction'},
+      {ch:'西',hun:'서녘',eum:'서',cat:'direction'}, {ch:'南',hun:'남녘',eum:'남',cat:'direction'},
+      {ch:'北',hun:'북녘',eum:'북',cat:'direction'}, {ch:'中',hun:'가운데',eum:'중',cat:'direction'},
+      {ch:'上',hun:'윗',eum:'상',cat:'direction'}, {ch:'下',hun:'아래',eum:'하',cat:'direction'},
+      {ch:'內',hun:'안',eum:'내',cat:'direction'}, {ch:'外',hun:'바깥',eum:'외',cat:'direction'},
+      {ch:'門',hun:'문',eum:'문',cat:'basic'}, {ch:'車',hun:'수레',eum:'거',cat:'basic'},
+      {ch:'學',hun:'배울',eum:'학',cat:'basic'}, {ch:'校',hun:'학교',eum:'교',cat:'basic'}
+    ],
+    7: [
+      {ch:'江',hun:'강',eum:'강',cat:'nature'}, {ch:'川',hun:'내',eum:'천',cat:'nature'},
+      {ch:'天',hun:'하늘',eum:'천',cat:'nature'}, {ch:'地',hun:'땅',eum:'지',cat:'nature'},
+      {ch:'心',hun:'마음',eum:'심',cat:'body'}, {ch:'手',hun:'손',eum:'수',cat:'body'},
+      {ch:'足',hun:'발',eum:'족',cat:'body'}, {ch:'目',hun:'눈',eum:'목',cat:'body'},
+      {ch:'口',hun:'입',eum:'구',cat:'body'}, {ch:'耳',hun:'귀',eum:'이',cat:'body'},
+      {ch:'力',hun:'힘',eum:'력',cat:'basic'}, {ch:'立',hun:'설',eum:'립',cat:'basic'},
+      {ch:'生',hun:'날',eum:'생',cat:'basic'}, {ch:'死',hun:'죽을',eum:'사',cat:'basic'},
+      {ch:'出',hun:'날',eum:'출',cat:'basic'}, {ch:'入',hun:'들',eum:'입',cat:'basic'},
+      {ch:'男',hun:'사내',eum:'남',cat:'family'}, {ch:'農',hun:'농사',eum:'농',cat:'basic'},
+      {ch:'電',hun:'번개',eum:'전',cat:'basic'}, {ch:'食',hun:'밥',eum:'식',cat:'basic'},
+      {ch:'色',hun:'빛',eum:'색',cat:'basic'}, {ch:'育',hun:'기를',eum:'육',cat:'basic'},
+      {ch:'敎',hun:'가르칠',eum:'교',cat:'basic'}, {ch:'事',hun:'일',eum:'사',cat:'basic'}
+    ]
+  };
+
+  function buildHanjaProblem(level){
+    var pool = HANJA_POOL[level];
+    var entry, guard = 0;
+    do {
+      entry = pool[pick(0, pool.length - 1)];
+      guard++;
+    } while(state.used.has(level + ':' + entry.ch) && guard < 200);
+    state.used.add(level + ':' + entry.ch);
+
+    var questionType = Math.random() < 0.5 ? 'char' : 'reading';
+    var promptText, answer;
+    if(questionType === 'char'){
+      promptText = entry.hun + ' ' + entry.eum;
+      answer = entry.ch;
+    } else {
+      promptText = entry.ch;
+      answer = entry.hun + ' ' + entry.eum;
+    }
+    return { entry:entry, questionType:questionType, promptText:promptText, answer:answer };
+  }
+
+  function buildHanjaCandidates(level, correctEntry, questionType){
+    var pool = HANJA_POOL[level];
+    var sameCat = pool.filter(function(e){ return e.cat === correctEntry.cat && e.ch !== correctEntry.ch; });
+    var others = pool.filter(function(e){ return e.ch !== correctEntry.ch; });
+    var source = sameCat.length >= 2 ? sameCat : others;
+
+    var shuffled = source.slice();
+    for(var i=shuffled.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = t;
+    }
+    var picks = [correctEntry].concat(shuffled.slice(0,2));
+    var texts = picks.map(function(e){
+      return questionType === 'char' ? e.ch : (e.hun + ' ' + e.eum);
+    });
+    for(var k=texts.length-1;k>0;k--){
+      var j2 = Math.floor(Math.random()*(k+1));
+      var t2 = texts[k]; texts[k] = texts[j2]; texts[j2] = t2;
+    }
+    return texts;
+  }
+
   var doorSlots = Array.prototype.slice.call(document.querySelectorAll('.door-slot'));
   var doorBtns = Array.prototype.slice.call(document.querySelectorAll('.door-btn'));
   var equationBanner = document.getElementById('equation-banner');
@@ -608,29 +734,49 @@
   var stageWrap = document.getElementById('stage-wrap');
   var fadeOverlay = document.getElementById('fade-overlay');
 
-  function startGame(difficulty){
-    state.difficulty = difficulty;
+  function startGame(gameType, level){
+    state.gameType = gameType;
     state.stage = 0;
     state.used = new Set();
     state.locked = false;
+    if(gameType === 'math'){
+      state.difficulty = level;
+      state.opSequence = buildOpSequence();
+    } else {
+      state.hanjaLevel = level;
+    }
     showScreen('game');
     resetSceneForNextStage();
     renderStage();
   }
 
   function renderStage(){
-    var problem = buildProblem(state.difficulty);
-    var candidates = buildCandidates(problem.answer);
-    var answerIndex = candidates.indexOf(problem.answer);
-    state.current = { problem:problem, candidates:candidates, answerIndex:answerIndex };
+    equationBanner.classList.remove('hanja-char');
+    doorSlots.forEach(function(slot){ slot.querySelector('.nameplate').classList.remove('small-text'); });
 
-    equationBanner.textContent = problem.text;
+    var promptText, answer, candidates;
+    if(state.gameType === 'hanja'){
+      var hp = buildHanjaProblem(state.hanjaLevel);
+      promptText = hp.promptText;
+      answer = hp.answer;
+      candidates = buildHanjaCandidates(state.hanjaLevel, hp.entry, hp.questionType);
+      if(hp.questionType === 'reading'){ equationBanner.classList.add('hanja-char'); }
+    } else {
+      var problem = buildProblem(state.difficulty);
+      promptText = problem.text;
+      answer = String(problem.answer);
+      candidates = buildCandidates(problem.answer).map(String);
+    }
+
+    state.current = { answer: String(answer) };
+    equationBanner.textContent = promptText;
     feedbackMsg.textContent = '';
     stageNumEl.textContent = state.stage + 1;
     updateDots();
 
     candidates.forEach(function(val, i){
       doorSlots[i].querySelector('.plate-number').textContent = val;
+      if(val.indexOf(' ') !== -1){ doorSlots[i].querySelector('.nameplate').classList.add('small-text'); }
       doorSlots[i].dataset.value = val;
     });
     state.locked = false;
@@ -658,8 +804,8 @@
   function selectDoor(idx){
     if(state.locked) return;
     var slot = doorSlots[idx];
-    var val = Number(slot.dataset.value);
-    if(val === state.current.problem.answer){
+    var val = slot.dataset.value;
+    if(val === state.current.answer){
       state.locked = true;
       feedbackMsg.textContent = '';
       playCorrect(idx);
