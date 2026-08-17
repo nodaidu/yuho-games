@@ -1099,6 +1099,16 @@
     poopGame.poops.push({ el:el, x:x, y:-5, speed:speed });
   }
 
+  function shrinkRect(r, wf, hf){
+    var w = r.width * wf, h = r.height * hf;
+    var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    return { left: cx - w/2, right: cx + w/2, top: cy - h/2, bottom: cy + h/2 };
+  }
+
+  function rectsOverlap(a, b){
+    return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
+  }
+
   function poopLoop(ts){
     if(!poopGame.running) return;
     if(!poopGame.lastTime) poopGame.lastTime = ts;
@@ -1122,6 +1132,7 @@
     }
     poopGame.playerX = Math.max(8, Math.min(92, poopGame.playerX + poopGame.vx * dt));
     poopPlayerEl.style.left = poopGame.playerX + '%';
+    var playerHitRect = shrinkRect(poopPlayerEl.getBoundingClientRect(), 0.5, 0.55);
 
     var speedMul = Math.min(2.2, 1 + poopGame.score * 0.025);
     for(var i = poopGame.poops.length - 1; i >= 0; i--){
@@ -1129,9 +1140,12 @@
       p.y += p.speed * speedMul * dt;
       p.el.style.top = p.y + '%';
 
-      if(p.y >= 84 && p.y <= 96 && Math.abs(p.x - poopGame.playerX) < 9){
-        hitPoopPlayer();
-        return;
+      if(p.y >= 60){
+        var poopHitRect = shrinkRect(p.el.getBoundingClientRect(), 0.55, 0.55);
+        if(rectsOverlap(playerHitRect, poopHitRect)){
+          hitPoopPlayer();
+          return;
+        }
       }
       if(p.y > 105){
         p.el.remove();
