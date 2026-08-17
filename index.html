@@ -230,24 +230,22 @@
   .ending-content{ z-index:2; text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px; width:100%; height:100%; justify-content:center; }
   .reunion-stage{ position:relative; width:min(420px,80vw); height:clamp(160px,28vh,240px); margin-bottom:6px; }
   .reunion-glow{
-    position:absolute; left:60%; bottom:8%; width:70%; height:70%; transform:translateX(-50%);
+    position:absolute; left:50%; bottom:8%; width:70%; height:70%; transform:translateX(-50%);
     background:radial-gradient(circle,rgba(255,255,255,0.9) 0%,rgba(255,241,176,0.5) 45%,rgba(255,241,176,0) 75%);
     opacity:0; transition:opacity 1s ease; pointer-events:none;
   }
   .reunion-stage.arrived .reunion-glow{ opacity:1; }
-  .parents{ position:absolute; right:16%; bottom:6%; width:44%; }
+  .toilet{ position:absolute; left:50%; bottom:6%; width:32%; transform:translateX(-50%); }
   .child-reunion{
     position:absolute; left:-6%; bottom:6%; width:20%;
-    transition:left 1.3s cubic-bezier(.3,.65,.35,1), transform 1.3s ease;
+    transition:left 1.3s cubic-bezier(.3,.65,.35,1), bottom .5s ease, width .5s ease;
   }
-  .reunion-stage.hug .child-reunion{ left:47%; }
+  .reunion-stage.hug .child-reunion{ left:50%; }
   .child-reunion.running svg{ animation:runBob .32s ease-in-out infinite; }
   @keyframes runBob{ 0%,100%{ transform:translateY(0) rotate(0deg); } 50%{ transform:translateY(-9px) rotate(-4deg); } }
-  .child-reunion.arrived svg{ animation:happyBounce .6s ease-in-out infinite; }
-  @keyframes happyBounce{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-7px); } }
-  .child-reunion .wave-arm{ transform-origin:50% 100%; }
-  .child-reunion.arrived .wave-arm{ animation:waveArm .55s ease-in-out infinite; }
-  @keyframes waveArm{ 0%,100%{ transform:rotate(0deg); } 50%{ transform:rotate(22deg); } }
+  .child-reunion.seated{ bottom:17%; width:19%; }
+  .child-reunion.seated svg{ animation:seatedIdle 1.4s ease-in-out infinite; }
+  @keyframes seatedIdle{ 0%,100%{ transform:scale(1) translateY(0); } 50%{ transform:scale(1.03) translateY(-2px); } }
 
   .ending-content h2, .ending-content p, .ending-content button{
     opacity:0; transform:translateY(12px);
@@ -272,6 +270,38 @@
     0%{ transform:translateY(-10vh) rotate(0deg); opacity:1; }
     100%{ transform:translateY(108vh) rotate(360deg); opacity:0.9; }
   }
+
+  /* ---------- POOP DODGE MINIGAME ---------- */
+  #screen-poop{ justify-content:flex-start; }
+  .poop-topbar{ z-index:6; width:100%; display:flex; align-items:center; justify-content:center; padding:14px 0 6px; position:relative; }
+  .poop-score{ font-weight:800; font-size:clamp(14px,2.4vw,18px); color:var(--text); background:var(--white); padding:8px 18px; border-radius:18px; box-shadow:var(--shadow); }
+  .poop-stage{ position:relative; flex:1; width:100%; overflow:hidden; touch-action:none; cursor:pointer; }
+  .poop-player{
+    position:absolute; bottom:6%; width:clamp(60px,11vw,96px); z-index:3;
+    transform:translateX(-50%); transition:left .12s linear;
+  }
+  .poop-player svg{ width:100%; height:100%; display:block; }
+  .poop-player.hit{ animation:poopHit .5s ease; }
+  @keyframes poopHit{
+    0%,100%{ filter:brightness(1) saturate(1); transform:translateX(-50%) rotate(0deg); }
+    20%{ filter:brightness(1.4) saturate(1.6); transform:translateX(-58%) rotate(-8deg); }
+    40%{ transform:translateX(-42%) rotate(8deg); }
+    60%{ transform:translateX(-58%) rotate(-6deg); }
+    80%{ transform:translateX(-42%) rotate(6deg); }
+  }
+  .poop-item{
+    position:absolute; font-size:clamp(26px,5.4vw,42px); line-height:1;
+    transform:translate(-50%,-50%); pointer-events:none; z-index:2;
+  }
+  .poop-gameover{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,0.88); opacity:0; pointer-events:none; transition:opacity .35s ease; z-index:8;
+  }
+  .poop-gameover.show{ opacity:1; }
+  .poop-gameover-card{ text-align:center; }
+  .poop-gameover-card .go-emoji{ font-size:clamp(40px,8vw,64px); }
+  .poop-gameover-card h3{ margin:6px 0 0; font-size:clamp(20px,4vw,30px); color:var(--accent); }
+  .poop-gameover-card p{ margin:6px 0 0; font-size:clamp(14px,2.4vw,18px); color:var(--text-soft); }
 
   @media (max-width:480px){
     .doors-row{ gap:10px; }
@@ -300,7 +330,11 @@
         <h2>한자를 찾아라!</h2>
         <p>한자와 뜻을 맞혀요</p>
       </button>
-      <div class="game-card locked"><div class="card-icon">🎨</div><h2>준비중</h2></div>
+      <button class="game-card main-card" id="card-poop-game">
+        <div class="card-icon">💩</div>
+        <h2>똥 피하기!</h2>
+        <p>쉬어가는 미니게임</p>
+      </button>
     </div>
   </section>
 
@@ -407,14 +441,34 @@
     <div class="ending-content">
       <div class="reunion-stage" id="reunion-stage">
         <div class="reunion-glow"></div>
-        <div class="parents" id="parents-figure"></div>
+        <div class="toilet" id="toilet-figure"></div>
         <div class="child-reunion" id="child-reunion"></div>
       </div>
-      <h2>🎉 엄마 아빠를 만났어요! 🎉</h2>
-      <p>10개의 문을 모두 통과한 우리 친구, 정말 잘했어요!</p>
+      <h2>🚽 드디어 성공! 💩</h2>
+      <p>10개의 문을 지나 화장실을 찾았어요! 응가 성공, 최고예요!</p>
       <button id="ending-home-btn">메인으로 돌아가기</button>
     </div>
     <div class="confetti-layer" id="confetti-layer"></div>
+  </section>
+
+  <!-- POOP DODGE MINIGAME -->
+  <section class="screen" id="screen-poop">
+    <button class="back-btn" id="poop-back">← 나가기</button>
+    <div class="poop-topbar">
+      <div class="poop-score">피한 똥: <span id="poop-score-num">0</span>개</div>
+    </div>
+    <div class="poop-stage" id="poop-stage">
+      <div class="sky-deco"><div class="cloud"></div><div class="cloud c2"></div><div class="cloud"></div></div>
+      <div class="ground"></div>
+      <div class="poop-player" id="poop-player"></div>
+      <div class="poop-gameover" id="poop-gameover">
+        <div class="poop-gameover-card">
+          <div class="go-emoji">💩</div>
+          <h3>앗, 똥에 맞았어요!</h3>
+          <p id="poop-final-score">피한 똥: 0개</p>
+        </div>
+      </div>
+    </div>
   </section>
 
 </div>
@@ -456,25 +510,37 @@
       + '</svg>';
   }
 
-  function parentsSVG(){
-    return '<svg viewBox="0 0 140 150" xmlns="http://www.w3.org/2000/svg">'
-      + '<ellipse cx="70" cy="144" rx="55" ry="6" fill="#000" opacity="0.08"/>'
-      + '<rect x="14" y="70" width="40" height="66" rx="18" fill="#F6A8C1"/>'
-      + '<circle cx="34" cy="44" r="24" fill="#FFDDBB"/>'
-      + '<path d="M9 42 Q34 66 59 42 L59 32 Q34 10 9 32 Z" fill="#6B4A2E"/>'
-      + '<circle cx="27" cy="47" r="3" fill="#3B2A22"/>'
-      + '<circle cx="41" cy="47" r="3" fill="#3B2A22"/>'
-      + '<circle cx="25" cy="53" r="4" fill="#FF9EB8" opacity="0.55"/>'
-      + '<circle cx="43" cy="53" r="4" fill="#FF9EB8" opacity="0.55"/>'
-      + '<path d="M26 57 Q34 63 42 57" stroke="#8A5A3A" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
-      + '<rect x="86" y="70" width="40" height="66" rx="16" fill="#7EC8E3"/>'
-      + '<circle cx="106" cy="44" r="23" fill="#FFD9B3"/>'
-      + '<path d="M83 36 Q106 16 129 36 Q129 24 106 20 Q83 24 83 36Z" fill="#4A3728"/>'
-      + '<circle cx="99" cy="47" r="3" fill="#3B2A22"/>'
-      + '<circle cx="113" cy="47" r="3" fill="#3B2A22"/>'
-      + '<circle cx="97" cy="53" r="4" fill="#FF9EB8" opacity="0.5"/>'
-      + '<circle cx="115" cy="53" r="4" fill="#FF9EB8" opacity="0.5"/>'
-      + '<path d="M99 57 Q106 63 113 57" stroke="#8A5A3A" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
+  function toiletSVG(){
+    return '<svg viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg">'
+      + '<ellipse cx="60" cy="134" rx="46" ry="6" fill="#000" opacity="0.08"/>'
+      + '<rect x="34" y="10" width="52" height="34" rx="10" fill="#FBFDFF" stroke="#D7E2EC" stroke-width="3"/>'
+      + '<rect x="80" y="18" width="7" height="14" rx="3" fill="#D7E2EC"/>'
+      + '<path d="M26 44 L94 44 L88 70 Q86 78 76 78 L44 78 Q34 78 32 70 Z" fill="#FBFDFF" stroke="#D7E2EC" stroke-width="3"/>'
+      + '<ellipse cx="60" cy="80" rx="34" ry="14" fill="#FFFFFF" stroke="#D7E2EC" stroke-width="3"/>'
+      + '<ellipse cx="60" cy="80" rx="20" ry="9" fill="#DCEEF7"/>'
+      + '<path d="M40 88 Q40 118 50 130 L70 130 Q80 118 80 88 Z" fill="#FBFDFF" stroke="#D7E2EC" stroke-width="3"/>'
+      + '</svg>';
+  }
+
+  function childSittingSVG(){
+    return '<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">'
+      + '<rect x="20" y="70" width="20" height="12" rx="6" fill="#6C5CE7" transform="rotate(8 30 70)"/>'
+      + '<rect x="60" y="70" width="20" height="12" rx="6" fill="#6C5CE7" transform="rotate(-8 70 70)"/>'
+      + '<rect x="30" y="34" width="40" height="44" rx="16" fill="#FF9EB8"/>'
+      + '<rect x="14" y="34" width="12" height="30" rx="6" fill="#FF9EB8" transform="rotate(-35 20 34)"/>'
+      + '<rect x="74" y="34" width="12" height="30" rx="6" fill="#FF9EB8" transform="rotate(35 80 34)"/>'
+      + '<circle cx="15" cy="24" r="7" fill="#FFD9B3"/>'
+      + '<circle cx="85" cy="24" r="7" fill="#FFD9B3"/>'
+      + '<circle cx="50" cy="26" r="20" fill="#FFD9B3"/>'
+      + '<path d="M28 22 Q50 2 72 22 Q73 32 66 28 Q50 16 34 28 Q27 32 28 22Z" fill="#4A3728"/>'
+      + '<circle cx="70" cy="16" r="5" fill="#4A3728"/>'
+      + '<path d="M40 24 Q43 20 46 24" stroke="#3B2A22" stroke-width="2.2" fill="none" stroke-linecap="round"/>'
+      + '<path d="M54 24 Q57 20 60 24" stroke="#3B2A22" stroke-width="2.2" fill="none" stroke-linecap="round"/>'
+      + '<circle cx="38" cy="31" r="4" fill="#FF9EB8" opacity="0.6"/>'
+      + '<circle cx="62" cy="31" r="4" fill="#FF9EB8" opacity="0.6"/>'
+      + '<path d="M42 33 Q50 40 58 33" stroke="#3B2A22" stroke-width="2.4" fill="none" stroke-linecap="round"/>'
+      + '<path d="M14 10 L16 4 L18 10 L24 8 L18 12 L20 18 L15 13 L10 17 L13 11 Z" fill="#FFE38A" opacity="0.9"/>'
+      + '<path d="M84 14 L86 9 L88 14 L92 12 L88 16 L90 20 L85 17 L81 20 L84 15 Z" fill="#9EE6C0" opacity="0.9"/>'
       + '</svg>';
   }
 
@@ -502,7 +568,7 @@
 
   document.getElementById('child-wrap').innerHTML = childSVG();
   document.querySelectorAll('[data-monster]').forEach(function(el){ el.innerHTML = monsterSVG(); });
-  document.getElementById('parents-figure').innerHTML = parentsSVG();
+  document.getElementById('toilet-figure').innerHTML = toiletSVG();
   document.getElementById('child-reunion').innerHTML = childRunningSVG();
 
   /* ============ screen management ============ */
@@ -521,7 +587,7 @@
   });
   document.getElementById('ending-home-btn').addEventListener('click', function(){
     document.getElementById('reunion-stage').classList.remove('hug','arrived');
-    document.getElementById('child-reunion').classList.remove('running','arrived');
+    document.getElementById('child-reunion').classList.remove('running','seated');
     document.querySelector('.ending-content').classList.remove('reveal');
     document.getElementById('confetti-layer').innerHTML = '';
     showScreen('lobby');
@@ -890,7 +956,8 @@
     var childEl = document.getElementById('child-reunion');
     var contentEl = document.querySelector('.ending-content');
     stageEl.classList.remove('hug','arrived');
-    childEl.classList.remove('running','arrived');
+    childEl.classList.remove('running','seated');
+    childEl.innerHTML = childRunningSVG();
     contentEl.classList.remove('reveal');
 
     var RUN_DELAY = 400, RUN_DUR = 1300;
@@ -902,7 +969,8 @@
 
     setTimeout(function(){
       childEl.classList.remove('running');
-      childEl.classList.add('arrived');
+      childEl.innerHTML = childSittingSVG();
+      childEl.classList.add('seated');
       stageEl.classList.add('arrived');
       contentEl.classList.add('reveal');
       spawnConfetti();
@@ -925,6 +993,125 @@
       piece.style.animationDelay = (Math.random()*0.6) + 's';
       layer.appendChild(piece);
     }
+  }
+
+  /* ============ poop dodge minigame ============ */
+  document.getElementById('poop-player').innerHTML = childRunningSVG();
+  document.getElementById('card-poop-game').addEventListener('click', function(){ startPoopGame(); });
+  document.getElementById('poop-back').addEventListener('click', function(){ stopPoopGame(); showScreen('lobby'); });
+
+  var poopStage = document.getElementById('poop-stage');
+  var poopPlayerEl = document.getElementById('poop-player');
+  var poopScoreEl = document.getElementById('poop-score-num');
+  var poopGameOverEl = document.getElementById('poop-gameover');
+  var poopFinalScoreEl = document.getElementById('poop-final-score');
+
+  var poopGame = {
+    running:false, score:0, playerX:50, poops:[], rafId:null,
+    spawnAcc:0, spawnInterval:1000, lastTime:0
+  };
+
+  function startPoopGame(){
+    poopGame.running = true;
+    poopGame.score = 0;
+    poopGame.playerX = 50;
+    poopGame.poops.forEach(function(p){ p.el.remove(); });
+    poopGame.poops = [];
+    poopGame.spawnAcc = 0;
+    poopGame.spawnInterval = 1000;
+    poopGame.lastTime = 0;
+    poopScoreEl.textContent = '0';
+    poopPlayerEl.style.left = '50%';
+    poopPlayerEl.classList.remove('hit');
+    poopGameOverEl.classList.remove('show');
+    showScreen('poop');
+    poopStage.addEventListener('pointermove', onPoopPointerMove);
+    window.addEventListener('keydown', onPoopKeyDown);
+    poopGame.rafId = requestAnimationFrame(poopLoop);
+  }
+
+  function stopPoopGame(){
+    poopGame.running = false;
+    if(poopGame.rafId){ cancelAnimationFrame(poopGame.rafId); poopGame.rafId = null; }
+    poopStage.removeEventListener('pointermove', onPoopPointerMove);
+    window.removeEventListener('keydown', onPoopKeyDown);
+    poopGame.poops.forEach(function(p){ p.el.remove(); });
+    poopGame.poops = [];
+  }
+
+  function onPoopPointerMove(e){
+    if(!poopGame.running) return;
+    var rect = poopStage.getBoundingClientRect();
+    var pct = ((e.clientX - rect.left) / rect.width) * 100;
+    poopGame.playerX = Math.max(8, Math.min(92, pct));
+    poopPlayerEl.style.left = poopGame.playerX + '%';
+  }
+
+  function onPoopKeyDown(e){
+    if(!poopGame.running) return;
+    if(e.key === 'ArrowLeft'){ poopGame.playerX = Math.max(8, poopGame.playerX - 6); poopPlayerEl.style.left = poopGame.playerX + '%'; }
+    else if(e.key === 'ArrowRight'){ poopGame.playerX = Math.min(92, poopGame.playerX + 6); poopPlayerEl.style.left = poopGame.playerX + '%'; }
+  }
+
+  function spawnPoop(){
+    var el = document.createElement('div');
+    el.className = 'poop-item';
+    el.textContent = '💩';
+    poopStage.appendChild(el);
+    var x = pick(6, 94);
+    var speed = 16 + Math.random()*8;
+    el.style.left = x + '%';
+    el.style.top = '-5%';
+    poopGame.poops.push({ el:el, x:x, y:-5, speed:speed });
+  }
+
+  function poopLoop(ts){
+    if(!poopGame.running) return;
+    if(!poopGame.lastTime) poopGame.lastTime = ts;
+    var dt = (ts - poopGame.lastTime) / 1000;
+    poopGame.lastTime = ts;
+
+    poopGame.spawnAcc += dt * 1000;
+    if(poopGame.spawnAcc >= poopGame.spawnInterval){
+      poopGame.spawnAcc = 0;
+      spawnPoop();
+      poopGame.spawnInterval = Math.max(320, poopGame.spawnInterval - 12);
+    }
+
+    var speedMul = Math.min(2.2, 1 + poopGame.score * 0.025);
+    for(var i = poopGame.poops.length - 1; i >= 0; i--){
+      var p = poopGame.poops[i];
+      p.y += p.speed * speedMul * dt;
+      p.el.style.top = p.y + '%';
+
+      if(p.y >= 84 && p.y <= 96 && Math.abs(p.x - poopGame.playerX) < 9){
+        hitPoopPlayer();
+        return;
+      }
+      if(p.y > 105){
+        p.el.remove();
+        poopGame.poops.splice(i, 1);
+        poopGame.score++;
+        poopScoreEl.textContent = poopGame.score;
+      }
+    }
+
+    poopGame.rafId = requestAnimationFrame(poopLoop);
+  }
+
+  function hitPoopPlayer(){
+    poopGame.running = false;
+    if(poopGame.rafId){ cancelAnimationFrame(poopGame.rafId); poopGame.rafId = null; }
+    poopStage.removeEventListener('pointermove', onPoopPointerMove);
+    window.removeEventListener('keydown', onPoopKeyDown);
+    poopPlayerEl.classList.add('hit');
+    poopFinalScoreEl.textContent = '피한 똥: ' + poopGame.score + '개';
+    poopGameOverEl.classList.add('show');
+    setTimeout(function(){
+      poopGame.poops.forEach(function(p){ p.el.remove(); });
+      poopGame.poops = [];
+      showScreen('lobby');
+    }, 1900);
   }
 
 })();
