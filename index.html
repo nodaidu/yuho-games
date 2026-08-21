@@ -219,6 +219,35 @@
   }
   .child-wrap svg, .monster-pop svg, .reunion-stage svg{ width:100%; height:100%; display:block; }
 
+  .child-wrap:not(.walk-approach):not(.walk-enter) svg{ animation:idleBob 1.8s ease-in-out infinite; }
+  @keyframes idleBob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-3px); } }
+
+  /* back-view child (door game) limb pivots */
+  .b-leg-a{ transform-origin:38px 86px; }
+  .b-leg-b{ transform-origin:62px 86px; }
+  .b-arm-a{ transform-origin:21px 58px; }
+  .b-arm-b{ transform-origin:79px 58px; }
+  .walk-approach .b-leg-a{ animation:legSwingA .32s ease-in-out infinite; }
+  .walk-approach .b-leg-b{ animation:legSwingB .32s ease-in-out infinite; }
+  .walk-approach .b-arm-a{ animation:armSwingA .32s ease-in-out infinite; }
+  .walk-approach .b-arm-b{ animation:armSwingWave .32s ease-in-out infinite; }
+
+  /* front-running child (poop game / ending run-in) limb pivots */
+  .r-leg-a{ transform-origin:41px 92px; transform:rotate(18deg); }
+  .r-leg-b{ transform-origin:57px 92px; transform:rotate(-24deg); }
+  .r-arm-a{ transform-origin:28px 58px; transform:rotate(20deg); }
+  .wave-arm{ transform-origin:72px 60px; }
+  .running .r-leg-a, #poop-player .r-leg-a{ animation:legSwingA .32s ease-in-out infinite; }
+  .running .r-leg-b, #poop-player .r-leg-b{ animation:legSwingB .32s ease-in-out infinite; }
+  .running .r-arm-a, #poop-player .r-arm-a{ animation:armSwingA .32s ease-in-out infinite; }
+  .running .wave-arm, #poop-player .wave-arm{ animation:armSwingWave2 .32s ease-in-out infinite; }
+
+  @keyframes legSwingA{ 0%,100%{ transform:rotate(32deg); } 50%{ transform:rotate(-28deg); } }
+  @keyframes legSwingB{ 0%,100%{ transform:rotate(-28deg); } 50%{ transform:rotate(32deg); } }
+  @keyframes armSwingA{ 0%,100%{ transform:rotate(36deg); } 50%{ transform:rotate(-24deg); } }
+  @keyframes armSwingWave{ 0%,100%{ transform:rotate(-26deg); } 50%{ transform:rotate(30deg); } }
+  @keyframes armSwingWave2{ 0%,100%{ transform:rotate(-14deg); } 50%{ transform:rotate(14deg); } }
+
   .fade-overlay{
     position:absolute; inset:0; background:#2E2440; opacity:0; pointer-events:none;
     transition:opacity .45s ease; z-index:20;
@@ -490,11 +519,11 @@
   function childSVG(){
     return '<svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg">'
       + '<ellipse cx="50" cy="132" rx="26" ry="6" fill="#000" opacity="0.08"/>'
-      + '<rect x="30" y="86" width="16" height="40" rx="7" fill="#6C5CE7"/>'
-      + '<rect x="54" y="86" width="16" height="40" rx="7" fill="#6C5CE7"/>'
+      + '<g class="b-leg-a"><rect x="30" y="86" width="16" height="40" rx="7" fill="#6C5CE7"/></g>'
+      + '<g class="b-leg-b"><rect x="54" y="86" width="16" height="40" rx="7" fill="#6C5CE7"/></g>'
       + '<path d="M25 55 Q50 40 75 55 L75 100 Q50 116 25 100 Z" fill="#FF9EB8"/>'
-      + '<rect x="14" y="58" width="14" height="34" rx="7" fill="#FF9EB8"/>'
-      + '<rect x="72" y="58" width="14" height="34" rx="7" fill="#FF9EB8"/>'
+      + '<g class="b-arm-a"><rect x="14" y="58" width="14" height="34" rx="7" fill="#FF9EB8"/></g>'
+      + '<g class="b-arm-b"><rect x="72" y="58" width="14" height="34" rx="7" fill="#FF9EB8"/></g>'
       + '<circle cx="50" cy="30" r="24" fill="#4A3728"/>'
       + '<circle cx="50" cy="34" r="19" fill="#5C4433"/>'
       + '<path d="M28 20 Q50 2 72 20 Q74 34 68 30 Q50 16 32 30 Q26 34 28 20Z" fill="#4A3728"/>'
@@ -556,9 +585,9 @@
   function childRunningSVG(){
     return '<svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg">'
       + '<ellipse cx="50" cy="134" rx="24" ry="6" fill="#000" opacity="0.08"/>'
-      + '<rect x="34" y="92" width="14" height="36" rx="7" fill="#6C5CE7" transform="rotate(18 41 92)"/>'
-      + '<rect x="50" y="92" width="14" height="36" rx="7" fill="#6C5CE7" transform="rotate(-24 57 92)"/>'
-      + '<rect x="22" y="58" width="13" height="32" rx="6" fill="#FF9EB8" transform="rotate(20 28 58)"/>'
+      + '<g class="r-leg-a"><rect x="34" y="92" width="14" height="36" rx="7" fill="#6C5CE7"/></g>'
+      + '<g class="r-leg-b"><rect x="50" y="92" width="14" height="36" rx="7" fill="#6C5CE7"/></g>'
+      + '<g class="r-arm-a"><rect x="22" y="58" width="13" height="32" rx="6" fill="#FF9EB8"/></g>'
       + '<rect x="32" y="52" width="36" height="46" rx="15" fill="#FF9EB8"/>'
       + '<g class="wave-arm">'
       + '<rect x="66" y="28" width="13" height="34" rx="6" fill="#FF9EB8" transform="rotate(-42 72 60)"/>'
