@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>문을 찾아라! - 두근두근 수학 나라</title>
+<title>숫자를 찾아라! - 두근두근 수학 나라</title>
 <style>
   :root{
     --pink:#FFD3E0;
@@ -99,6 +99,10 @@
   .diff-card.lvl8{ background:linear-gradient(160deg,#FFF3DC,#fff); }
   .diff-card.lvl7{ background:linear-gradient(160deg,#E8F0FF,#fff); }
   .diff-card .diff-hanja{ font-size:clamp(30px,5vw,44px); font-weight:800; color:var(--accent); }
+  .diff-card.eng1{ background:linear-gradient(160deg,#FFEFE0,#fff); }
+  .diff-card.eng2{ background:linear-gradient(160deg,#E4F7FF,#fff); }
+  .diff-card.eng3{ background:linear-gradient(160deg,#E9FFEA,#fff); }
+  .diff-card.eng4{ background:linear-gradient(160deg,#F3E9FF,#fff); }
 
   /* ---------- GAME ---------- */
   #screen-game{ justify-content:flex-start; }
@@ -113,11 +117,11 @@
   .progress-dots span.current{ background:var(--accent-2); transform:scale(1.3); }
 
   .equation-banner{
-    z-index:5; margin:20px auto 4px; padding:14px 26px; background:var(--white); border-radius:22px;
-    font-size:clamp(24px,5.4vw,40px); font-weight:800; color:var(--text); box-shadow:var(--shadow);
+    z-index:5; margin:20px auto 4px; padding:20px 36px; background:var(--white); border-radius:26px;
+    font-size:clamp(48px,10.8vw,80px); font-weight:800; color:var(--text); box-shadow:var(--shadow);
     letter-spacing:2px; text-align:center;
   }
-  .equation-banner.hanja-char{ font-size:clamp(48px,11vw,90px); padding:6px 34px; letter-spacing:0; }
+  .equation-banner.hanja-char{ font-size:clamp(96px,22vw,180px); padding:8px 44px; letter-spacing:0; }
   .feedback-msg{ z-index:5; min-height:22px; font-size:clamp(12px,2vw,15px); color:var(--accent); font-weight:700; margin-bottom:4px; }
 
   .stage-wrap{
@@ -134,16 +138,16 @@
 
   .doors-row{
     position:absolute; bottom:12%; left:50%; transform:translateX(-50%);
-    display:flex; gap:clamp(14px,4vw,48px); z-index:2; perspective:1300px;
-    width:min(880px,94vw); justify-content:center;
+    display:flex; gap:clamp(10px,3.2vw,60px); z-index:2; perspective:1300px;
+    width:min(880px,96vw); justify-content:center;
   }
-  .door-slot{ display:flex; flex-direction:column; align-items:center; gap:8px; width:clamp(78px,20vw,150px); }
+  .door-slot{ display:flex; flex-direction:column; align-items:center; gap:10px; width:clamp(105px,27vw,225px); }
   .nameplate{
-    background:#FFF3D6; border:3px solid #E8C97A; border-radius:12px; padding:4px 14px;
-    font-weight:800; font-size:clamp(18px,3.6vw,28px); color:#8A6A1F; box-shadow:0 3px 0 rgba(0,0,0,0.08);
+    background:#FFF3D6; border:3px solid #E8C97A; border-radius:14px; padding:6px 20px;
+    font-weight:800; font-size:clamp(27px,5.4vw,42px); color:#8A6A1F; box-shadow:0 3px 0 rgba(0,0,0,0.08);
     white-space:nowrap;
   }
-  .nameplate.small-text{ font-size:clamp(13px,2.6vw,18px); padding:4px 10px; }
+  .nameplate.small-text{ font-size:clamp(20px,4vw,27px); padding:6px 15px; }
   .door-btn{ border:none; background:none; padding:0; width:100%; }
   .door-frame{
     position:relative; width:100%; aspect-ratio:3/5; background:#C99A6B; border-radius:14px 14px 4px 4px;
@@ -193,7 +197,7 @@
   }
 
   .child-wrap{
-    position:absolute; left:50%; bottom:6%; width:clamp(60px,11vw,96px); z-index:3;
+    position:absolute; left:50%; bottom:6%; width:clamp(90px,16.5vw,144px); z-index:3;
     transform-origin:50% 100%;
     transform:translate(-50%,0) scale(1);
     transition:transform .35s ease;
@@ -305,6 +309,13 @@
   .poop-topbar{ z-index:6; width:100%; display:flex; align-items:center; justify-content:center; padding:14px 0 6px; position:relative; }
   .poop-score{ font-weight:800; font-size:clamp(14px,2.4vw,18px); color:var(--text); background:var(--white); padding:8px 18px; border-radius:18px; box-shadow:var(--shadow); }
   .poop-stage{ position:relative; flex:1; width:100%; overflow:hidden; touch-action:none; cursor:pointer; }
+  .poop-intro{
+    position:absolute; top:6%; left:50%; transform:translateX(-50%);
+    background:var(--white); padding:10px 22px; border-radius:20px; box-shadow:var(--shadow);
+    font-weight:800; font-size:clamp(14px,2.6vw,20px); color:var(--accent); z-index:9;
+    opacity:0; transition:opacity .4s ease; pointer-events:none; white-space:nowrap;
+  }
+  .poop-intro.show{ opacity:1; }
   .poop-player{
     position:absolute; bottom:6%; width:clamp(60px,11vw,96px); z-index:3;
     transform:translateX(-50%);
@@ -326,7 +337,7 @@
     80%{ transform:translateX(-42%) rotate(6deg); }
   }
   .poop-item{
-    position:absolute; font-size:clamp(26px,5.4vw,42px); line-height:1;
+    position:absolute; font-size:clamp(34px,7vw,56px); line-height:1;
     transform:translate(-50%,-50%); pointer-events:none; z-index:2;
   }
   .poop-gameover{
@@ -340,8 +351,8 @@
   .poop-gameover-card p{ margin:6px 0 0; font-size:clamp(14px,2.4vw,18px); color:var(--text-soft); }
 
   @media (max-width:480px){
-    .doors-row{ gap:10px; }
-    .equation-banner{ padding:10px 16px; letter-spacing:1px; }
+    .doors-row{ gap:8px; }
+    .equation-banner{ padding:14px 20px; letter-spacing:1px; }
   }
 </style>
 </head>
@@ -357,8 +368,8 @@
     </div>
     <div class="game-grid">
       <button class="game-card main-card" id="card-door-game">
-        <div class="card-icon">🚪</div>
-        <h2>문을 찾아라!</h2>
+        <div class="card-icon">🔢</div>
+        <h2>숫자를 찾아라!</h2>
         <p>정답의 문을 찾아 떠나는 모험</p>
       </button>
       <button class="game-card main-card" id="card-hanja-game">
@@ -366,10 +377,10 @@
         <h2>한자를 찾아라!</h2>
         <p>한자와 뜻을 맞혀요</p>
       </button>
-      <button class="game-card main-card" id="card-poop-game">
-        <div class="card-icon">💩</div>
-        <h2>똥 피하기!</h2>
-        <p>쉬어가는 미니게임</p>
+      <button class="game-card main-card" id="card-english-game">
+        <div class="card-icon">🔤</div>
+        <h2>영어를 찾아라!</h2>
+        <p>영단어와 뜻을 맞혀요</p>
       </button>
     </div>
   </section>
@@ -412,6 +423,31 @@
       <button class="diff-card lvl7" data-level="7">
         <span class="diff-hanja">七</span><b>7급</b>
         <small>방향 · 몸 한자<br>東 西 手 足 ...</small>
+      </button>
+    </div>
+  </section>
+
+  <!-- ENGLISH DIFFICULTY -->
+  <section class="screen" id="screen-difficulty-english">
+    <div class="bg-deco"><span></span><span></span><span></span><span></span></div>
+    <button class="back-btn" id="diff-english-back">← 돌아가기</button>
+    <h2>레벨을 골라주세요</h2>
+    <div class="diff-grid">
+      <button class="diff-card eng1" data-level="1">
+        <span class="diff-emoji">🍎</span><b>5~7세</b>
+        <small>동물 · 색깔 · 숫자<br>cat, red, one ...</small>
+      </button>
+      <button class="diff-card eng2" data-level="2">
+        <span class="diff-emoji">✏️</span><b>초1~2</b>
+        <small>학교 · 가족 · 동작<br>school, run, big ...</small>
+      </button>
+      <button class="diff-card eng3" data-level="3">
+        <span class="diff-emoji">📘</span><b>초3~4</b>
+        <small>날씨 · 장소 · 계절<br>weather, city, fast ...</small>
+      </button>
+      <button class="diff-card eng4" data-level="4">
+        <span class="diff-emoji">🎓</span><b>초5~6</b>
+        <small>과목 · 활동 · 어휘<br>subject, hobby, exam ...</small>
       </button>
     </div>
   </section>
@@ -489,7 +525,7 @@
 
   <!-- POOP DODGE MINIGAME -->
   <section class="screen" id="screen-poop">
-    <button class="back-btn" id="poop-back">← 나가기</button>
+    <button class="back-btn" id="poop-back">건너뛰기 →</button>
     <div class="poop-topbar">
       <div class="poop-score">피한 똥: <span id="poop-score-num">0</span>개</div>
     </div>
@@ -498,6 +534,7 @@
       <div class="ground"></div>
       <div class="poop-zone-hint left">◀</div>
       <div class="poop-zone-hint right">▶</div>
+      <div class="poop-intro" id="poop-intro">🎉 클리어! 쉬어가는 시간~</div>
       <div class="poop-player" id="poop-player"></div>
       <div class="poop-gameover" id="poop-gameover">
         <div class="poop-gameover-card">
@@ -529,7 +566,6 @@
       + '<circle cx="79" cy="22" r="4.5" fill="#FF9EB8" stroke="#3B2A22" stroke-width="2"/>'
       + '<circle cx="50" cy="32" r="26" fill="#4A3728" stroke="#3B2A22" stroke-width="3"/>'
       + '<path d="M25 22 Q50 0 75 22 Q78 35 70 30 Q50 17 30 30 Q22 35 25 22Z" fill="#4A3728" stroke="#3B2A22" stroke-width="3" stroke-linejoin="round"/>'
-      + '<path d="M33 14 Q50 5 67 14" stroke="#6B4A2E" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.8"/>'
       + '</svg>';
   }
 
@@ -574,7 +610,6 @@
       + '<circle cx="85" cy="23" r="7.5" fill="#FFD9B3" stroke="#3B2A22" stroke-width="2.5"/>'
       + '<circle cx="50" cy="26" r="21" fill="#FFD9B3" stroke="#3B2A22" stroke-width="3"/>'
       + '<path d="M27 22 Q50 1 73 22 Q75 33 67 29 Q50 16 33 29 Q25 33 27 22Z" fill="#4A3728" stroke="#3B2A22" stroke-width="3" stroke-linejoin="round"/>'
-      + '<path d="M35 13 Q50 4 65 13" stroke="#6B4A2E" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.8"/>'
       + '<circle cx="71" cy="16" r="4.5" fill="#4A3728" stroke="#3B2A22" stroke-width="2"/>'
       + '<path d="M40 24 Q43 19 46 24" stroke="#3B2A22" stroke-width="2.4" fill="none" stroke-linecap="round"/>'
       + '<path d="M54 24 Q57 19 60 24" stroke="#3B2A22" stroke-width="2.4" fill="none" stroke-linecap="round"/>'
@@ -600,7 +635,6 @@
       + '</g>'
       + '<circle cx="50" cy="27" r="21" fill="#FFD9B3" stroke="#3B2A22" stroke-width="3"/>'
       + '<path d="M27 22 Q50 1 73 22 Q75 33 67 29 Q50 16 33 29 Q25 33 27 22Z" fill="#4A3728" stroke="#3B2A22" stroke-width="3" stroke-linejoin="round"/>'
-      + '<path d="M35 13 Q50 4 65 13" stroke="#6B4A2E" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.8"/>'
       + '<circle cx="71" cy="17" r="4.5" fill="#4A3728" stroke="#3B2A22" stroke-width="2"/>'
       + '<circle cx="41" cy="26" r="3.2" fill="#3B2A22"/>'
       + '<circle cx="57" cy="26" r="3.2" fill="#3B2A22"/>'
@@ -627,6 +661,8 @@
   document.getElementById('diff-back').addEventListener('click', function(){ showScreen('lobby'); });
   document.getElementById('card-hanja-game').addEventListener('click', function(){ showScreen('difficulty-hanja'); });
   document.getElementById('diff-hanja-back').addEventListener('click', function(){ showScreen('lobby'); });
+  document.getElementById('card-english-game').addEventListener('click', function(){ showScreen('difficulty-english'); });
+  document.getElementById('diff-english-back').addEventListener('click', function(){ showScreen('lobby'); });
   document.getElementById('game-back').addEventListener('click', function(){
     resetSceneForNextStage();
     showScreen('lobby');
@@ -649,6 +685,11 @@
       startGame('hanja', card.dataset.level);
     });
   });
+  document.querySelectorAll('#screen-difficulty-english .diff-card').forEach(function(card){
+    card.addEventListener('click', function(){
+      startGame('english', card.dataset.level);
+    });
+  });
 
   /* ============ progress dots ============ */
   var dotsWrap = document.getElementById('progress-dots');
@@ -665,7 +706,7 @@
   }
 
   /* ============ game state & logic ============ */
-  var state = { gameType:'math', difficulty:'easy', hanjaLevel:'9', opSequence:null, stage:0, totalStages:10, used:null, current:null, locked:false };
+  var state = { gameType:'math', difficulty:'easy', hanjaLevel:'9', englishLevel:'1', opSequence:null, stage:0, totalStages:10, used:null, current:null, locked:false };
 
   function pick(min,max){ return Math.floor(Math.random()*(max-min+1)) + min; }
 
@@ -794,6 +835,99 @@
     ]
   };
 
+  var ENGLISH_POOL = {
+    1: [
+      {en:'cat',ko:'고양이',cat:'animal'}, {en:'dog',ko:'강아지',cat:'animal'},
+      {en:'bird',ko:'새',cat:'animal'}, {en:'fish',ko:'물고기',cat:'animal'},
+      {en:'pig',ko:'돼지',cat:'animal'},
+      {en:'red',ko:'빨강',cat:'color'}, {en:'blue',ko:'파랑',cat:'color'},
+      {en:'yellow',ko:'노랑',cat:'color'}, {en:'green',ko:'초록',cat:'color'},
+      {en:'white',ko:'하양',cat:'color'},
+      {en:'one',ko:'하나',cat:'number'}, {en:'two',ko:'둘',cat:'number'},
+      {en:'three',ko:'셋',cat:'number'}, {en:'four',ko:'넷',cat:'number'},
+      {en:'five',ko:'다섯',cat:'number'},
+      {en:'mom',ko:'엄마',cat:'family'}, {en:'dad',ko:'아빠',cat:'family'},
+      {en:'apple',ko:'사과',cat:'food'}, {en:'banana',ko:'바나나',cat:'food'}, {en:'milk',ko:'우유',cat:'food'},
+      {en:'sun',ko:'해',cat:'nature'}, {en:'moon',ko:'달',cat:'nature'}, {en:'star',ko:'별',cat:'nature'}, {en:'tree',ko:'나무',cat:'nature'}
+    ],
+    2: [
+      {en:'school',ko:'학교',cat:'school'}, {en:'friend',ko:'친구',cat:'school'},
+      {en:'teacher',ko:'선생님',cat:'school'}, {en:'book',ko:'책',cat:'school'},
+      {en:'pencil',ko:'연필',cat:'school'}, {en:'desk',ko:'책상',cat:'school'}, {en:'chair',ko:'의자',cat:'school'},
+      {en:'big',ko:'큰',cat:'size'}, {en:'small',ko:'작은',cat:'size'},
+      {en:'long',ko:'긴',cat:'size'}, {en:'short',ko:'짧은',cat:'size'},
+      {en:'run',ko:'달리다',cat:'action'}, {en:'jump',ko:'뛰다',cat:'action'}, {en:'eat',ko:'먹다',cat:'action'},
+      {en:'sleep',ko:'자다',cat:'action'}, {en:'walk',ko:'걷다',cat:'action'}, {en:'sing',ko:'노래하다',cat:'action'},
+      {en:'house',ko:'집',cat:'home'}, {en:'family',ko:'가족',cat:'home'}, {en:'room',ko:'방',cat:'home'},
+      {en:'door',ko:'문',cat:'home'}, {en:'window',ko:'창문',cat:'home'},
+      {en:'morning',ko:'아침',cat:'time'}, {en:'night',ko:'밤',cat:'time'}
+    ],
+    3: [
+      {en:'weather',ko:'날씨',cat:'weather'}, {en:'rain',ko:'비',cat:'weather'},
+      {en:'snow',ko:'눈',cat:'weather'}, {en:'wind',ko:'바람',cat:'weather'},
+      {en:'cloud',ko:'구름',cat:'weather'}, {en:'sunny',ko:'맑은',cat:'weather'},
+      {en:'city',ko:'도시',cat:'place'}, {en:'country',ko:'나라',cat:'place'}, {en:'museum',ko:'박물관',cat:'place'},
+      {en:'library',ko:'도서관',cat:'place'}, {en:'park',ko:'공원',cat:'place'}, {en:'zoo',ko:'동물원',cat:'place'},
+      {en:'fast',ko:'빠른',cat:'descriptive'}, {en:'slow',ko:'느린',cat:'descriptive'},
+      {en:'difficult',ko:'어려운',cat:'descriptive'}, {en:'easy',ko:'쉬운',cat:'descriptive'}, {en:'important',ko:'중요한',cat:'descriptive'},
+      {en:'season',ko:'계절',cat:'time2'}, {en:'holiday',ko:'휴일',cat:'time2'},
+      {en:'always',ko:'항상',cat:'time2'}, {en:'sometimes',ko:'가끔',cat:'time2'}
+    ],
+    4: [
+      {en:'subject',ko:'과목',cat:'school2'}, {en:'math',ko:'수학',cat:'school2'}, {en:'science',ko:'과학',cat:'school2'},
+      {en:'music',ko:'음악',cat:'school2'}, {en:'art',ko:'미술',cat:'school2'},
+      {en:'homework',ko:'숙제',cat:'school2'}, {en:'exam',ko:'시험',cat:'school2'},
+      {en:'hobby',ko:'취미',cat:'activity'}, {en:'activity',ko:'활동',cat:'activity'},
+      {en:'invite',ko:'초대하다',cat:'activity'}, {en:'borrow',ko:'빌리다',cat:'activity'}, {en:'lend',ko:'빌려주다',cat:'activity'},
+      {en:'dangerous',ko:'위험한',cat:'abstract'}, {en:'magazine',ko:'잡지',cat:'abstract'},
+      {en:'abroad',ko:'해외로',cat:'abstract'}, {en:'festival',ko:'축제',cat:'abstract'}, {en:'vacation',ko:'방학',cat:'abstract'},
+      {en:'however',ko:'그러나',cat:'connector'}, {en:'especially',ko:'특히',cat:'connector'}, {en:'including',ko:'포함하여',cat:'connector'}
+    ]
+  };
+
+  function buildEnglishProblem(level){
+    var pool = ENGLISH_POOL[level];
+    var entry, guard = 0;
+    do {
+      entry = pool[pick(0, pool.length - 1)];
+      guard++;
+    } while(state.used.has('en' + level + ':' + entry.en) && guard < 200);
+    state.used.add('en' + level + ':' + entry.en);
+
+    var questionType = Math.random() < 0.5 ? 'word' : 'meaning';
+    var promptText, answer;
+    if(questionType === 'word'){
+      promptText = entry.ko;
+      answer = entry.en;
+    } else {
+      promptText = entry.en;
+      answer = entry.ko;
+    }
+    return { entry:entry, questionType:questionType, promptText:promptText, answer:answer };
+  }
+
+  function buildEnglishCandidates(level, correctEntry, questionType){
+    var pool = ENGLISH_POOL[level];
+    var sameCat = pool.filter(function(e){ return e.cat === correctEntry.cat && e.en !== correctEntry.en; });
+    var others = pool.filter(function(e){ return e.en !== correctEntry.en; });
+    var source = sameCat.length >= 2 ? sameCat : others;
+
+    var shuffled = source.slice();
+    for(var i=shuffled.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = t;
+    }
+    var picks = [correctEntry].concat(shuffled.slice(0,2));
+    var texts = picks.map(function(e){
+      return questionType === 'word' ? e.en : e.ko;
+    });
+    for(var k=texts.length-1;k>0;k--){
+      var j2 = Math.floor(Math.random()*(k+1));
+      var t2 = texts[k]; texts[k] = texts[j2]; texts[j2] = t2;
+    }
+    return texts;
+  }
+
   function buildHanjaProblem(level){
     var pool = HANJA_POOL[level];
     var entry, guard = 0;
@@ -854,6 +988,8 @@
     if(gameType === 'math'){
       state.difficulty = level;
       state.opSequence = buildOpSequence();
+    } else if(gameType === 'english'){
+      state.englishLevel = level;
     } else {
       state.hanjaLevel = level;
     }
@@ -873,6 +1009,11 @@
       answer = hp.answer;
       candidates = buildHanjaCandidates(state.hanjaLevel, hp.entry, hp.questionType);
       if(hp.questionType === 'reading'){ equationBanner.classList.add('hanja-char'); }
+    } else if(state.gameType === 'english'){
+      var ep = buildEnglishProblem(state.englishLevel);
+      promptText = ep.promptText;
+      answer = ep.answer;
+      candidates = buildEnglishCandidates(state.englishLevel, ep.entry, ep.questionType);
     } else {
       var problem = buildProblem(state.difficulty);
       promptText = problem.text;
@@ -988,7 +1129,7 @@
     state.stage++;
     if(state.stage >= state.totalStages){
       resetSceneForNextStage();
-      showEnding();
+      startPoopGame();
       return;
     }
     resetSceneForNextStage();
@@ -1044,16 +1185,16 @@
     }
   }
 
-  /* ============ poop dodge minigame ============ */
+  /* ============ poop dodge minigame (post-clear breather, one round) ============ */
   document.getElementById('poop-player').innerHTML = childRunningSVG();
-  document.getElementById('card-poop-game').addEventListener('click', function(){ startPoopGame(); });
-  document.getElementById('poop-back').addEventListener('click', function(){ stopPoopGame(); showScreen('lobby'); });
+  document.getElementById('poop-back').addEventListener('click', function(){ stopPoopGame(); showEnding(); });
 
   var poopStage = document.getElementById('poop-stage');
   var poopPlayerEl = document.getElementById('poop-player');
   var poopScoreEl = document.getElementById('poop-score-num');
   var poopGameOverEl = document.getElementById('poop-gameover');
   var poopFinalScoreEl = document.getElementById('poop-final-score');
+  var poopIntroEl = document.getElementById('poop-intro');
 
   var POOP_ACCEL = 60, POOP_MAX_SPEED = 78, POOP_FRICTION = 20;
   var poopActiveKey = null;
@@ -1079,6 +1220,8 @@
     poopPlayerEl.classList.remove('hit');
     poopGameOverEl.classList.remove('show');
     showScreen('poop');
+    poopIntroEl.classList.add('show');
+    setTimeout(function(){ poopIntroEl.classList.remove('show'); }, 1800);
     poopStage.addEventListener('pointerdown', onPoopPointerDown);
     poopStage.addEventListener('pointerup', onPoopPointerUp);
     poopStage.addEventListener('pointercancel', onPoopPointerUp);
@@ -1133,7 +1276,7 @@
     el.textContent = '💩';
     poopStage.appendChild(el);
     var x = pick(6, 94);
-    var speed = 16 + Math.random()*8;
+    var speed = 20 + Math.random()*10;
     el.style.left = x + '%';
     el.style.top = '-5%';
     poopGame.poops.push({ el:el, x:x, y:-5, speed:speed });
@@ -1215,7 +1358,7 @@
     setTimeout(function(){
       poopGame.poops.forEach(function(p){ p.el.remove(); });
       poopGame.poops = [];
-      showScreen('lobby');
+      showEnding();
     }, 1900);
   }
 
