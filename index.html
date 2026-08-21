@@ -117,11 +117,21 @@
   .progress-dots span.current{ background:var(--accent-2); transform:scale(1.3); }
 
   .equation-banner{
+    position:relative;
     z-index:5; margin:20px auto 4px; padding:20px 36px; background:var(--white); border-radius:26px;
     font-size:clamp(48px,10.8vw,80px); font-weight:800; color:var(--text); box-shadow:var(--shadow);
     letter-spacing:2px; text-align:center;
   }
   .equation-banner.hanja-char{ font-size:clamp(96px,22vw,180px); padding:8px 44px; letter-spacing:0; }
+  .banner-speak{
+    display:none; position:absolute; top:-14px; right:-14px; z-index:6;
+    width:44px; height:44px; border-radius:50%; border:none; background:var(--accent-2);
+    color:#fff; font-size:20px; box-shadow:0 4px 0 rgba(91,75,122,0.2); align-items:center; justify-content:center;
+  }
+  .banner-speak.show{ display:flex; }
+  .banner-speak:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(91,75,122,0.2); }
+  .banner-speak.speaking{ animation:speakPulse .5s ease-in-out infinite; }
+  @keyframes speakPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.15); } }
   .feedback-msg{ z-index:5; min-height:22px; font-size:clamp(12px,2vw,15px); color:var(--accent); font-weight:700; margin-bottom:4px; }
 
   .stage-wrap{
@@ -143,11 +153,20 @@
   }
   .door-slot{ display:flex; flex-direction:column; align-items:center; gap:10px; width:clamp(105px,27vw,225px); }
   .nameplate{
+    position:relative;
     background:#FFF3D6; border:3px solid #E8C97A; border-radius:14px; padding:6px 20px;
     font-weight:800; font-size:clamp(27px,5.4vw,42px); color:#8A6A1F; box-shadow:0 3px 0 rgba(0,0,0,0.08);
     white-space:nowrap;
   }
   .nameplate.small-text{ font-size:clamp(20px,4vw,27px); padding:6px 15px; }
+  .plate-speak{
+    display:none; position:absolute; top:-12px; right:-12px; z-index:6;
+    width:30px; height:30px; border-radius:50%; border:none; background:var(--accent-2);
+    color:#fff; font-size:14px; box-shadow:0 3px 0 rgba(91,75,122,0.2); align-items:center; justify-content:center;
+  }
+  .plate-speak.show{ display:flex; }
+  .plate-speak:active{ transform:translateY(2px); box-shadow:0 1px 0 rgba(91,75,122,0.2); }
+  .plate-speak.speaking{ animation:speakPulse .5s ease-in-out infinite; }
   .door-btn{ border:none; background:none; padding:0; width:100%; }
   .door-frame{
     position:relative; width:100%; aspect-ratio:3/5; background:#C99A6B; border-radius:14px 14px 4px 4px;
@@ -459,7 +478,10 @@
       <div class="stage-indicator">스테이지 <span id="stage-num">1</span> / 10</div>
       <div class="progress-dots" id="progress-dots"></div>
     </div>
-    <div class="equation-banner" id="equation-banner">3 + 4 = ⬜</div>
+    <div class="equation-banner" id="equation-banner">
+      <span class="banner-text" id="banner-text">3 + 4 = ⬜</span>
+      <button class="banner-speak" id="banner-speak" aria-label="발음 듣기">🔊</button>
+    </div>
     <div class="feedback-msg" id="feedback-msg"></div>
 
     <div class="stage-wrap" id="stage-wrap">
@@ -468,7 +490,7 @@
 
       <div class="doors-row" id="doors-row">
         <div class="door-slot" data-index="0">
-          <div class="nameplate"><span class="plate-number">1</span></div>
+          <div class="nameplate"><span class="plate-number">1</span><button class="plate-speak" data-index="0" aria-label="발음 듣기">🔊</button></div>
           <button class="door-btn" data-index="0">
             <div class="door-frame">
               <div class="door-inside"></div>
@@ -479,7 +501,7 @@
           </button>
         </div>
         <div class="door-slot" data-index="1">
-          <div class="nameplate"><span class="plate-number">2</span></div>
+          <div class="nameplate"><span class="plate-number">2</span><button class="plate-speak" data-index="1" aria-label="발음 듣기">🔊</button></div>
           <button class="door-btn" data-index="1">
             <div class="door-frame">
               <div class="door-inside"></div>
@@ -490,7 +512,7 @@
           </button>
         </div>
         <div class="door-slot" data-index="2">
-          <div class="nameplate"><span class="plate-number">3</span></div>
+          <div class="nameplate"><span class="plate-number">3</span><button class="plate-speak" data-index="2" aria-label="발음 듣기">🔊</button></div>
           <button class="door-btn" data-index="2">
             <div class="door-frame">
               <div class="door-inside"></div>
@@ -664,6 +686,7 @@
   document.getElementById('card-english-game').addEventListener('click', function(){ showScreen('difficulty-english'); });
   document.getElementById('diff-english-back').addEventListener('click', function(){ showScreen('lobby'); });
   document.getElementById('game-back').addEventListener('click', function(){
+    if('speechSynthesis' in window){ window.speechSynthesis.cancel(); }
     resetSceneForNextStage();
     showScreen('lobby');
   });
@@ -974,11 +997,40 @@
   var doorSlots = Array.prototype.slice.call(document.querySelectorAll('.door-slot'));
   var doorBtns = Array.prototype.slice.call(document.querySelectorAll('.door-btn'));
   var equationBanner = document.getElementById('equation-banner');
+  var bannerTextEl = document.getElementById('banner-text');
+  var bannerSpeakBtn = document.getElementById('banner-speak');
+  var plateSpeakBtns = Array.prototype.slice.call(document.querySelectorAll('.plate-speak'));
   var feedbackMsg = document.getElementById('feedback-msg');
   var stageNumEl = document.getElementById('stage-num');
   var childWrap = document.getElementById('child-wrap');
   var stageWrap = document.getElementById('stage-wrap');
   var fadeOverlay = document.getElementById('fade-overlay');
+
+  function speakEnglish(text, btn){
+    if(!('speechSynthesis' in window) || !text) return;
+    window.speechSynthesis.cancel();
+    var utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'en-US';
+    utter.rate = 0.85;
+    if(btn){
+      btn.classList.add('speaking');
+      utter.onend = function(){ btn.classList.remove('speaking'); };
+      utter.onerror = function(){ btn.classList.remove('speaking'); };
+    }
+    window.speechSynthesis.speak(utter);
+  }
+
+  bannerSpeakBtn.addEventListener('click', function(){
+    speakEnglish(bannerTextEl.textContent, bannerSpeakBtn);
+  });
+  plateSpeakBtns.forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var idx = Number(btn.dataset.index);
+      var word = doorSlots[idx].querySelector('.plate-number').textContent;
+      speakEnglish(word, btn);
+    });
+  });
 
   function startGame(gameType, level){
     state.gameType = gameType;
@@ -999,8 +1051,11 @@
   }
 
   function renderStage(){
+    if('speechSynthesis' in window){ window.speechSynthesis.cancel(); }
     equationBanner.classList.remove('hanja-char');
+    bannerSpeakBtn.classList.remove('show','speaking');
     doorSlots.forEach(function(slot){ slot.querySelector('.nameplate').classList.remove('small-text'); });
+    plateSpeakBtns.forEach(function(btn){ btn.classList.remove('show','speaking'); });
 
     var promptText, answer, candidates;
     if(state.gameType === 'hanja'){
@@ -1014,6 +1069,11 @@
       promptText = ep.promptText;
       answer = ep.answer;
       candidates = buildEnglishCandidates(state.englishLevel, ep.entry, ep.questionType);
+      if(ep.questionType === 'meaning'){
+        bannerSpeakBtn.classList.add('show');
+      } else {
+        plateSpeakBtns.forEach(function(btn){ btn.classList.add('show'); });
+      }
     } else {
       var problem = buildProblem(state.difficulty);
       promptText = problem.text;
@@ -1022,7 +1082,7 @@
     }
 
     state.current = { answer: String(answer) };
-    equationBanner.textContent = promptText;
+    bannerTextEl.textContent = promptText;
     feedbackMsg.textContent = '';
     stageNumEl.textContent = state.stage + 1;
     updateDots();
