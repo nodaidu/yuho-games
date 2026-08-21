@@ -891,6 +891,7 @@
 
   function playWrong(idx){
     var slot = doorSlots[idx];
+    state.locked = true;
     slot.classList.add('wrong');
     feedbackMsg.textContent = '다시 한번 생각해볼까요? 🙂';
 
@@ -904,6 +905,8 @@
     }, 930);
     setTimeout(function(){
       slot.classList.remove('wrong');
+      resetSceneForNextStage();
+      renderStage();
     }, 1150);
   }
 
