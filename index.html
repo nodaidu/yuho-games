@@ -1026,16 +1026,29 @@
     var voices = window.speechSynthesis.getVoices();
     if(!voices || voices.length === 0) return;
     var enVoices = voices.filter(function(v){ return /^en/i.test(v.lang); });
-    var preferred = ['female','zira','samantha','susan','aria','jenny','google us english','google uk english female','moira','tessa','karen','victoria','salli','joanna'];
-    for(var i=0;i<preferred.length;i++){
+    if(!enVoices.length) return;
+    var femaleKeywords = [
+      'female','zira','samantha','susan','aria','jenny','michelle','sara','emma','libby','sonia','hazel',
+      'natasha','moira','tessa','karen','victoria','fiona','kate','serena','allison','ava','ivy','joanna',
+      'kendra','kimberly','salli','nicole','amy','heera','olivia','isla','ruth','shelley',
+      'google us english','google uk english female'
+    ];
+    for(var i=0;i<femaleKeywords.length;i++){
       for(var j=0;j<enVoices.length;j++){
-        if(enVoices[j].name.toLowerCase().indexOf(preferred[i]) !== -1){
+        if(enVoices[j].name.toLowerCase().indexOf(femaleKeywords[i]) !== -1){
           ttsVoice = enVoices[j];
+          console.log('[TTS] picked female-matched voice:', ttsVoice.name);
           return;
         }
       }
     }
-    if(enVoices.length){ ttsVoice = enVoices[0]; }
+    var maleKeywords = ['male','david','mark','guy','daniel','james','alex','fred','ryan','tom','sean','george','christopher'];
+    var nonMale = enVoices.filter(function(v){
+      var n = v.name.toLowerCase();
+      return maleKeywords.every(function(k){ return n.indexOf(k) === -1; });
+    });
+    ttsVoice = nonMale.length ? nonMale[0] : enVoices[0];
+    console.log('[TTS] no female match, fell back to:', ttsVoice.name, '| all en voices:', enVoices.map(function(v){ return v.name; }));
   }
   if('speechSynthesis' in window){
     pickFemaleEnglishVoice();
@@ -1044,6 +1057,7 @@
 
   function speakEnglish(text, btn){
     if(!('speechSynthesis' in window) || !text) return;
+    if(!ttsVoice){ pickFemaleEnglishVoice(); }
     window.speechSynthesis.cancel();
     var utter = new SpeechSynthesisUtterance(text);
     utter.lang = 'en-US';
