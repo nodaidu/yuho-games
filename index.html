@@ -1020,12 +1020,35 @@
   var stageWrap = document.getElementById('stage-wrap');
   var fadeOverlay = document.getElementById('fade-overlay');
 
+  var ttsVoice = null;
+  function pickFemaleEnglishVoice(){
+    if(!('speechSynthesis' in window)) return;
+    var voices = window.speechSynthesis.getVoices();
+    if(!voices || voices.length === 0) return;
+    var enVoices = voices.filter(function(v){ return /^en/i.test(v.lang); });
+    var preferred = ['female','zira','samantha','susan','aria','jenny','google us english','google uk english female','moira','tessa','karen','victoria','salli','joanna'];
+    for(var i=0;i<preferred.length;i++){
+      for(var j=0;j<enVoices.length;j++){
+        if(enVoices[j].name.toLowerCase().indexOf(preferred[i]) !== -1){
+          ttsVoice = enVoices[j];
+          return;
+        }
+      }
+    }
+    if(enVoices.length){ ttsVoice = enVoices[0]; }
+  }
+  if('speechSynthesis' in window){
+    pickFemaleEnglishVoice();
+    window.speechSynthesis.onvoiceschanged = pickFemaleEnglishVoice;
+  }
+
   function speakEnglish(text, btn){
     if(!('speechSynthesis' in window) || !text) return;
     window.speechSynthesis.cancel();
     var utter = new SpeechSynthesisUtterance(text);
     utter.lang = 'en-US';
-    utter.rate = 0.6;
+    utter.rate = 0.7;
+    if(ttsVoice){ utter.voice = ttsVoice; }
     if(btn){
       btn.classList.add('speaking');
       utter.onend = function(){ btn.classList.remove('speaking'); };
