@@ -78,9 +78,9 @@
 
   .game-grid{
     z-index:1; display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-columns:repeat(2,minmax(0,1fr));
     gap:clamp(18px,4vw,32px);
-    width:min(920px,92vw);
+    width:min(640px,92vw);
   }
   .game-card{
     position:relative; border:6px solid var(--ink); border-radius:22px; padding:clamp(20px,4vw,30px) 10px clamp(20px,4vw,28px);
@@ -91,6 +91,7 @@
   .game-card:nth-child(1){ transform:rotate(-3deg); }
   .game-card:nth-child(2){ transform:rotate(2deg); }
   .game-card:nth-child(3){ transform:rotate(-2deg); }
+  .game-card:nth-child(4){ transform:rotate(3deg); }
   .game-card .card-icon-badge{
     width:clamp(48px,10vw,72px); height:clamp(48px,10vw,72px); border-radius:50%;
     background:#fff; border:5px solid var(--ink); display:flex; align-items:center; justify-content:center;
@@ -104,6 +105,8 @@
   .game-card.card-hanja:active{ transform:translateY(6px) rotate(2deg); box-shadow:2px 2px 0 var(--ink); }
   .game-card.card-english{ background:#5CFF9E; }
   .game-card.card-english:active{ transform:translateY(6px) rotate(-2deg); box-shadow:2px 2px 0 var(--ink); }
+  .game-card.card-spot{ background:#FF7FA6; }
+  .game-card.card-spot:active{ transform:translateY(6px) rotate(3deg); box-shadow:2px 2px 0 var(--ink); }
   .lobby-credit{
     position:absolute; bottom:10px; left:0; width:100%; text-align:center; z-index:1;
     font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; font-size:10px; color:#fff; opacity:0.7;
@@ -118,8 +121,8 @@
   .back-btn:active{ transform:translateY(4px); box-shadow:1px 1px 0 var(--ink); }
 
   /* ---------- DIFFICULTY ---------- */
-  #screen-difficulty, #screen-difficulty-hanja, #screen-difficulty-english{ justify-content:center; align-items:center; gap:6vh; }
-  #screen-difficulty h2, #screen-difficulty-hanja h2, #screen-difficulty-english h2{
+  #screen-difficulty, #screen-difficulty-hanja, #screen-difficulty-english, #screen-difficulty-spot{ justify-content:center; align-items:center; gap:6vh; }
+  #screen-difficulty h2, #screen-difficulty-hanja h2, #screen-difficulty-english h2, #screen-difficulty-spot h2{
     z-index:1; font-size:clamp(24px,4.4vw,34px); margin:0; color:#fff; letter-spacing:1px;
     -webkit-text-stroke:1.5px var(--ink); text-shadow:2px 3px 0 var(--ink);
   }
@@ -430,6 +433,29 @@
   .poop-gameover-card h3{ margin:6px 0 0; font-size:clamp(20px,4vw,30px); color:var(--ink); }
   .poop-gameover-card p{ margin:6px 0 0; font-size:clamp(14px,2.4vw,18px); color:var(--text-soft); font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; }
 
+  /* ---------- SPOT-THE-DIFFERENCE GAME ---------- */
+  #screen-spot{ justify-content:flex-start; background:linear-gradient(160deg,var(--sky) 0%,var(--mint) 45%,var(--lavender) 100%); }
+  .spot-found-row{ z-index:2; display:flex; gap:8px; margin:4px 0 8px; }
+  .spot-found-row span{ width:18px; height:18px; border-radius:50%; background:#fff; border:3px solid var(--ink); transition:background .15s ease; }
+  .spot-found-row span.done{ background:#33C070; }
+  .spot-feedback{ z-index:2; min-height:20px; font-size:clamp(12px,2vw,15px); color:var(--accent); font-weight:700; margin-bottom:4px; text-align:center; padding:0 4vw; }
+  .spot-scenes{
+    z-index:2; display:flex; gap:clamp(10px,2.4vw,22px); width:min(940px,94vw);
+    flex:1; align-items:flex-start; justify-content:center; padding-bottom:18px; min-height:0;
+  }
+  .spot-panel{
+    position:relative; flex:1 1 0; max-width:460px; aspect-ratio:4/3; border-radius:20px; overflow:hidden;
+    border:5px solid var(--ink); box-shadow:6px 6px 0 var(--ink); background:#CFEFFF; cursor:pointer;
+  }
+  .spot-panel svg{ width:100%; height:100%; display:block; }
+  .spot-panel.shake{ animation:screenShake .4s; }
+  .spot-found-mark{ animation:spotFoundPop .3s ease; }
+  @keyframes spotFoundPop{ from{ opacity:0; } to{ opacity:1; } }
+  @media (max-width:700px){
+    .spot-scenes{ flex-direction:column; align-items:center; }
+    .spot-panel{ max-width:min(94vw,420px); width:100%; }
+  }
+
   @media (max-width:480px){
     .doors-row{ gap:8px; }
     .equation-banner{ padding:14px 20px; letter-spacing:1px; }
@@ -466,6 +492,11 @@
         <div class="card-icon-badge">ABC</div>
         <h2>영어를 찾아라!</h2>
         <p>영단어와 뜻을 맞혀요</p>
+      </button>
+      <button class="game-card card-spot" id="card-spot-game">
+        <div class="card-icon-badge" id="spot-card-badge"></div>
+        <h2>틀린그림 찾기!</h2>
+        <p>다른 그림 5개를 찾아봐요</p>
       </button>
     </div>
     <div class="lobby-credit">얼굴 일러스트: Ashley Seo (CC BY 4.0), via DiceBear</div>
@@ -538,6 +569,27 @@
     </div>
   </section>
 
+  <!-- SPOT-THE-DIFFERENCE DIFFICULTY -->
+  <section class="screen" id="screen-difficulty-spot">
+    <div class="bg-deco"><span></span><span></span><span></span><span></span></div>
+    <button class="back-btn" id="diff-spot-back">← 돌아가기</button>
+    <h2>난이도를 골라주세요</h2>
+    <div class="diff-grid">
+      <button class="diff-card tier1" data-diff="easy">
+        <span class="diff-badge">🔍</span><b>초급</b>
+        <small>그림 12개 · 큰 차이<br>다른 그림 5개 찾기</small>
+      </button>
+      <button class="diff-card tier2" data-diff="normal">
+        <span class="diff-badge">🧐</span><b>중급</b>
+        <small>그림 15개 · 꼼꼼히!<br>다른 그림 5개 찾기</small>
+      </button>
+      <button class="diff-card tier3" data-diff="hard">
+        <span class="diff-badge">🦅</span><b>고급</b>
+        <small>그림 18개 · 매의 눈<br>다른 그림 5개 찾기</small>
+      </button>
+    </div>
+  </section>
+
   <!-- GAME -->
   <section class="screen" id="screen-game">
     <button class="back-btn" id="game-back">← 나가기</button>
@@ -594,6 +646,22 @@
       <div class="child-wrap" id="child-wrap"></div>
       <div class="fade-overlay" id="fade-overlay"></div>
     </div>
+  </section>
+
+  <!-- SPOT-THE-DIFFERENCE GAME -->
+  <section class="screen" id="screen-spot">
+    <button class="back-btn" id="spot-back">← 나가기</button>
+    <div class="game-topbar">
+      <div class="stage-indicator">스테이지 <span id="spot-stage-num">1</span> / 10</div>
+      <div class="progress-dots" id="spot-progress-dots"></div>
+    </div>
+    <div class="spot-found-row" id="spot-found-indicator"></div>
+    <div class="spot-feedback" id="spot-feedback"></div>
+    <div class="spot-scenes">
+      <div class="spot-panel" data-side="left"><svg id="spot-svg-left" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg"></svg></div>
+      <div class="spot-panel" data-side="right"><svg id="spot-svg-right" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg"></svg></div>
+    </div>
+    <div class="fade-overlay" id="spot-fade-overlay"></div>
   </section>
 
   <!-- ENDING -->
@@ -752,11 +820,203 @@
       + '</svg>';
   }
 
+  function spotBadgeIconSVG(){
+    return '<svg viewBox="0 0 48 48" width="70%" height="70%" xmlns="http://www.w3.org/2000/svg">'
+      + '<circle cx="20" cy="20" r="13" fill="none" stroke="#1A1A2E" stroke-width="4"/>'
+      + '<line x1="29" y1="29" x2="41" y2="41" stroke="#1A1A2E" stroke-width="5" stroke-linecap="round"/>'
+      + '<path d="M14 20 L18 24 L27 14" stroke="#33C070" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
+      + '</svg>';
+  }
+
   document.getElementById('child-wrap').innerHTML = childSVG();
   document.querySelectorAll('[data-monster]').forEach(function(el){ el.innerHTML = monsterSVG(); });
   document.getElementById('toilet-figure').innerHTML = toiletSVG();
   document.getElementById('child-reunion').innerHTML = childRunningSVG();
   document.getElementById('lobby-mascot').innerHTML = lobbyMascotSVG();
+  document.getElementById('spot-card-badge').innerHTML = spotBadgeIconSVG();
+
+  /* ============ spot-the-difference: scene shape library ============ */
+  var SPOT_PALETTE = ['#FF9EB8','#7EC8E3','#FFE38A','#B7A6E8','#9EE6C0','#FF7FA6','#6FE0B8','#FFC26B','#C79BFF','#6FB3FF','#FF9B7A'];
+
+  var SPOT_TYPES = {
+    sun:{rotatable:true, flippable:false, variants:1},
+    cloud:{rotatable:false, flippable:false, variants:1},
+    tree:{rotatable:false, flippable:false, variants:2},
+    flower:{rotatable:true, flippable:false, variants:2},
+    star:{rotatable:true, flippable:false, variants:1},
+    heart:{rotatable:true, flippable:false, variants:1},
+    balloon:{rotatable:false, flippable:false, variants:1},
+    butterfly:{rotatable:true, flippable:true, variants:2},
+    mushroom:{rotatable:false, flippable:false, variants:2},
+    house:{rotatable:false, flippable:false, variants:2},
+    fish:{rotatable:false, flippable:true, variants:1},
+    rainbow:{rotatable:false, flippable:false, variants:1},
+    ladybug:{rotatable:false, flippable:false, variants:2},
+    kite:{rotatable:true, flippable:true, variants:1}
+  };
+  var SPOT_TYPE_NAMES = Object.keys(SPOT_TYPES);
+
+  function spotStarPoints(r1, r2){
+    var pts = [];
+    for(var i=0;i<10;i++){
+      var r = i % 2 === 0 ? r1 : r2;
+      var ang = (Math.PI/5) * i - Math.PI/2;
+      pts.push((r*Math.cos(ang)).toFixed(1) + ',' + (r*Math.sin(ang)).toFixed(1));
+    }
+    return pts.join(' ');
+  }
+  var SPOT_STAR_PTS = spotStarPoints(12, 5);
+
+  function spotShapeMarkup(type, color, variant){
+    switch(type){
+      case 'sun': {
+        var rays = '';
+        for(var i=0;i<8;i++){
+          rays += '<rect x="-2" y="-19" width="4" height="9" rx="2" fill="' + color + '" transform="rotate(' + (i*45) + ')"/>';
+        }
+        return rays + '<circle r="10" fill="' + color + '"/>';
+      }
+      case 'cloud':
+        return '<ellipse cx="-8" cy="2" rx="10" ry="7" fill="' + color + '"/><ellipse cx="8" cy="2" rx="10" ry="7" fill="' + color + '"/><ellipse cx="0" cy="-4" rx="12" ry="9" fill="' + color + '"/>';
+      case 'tree':
+        if(variant === 1){
+          return '<rect x="-3" y="6" width="6" height="14" rx="2" fill="#8B5E34"/><polygon points="0,-20 14,8 -14,8" fill="' + color + '"/><polygon points="0,-8 11,14 -11,14" fill="' + color + '"/>';
+        }
+        return '<rect x="-3" y="6" width="6" height="14" rx="2" fill="#8B5E34"/><circle cx="0" cy="-4" r="13" fill="' + color + '"/><circle cx="-9" cy="4" r="9" fill="' + color + '"/><circle cx="9" cy="4" r="9" fill="' + color + '"/>';
+      case 'flower': {
+        var n = variant === 1 ? 6 : 5;
+        var petals = '';
+        for(var p=0;p<n;p++){
+          petals += '<g transform="rotate(' + (p*(360/n)) + ')"><ellipse cx="0" cy="-9" rx="4.5" ry="7" fill="' + color + '"/></g>';
+        }
+        return '<rect x="-1.5" y="4" width="3" height="14" fill="#6FB380"/>' + petals + '<circle r="4" fill="#FFE38A"/>';
+      }
+      case 'star':
+        return '<polygon points="' + SPOT_STAR_PTS + '" fill="' + color + '"/>';
+      case 'heart':
+        return '<path d="M0,9 C-14,-3 -9,-15 0,-7 C9,-15 14,-3 0,9Z" fill="' + color + '"/>';
+      case 'balloon':
+        return '<path d="M0,14 Q3,20 0,25" stroke="#8578A8" stroke-width="1.4" fill="none"/><ellipse cx="0" cy="-2" rx="9" ry="12" fill="' + color + '"/><polygon points="-2,10 2,10 0,14" fill="' + color + '"/>';
+      case 'butterfly': {
+        var dots = variant === 1 ? '<circle cx="-7" cy="-5" r="2" fill="#fff" opacity="0.7"/><circle cx="7" cy="-5" r="2" fill="#fff" opacity="0.7"/>' : '';
+        return '<ellipse cx="-7" cy="-5" rx="7" ry="9" fill="' + color + '" transform="rotate(-15)"/><ellipse cx="7" cy="-5" rx="7" ry="9" fill="' + color + '" transform="rotate(15)"/><ellipse cx="-6" cy="6" rx="5" ry="6" fill="' + color + '" opacity="0.85" transform="rotate(-10)"/><ellipse cx="6" cy="6" rx="5" ry="6" fill="' + color + '" opacity="0.85" transform="rotate(10)"/>' + dots + '<rect x="-1.2" y="-10" width="2.4" height="20" rx="1.2" fill="#5B4B7A"/>';
+      }
+      case 'mushroom': {
+        var spots = variant === 1 ? '<circle cx="-6" cy="-6" r="2" fill="#fff"/><circle cx="5" cy="-9" r="2" fill="#fff"/><circle cx="0" cy="-2" r="1.8" fill="#fff"/>' : '';
+        return '<rect x="-4" y="2" width="8" height="10" rx="3" fill="#FFF3E0"/><path d="M-12,2 Q0,-16 12,2 Z" fill="' + color + '"/>' + spots;
+      }
+      case 'house': {
+        var win = variant === 1 ? '<rect x="3" y="0" width="6" height="6" fill="#DCEEF7"/>' : '<circle cx="6" cy="3" r="3" fill="#DCEEF7"/>';
+        return '<rect x="-11" y="-2" width="22" height="16" fill="' + color + '"/><polygon points="-14,-2 0,-16 14,-2" fill="#C97A4D"/><rect x="-3" y="4" width="6" height="10" fill="#5B4B7A"/>' + win;
+      }
+      case 'fish':
+        return '<polygon points="10,0 18,-6 18,6" fill="' + color + '"/><ellipse cx="0" cy="0" rx="12" ry="7" fill="' + color + '"/><circle cx="-6" cy="-1" r="1.6" fill="#3B2A22"/>';
+      case 'rainbow':
+        return '<path d="M-16,8 A16,16 0 0 1 16,8" stroke="' + color + '" stroke-width="4" fill="none"/><path d="M-11,8 A11,11 0 0 1 11,8" stroke="#FFE38A" stroke-width="4" fill="none"/><path d="M-6,8 A6,6 0 0 1 6,8" stroke="#9EE6C0" stroke-width="4" fill="none"/>';
+      case 'ladybug': {
+        var spotCount = variant === 1 ? 4 : 2;
+        var sdots = '<circle cx="-4" cy="1" r="1.6" fill="#3B2A22"/><circle cx="4" cy="1" r="1.6" fill="#3B2A22"/>';
+        if(spotCount === 4){ sdots += '<circle cx="-4" cy="6" r="1.6" fill="#3B2A22"/><circle cx="4" cy="6" r="1.6" fill="#3B2A22"/>'; }
+        return '<circle cx="0" cy="0" r="10" fill="' + color + '"/><path d="M0,-10 A10,10 0 0 1 0,10 Z" fill="#000" opacity="0.15"/><circle cx="0" cy="-8" r="4" fill="#3B2A22"/>' + sdots;
+      }
+      case 'kite':
+        return '<path d="M0,14 Q4,20 0,26 Q-4,32 0,38" stroke="#8578A8" stroke-width="1.4" fill="none"/><polygon points="0,-14 10,0 0,14 -10,0" fill="' + color + '"/>';
+      default:
+        return '<circle r="10" fill="' + color + '"/>';
+    }
+  }
+
+  var SPOT_DIFF_CFG = {
+    easy:  { count:12, cols:4, rows:3, hitR:30, scaleDelta:0.4,  rotateDelta:45, removeMax:2 },
+    normal:{ count:15, cols:5, rows:3, hitR:24, scaleDelta:0.28, rotateDelta:28, removeMax:2 },
+    hard:  { count:18, cols:6, rows:3, hitR:19, scaleDelta:0.18, rotateDelta:16, removeMax:1 }
+  };
+  var SPOT_VB_W = 400, SPOT_VB_H = 300, SPOT_TOP_MARGIN = 30;
+
+  function spotShuffle(arr){
+    for(var i=arr.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+    }
+    return arr;
+  }
+
+  function buildSpotScene(difficulty){
+    var cfg = SPOT_DIFF_CFG[difficulty] || SPOT_DIFF_CFG.easy;
+    var cellW = SPOT_VB_W / cfg.cols, cellH = (SPOT_VB_H - SPOT_TOP_MARGIN) / cfg.rows;
+    var cells = [];
+    for(var r=0;r<cfg.rows;r++){
+      for(var c=0;c<cfg.cols;c++){ cells.push({r:r,c:c}); }
+    }
+    cells = spotShuffle(cells).slice(0, cfg.count);
+
+    var objects = cells.map(function(cell){
+      var type = SPOT_TYPE_NAMES[pick(0, SPOT_TYPE_NAMES.length - 1)];
+      var meta = SPOT_TYPES[type];
+      var variant = pick(0, meta.variants - 1);
+      var color = SPOT_PALETTE[pick(0, SPOT_PALETTE.length - 1)];
+      var jx = (Math.random() - 0.5) * cellW * 0.4;
+      var jy = (Math.random() - 0.5) * cellH * 0.4;
+      var x = cell.c * cellW + cellW / 2 + jx;
+      var y = SPOT_TOP_MARGIN + cell.r * cellH + cellH / 2 + jy;
+      var rot = meta.rotatable ? pick(-20, 20) : 0;
+      var scale = 0.85 + Math.random() * 0.5;
+      var flip = meta.flippable && Math.random() < 0.5;
+      return { type:type, variant:variant, color:color, x:x, y:y, rot:rot, scale:scale, flip:flip, hidden:false };
+    });
+
+    var idxPool = spotShuffle(objects.map(function(_, i){ return i; }));
+    var diffIdx = idxPool.slice(0, 5);
+    var rightObjects = objects.map(function(o){
+      return { type:o.type, variant:o.variant, color:o.color, x:o.x, y:o.y, rot:o.rot, scale:o.scale, flip:o.flip, hidden:o.hidden };
+    });
+
+    var diffs = [];
+    var removeCount = 0;
+    diffIdx.forEach(function(i){
+      var obj = objects[i], rObj = rightObjects[i], meta = SPOT_TYPES[obj.type];
+      var kinds = ['color', 'scale'];
+      if(meta.rotatable){ kinds.push('rotate'); }
+      if(meta.flippable){ kinds.push('flip'); }
+      if(meta.variants > 1){ kinds.push('variant'); }
+      if(removeCount < cfg.removeMax){ kinds.push('remove'); }
+      var kind = kinds[pick(0, kinds.length - 1)];
+      if(kind === 'color'){
+        var newColor;
+        do { newColor = SPOT_PALETTE[pick(0, SPOT_PALETTE.length - 1)]; } while(newColor === obj.color);
+        rObj.color = newColor;
+      } else if(kind === 'scale'){
+        var factor = (Math.random() < 0.5 ? 1 : -1) * cfg.scaleDelta;
+        rObj.scale = Math.max(0.35, obj.scale + factor);
+      } else if(kind === 'rotate'){
+        rObj.rot = obj.rot + (Math.random() < 0.5 ? 1 : -1) * cfg.rotateDelta;
+      } else if(kind === 'flip'){
+        rObj.flip = !obj.flip;
+      } else if(kind === 'variant'){
+        rObj.variant = (obj.variant + 1) % meta.variants;
+      } else if(kind === 'remove'){
+        rObj.hidden = true;
+        removeCount++;
+      }
+      diffs.push({ x:obj.x, y:obj.y, r:cfg.hitR, found:false });
+    });
+
+    return { left:objects, right:rightObjects, diffs:diffs };
+  }
+
+  function renderSpotObjects(objects){
+    return objects.filter(function(o){ return !o.hidden; }).map(function(o){
+      var sx = o.flip ? -1 : 1;
+      return '<g transform="translate(' + o.x + ',' + o.y + ') rotate(' + o.rot + ') scale(' + (sx*o.scale) + ',' + o.scale + ')">'
+        + spotShapeMarkup(o.type, o.color, o.variant) + '</g>';
+    }).join('');
+  }
+
+  function spotSceneBackground(gradId){
+    return '<defs><linearGradient id="' + gradId + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#CFEFFF"/><stop offset="100%" stop-color="#E6DEFF"/></linearGradient></defs>'
+      + '<rect width="' + SPOT_VB_W + '" height="' + SPOT_VB_H + '" fill="url(#' + gradId + ')"/>'
+      + '<rect x="0" y="248" width="' + SPOT_VB_W + '" height="52" fill="#BFEFC9"/>';
+  }
 
   /* ============ screen management ============ */
   function showScreen(name){
@@ -770,6 +1030,12 @@
   document.getElementById('diff-hanja-back').addEventListener('click', function(){ showScreen('lobby'); });
   document.getElementById('card-english-game').addEventListener('click', function(){ showScreen('difficulty-english'); });
   document.getElementById('diff-english-back').addEventListener('click', function(){ showScreen('lobby'); });
+  document.getElementById('card-spot-game').addEventListener('click', function(){ showScreen('difficulty-spot'); });
+  document.getElementById('diff-spot-back').addEventListener('click', function(){ showScreen('lobby'); });
+  document.getElementById('spot-back').addEventListener('click', function(){
+    clearPendingTimers();
+    showScreen('lobby');
+  });
   document.getElementById('game-back').addEventListener('click', function(){
     if('speechSynthesis' in window){ window.speechSynthesis.cancel(); }
     clearPendingTimers();
@@ -799,6 +1065,11 @@
       startGame('english', card.dataset.level);
     });
   });
+  document.querySelectorAll('#screen-difficulty-spot .diff-card').forEach(function(card){
+    card.addEventListener('click', function(){
+      startGame('spot', card.dataset.diff);
+    });
+  });
 
   /* ============ progress dots ============ */
   var dotsWrap = document.getElementById('progress-dots');
@@ -806,8 +1077,12 @@
     var dot = document.createElement('span');
     dotsWrap.appendChild(dot);
   }
-  function updateDots(){
-    var dots = dotsWrap.children;
+  var spotDotsWrap = document.getElementById('spot-progress-dots');
+  for(var d3=0; d3<10; d3++){
+    spotDotsWrap.appendChild(document.createElement('span'));
+  }
+  function updateDots(el){
+    var dots = el.children;
     for(var i=0;i<dots.length;i++){
       dots[i].classList.toggle('done', i < state.stage);
       dots[i].classList.toggle('current', i === state.stage);
@@ -815,7 +1090,7 @@
   }
 
   /* ============ game state & logic ============ */
-  var state = { gameType:'math', difficulty:'easy', hanjaLevel:'9', englishLevel:'1', opSequence:null, stage:0, totalStages:10, used:null, current:null, locked:false, wrongCount:0 };
+  var state = { gameType:'math', difficulty:'easy', hanjaLevel:'9', englishLevel:'1', spotDifficulty:'easy', opSequence:null, stage:0, totalStages:10, used:null, current:null, locked:false, wrongCount:0 };
 
   var pendingTimers = [];
   function setTrackedTimeout(fn, ms){
@@ -832,11 +1107,12 @@
     pendingTimers = [];
   }
 
-  var LEVEL_PROGRESSION = { math:['easy','normal','hard'], hanja:['9','8','7'], english:['1','2','3','4'] };
+  var LEVEL_PROGRESSION = { math:['easy','normal','hard'], hanja:['9','8','7'], english:['1','2','3','4'], spot:['easy','normal','hard'] };
   function getCurrentLevel(){
     if(state.gameType === 'math') return state.difficulty;
     if(state.gameType === 'hanja') return state.hanjaLevel;
     if(state.gameType === 'english') return state.englishLevel;
+    if(state.gameType === 'spot') return state.spotDifficulty;
     return null;
   }
   function getNextLevel(){
@@ -1197,8 +1473,15 @@
       state.opSequence = buildOpSequence();
     } else if(gameType === 'english'){
       state.englishLevel = level;
+    } else if(gameType === 'spot'){
+      state.spotDifficulty = level;
     } else {
       state.hanjaLevel = level;
+    }
+    if(gameType === 'spot'){
+      showScreen('spot');
+      renderSpotStage();
+      return;
     }
     showScreen('game');
     resetSceneForNextStage();
@@ -1240,7 +1523,7 @@
     bannerTextEl.textContent = promptText;
     feedbackMsg.textContent = '';
     stageNumEl.textContent = state.stage + 1;
-    updateDots();
+    updateDots(dotsWrap);
 
     candidates.forEach(function(val, i){
       doorSlots[i].querySelector('.plate-number').textContent = val;
@@ -1600,6 +1883,112 @@
       showEnding();
     }, 1900);
   }
+
+  /* ============ spot-the-difference game runtime ============ */
+  var spotSvgLeft = document.getElementById('spot-svg-left');
+  var spotSvgRight = document.getElementById('spot-svg-right');
+  var spotStageNumEl = document.getElementById('spot-stage-num');
+  var spotFeedback = document.getElementById('spot-feedback');
+  var spotFadeOverlay = document.getElementById('spot-fade-overlay');
+  var spotFoundWrap = document.getElementById('spot-found-indicator');
+  var spotPanelEls = Array.prototype.slice.call(document.querySelectorAll('.spot-panel'));
+
+  for(var f=0; f<5; f++){ spotFoundWrap.appendChild(document.createElement('span')); }
+
+  var spotState = { diffs:[], foundCount:0, locked:false };
+
+  function updateSpotFoundIndicator(){
+    var kids = spotFoundWrap.children;
+    for(var i=0;i<kids.length;i++){ kids[i].classList.toggle('done', i < spotState.foundCount); }
+  }
+
+  function renderSpotStage(){
+    var scene = buildSpotScene(state.spotDifficulty);
+    spotState.diffs = scene.diffs;
+    spotState.foundCount = 0;
+    spotState.locked = false;
+    spotSvgLeft.innerHTML = spotSceneBackground('spotSkyL') + renderSpotObjects(scene.left);
+    spotSvgRight.innerHTML = spotSceneBackground('spotSkyR') + renderSpotObjects(scene.right);
+    spotFeedback.textContent = '다른 부분 5개를 찾아 눌러보세요!';
+    spotStageNumEl.textContent = state.stage + 1;
+    updateDots(spotDotsWrap);
+    updateSpotFoundIndicator();
+  }
+
+  function advanceSpotStage(){
+    state.stage++;
+    if(state.stage >= state.totalStages){
+      showPoopIntro();
+      return;
+    }
+    spotFadeOverlay.classList.add('active');
+    setTrackedTimeout(function(){
+      renderSpotStage();
+      requestAnimationFrame(function(){ spotFadeOverlay.classList.remove('active'); });
+    }, 450);
+  }
+
+  function svgLocalPoint(svgEl, clientX, clientY){
+    var rect = svgEl.getBoundingClientRect();
+    return {
+      x: (clientX - rect.left) / rect.width * SPOT_VB_W,
+      y: (clientY - rect.top) / rect.height * SPOT_VB_H
+    };
+  }
+
+  function markSpotFound(d){
+    [spotSvgLeft, spotSvgRight].forEach(function(svg){
+      var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.setAttribute('class', 'spot-found-mark');
+      g.innerHTML = '<circle cx="' + d.x + '" cy="' + d.y + '" r="' + (d.r*0.55) + '" fill="none" stroke="#33C070" stroke-width="4" stroke-dasharray="6 5"/><circle cx="' + d.x + '" cy="' + d.y + '" r="4" fill="#33C070"/>';
+      svg.appendChild(g);
+    });
+  }
+
+  function showSpotMiss(panelEl, pt){
+    panelEl.classList.add('shake');
+    setTrackedTimeout(function(){ panelEl.classList.remove('shake'); }, 400);
+    var svg = panelEl.querySelector('svg');
+    var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.setAttribute('class', 'spot-miss-mark');
+    g.innerHTML = '<line x1="' + (pt.x-8) + '" y1="' + (pt.y-8) + '" x2="' + (pt.x+8) + '" y2="' + (pt.y+8) + '" stroke="#FF6F4D" stroke-width="4" stroke-linecap="round"/><line x1="' + (pt.x+8) + '" y1="' + (pt.y-8) + '" x2="' + (pt.x-8) + '" y2="' + (pt.y+8) + '" stroke="#FF6F4D" stroke-width="4" stroke-linecap="round"/>';
+    svg.appendChild(g);
+    setTrackedTimeout(function(){ g.remove(); }, 550);
+  }
+
+  function onSpotPanelClick(e){
+    if(spotState.locked) return;
+    var svgEl = e.currentTarget.querySelector('svg');
+    var pt = svgLocalPoint(svgEl, e.clientX, e.clientY);
+    var hit = null;
+    for(var i=0;i<spotState.diffs.length;i++){
+      var dd = spotState.diffs[i];
+      if(dd.found) continue;
+      var dx = pt.x - dd.x, dy = pt.y - dd.y;
+      if(dx*dx + dy*dy <= dd.r*dd.r){ hit = dd; break; }
+    }
+    if(hit){
+      hit.found = true;
+      spotState.foundCount++;
+      markSpotFound(hit);
+      updateSpotFoundIndicator();
+      if(spotState.foundCount >= 5){
+        spotState.locked = true;
+        spotFeedback.textContent = '완벽해요! 다음 그림으로 가요 🎉';
+        setTrackedTimeout(advanceSpotStage, 1100);
+      } else {
+        spotFeedback.textContent = '잘 찾았어요!';
+      }
+    } else {
+      state.wrongCount++;
+      spotFeedback.textContent = '음... 다시 잘 찾아볼까요? 🔍';
+      showSpotMiss(e.currentTarget, pt);
+    }
+  }
+
+  spotPanelEls.forEach(function(panel){
+    panel.addEventListener('click', onSpotPanelClick);
+  });
 
 })();
 </script>
