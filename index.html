@@ -85,13 +85,20 @@
   .game-card{
     position:relative; border:6px solid var(--ink); border-radius:22px; padding:clamp(20px,4vw,30px) 10px clamp(20px,4vw,28px);
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:var(--ink); text-align:center;
-    transition:transform .12s ease, box-shadow .12s ease; min-height:clamp(150px,26vw,220px);
+    transition:transform .12s ease, box-shadow .12s ease; min-height:clamp(120px,17vh,200px);
     box-shadow:8px 8px 0 var(--ink);
   }
   .game-card:nth-child(1){ transform:rotate(-3deg); }
   .game-card:nth-child(2){ transform:rotate(2deg); }
   .game-card:nth-child(3){ transform:rotate(-2deg); }
   .game-card:nth-child(4){ transform:rotate(3deg); }
+  .game-card:nth-child(5){ transform:rotate(-2deg); grid-column:1 / -1; width:calc(50% - clamp(9px,2vw,16px)); justify-self:center; }
+  @media (min-width:820px){
+    .game-grid{ grid-template-columns:repeat(6,minmax(0,1fr)); width:min(920px,92vw); }
+    .game-card{ grid-column:span 2; min-height:clamp(150px,22vh,210px); }
+    .game-card:nth-child(4){ grid-column:2 / span 2; }
+    .game-card:nth-child(5){ grid-column:4 / span 2; width:auto; justify-self:stretch; }
+  }
   .game-card .card-icon-badge{
     width:clamp(48px,10vw,72px); height:clamp(48px,10vw,72px); border-radius:50%;
     background:#fff; border:5px solid var(--ink); display:flex; align-items:center; justify-content:center;
@@ -107,6 +114,8 @@
   .game-card.card-english:active{ transform:translateY(6px) rotate(-2deg); box-shadow:2px 2px 0 var(--ink); }
   .game-card.card-spot{ background:#FF7FA6; }
   .game-card.card-spot:active{ transform:translateY(6px) rotate(3deg); box-shadow:2px 2px 0 var(--ink); }
+  .game-card.card-divmul{ background:#FFA94D; }
+  .game-card.card-divmul:active{ transform:translateY(6px) rotate(-2deg); box-shadow:2px 2px 0 var(--ink); }
   .lobby-credit{
     position:absolute; bottom:10px; left:0; width:100%; text-align:center; z-index:1;
     font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; font-size:10px; color:#fff; opacity:0.7;
@@ -121,8 +130,8 @@
   .back-btn:active{ transform:translateY(4px); box-shadow:1px 1px 0 var(--ink); }
 
   /* ---------- DIFFICULTY ---------- */
-  #screen-difficulty, #screen-difficulty-hanja, #screen-difficulty-english, #screen-difficulty-spot{ justify-content:center; align-items:center; gap:6vh; }
-  #screen-difficulty h2, #screen-difficulty-hanja h2, #screen-difficulty-english h2, #screen-difficulty-spot h2{
+  #screen-difficulty, #screen-difficulty-hanja, #screen-difficulty-english, #screen-difficulty-spot, #screen-difficulty-divmul{ justify-content:center; align-items:center; gap:6vh; }
+  #screen-difficulty h2, #screen-difficulty-hanja h2, #screen-difficulty-english h2, #screen-difficulty-spot h2, #screen-difficulty-divmul h2{
     z-index:1; font-size:clamp(24px,4.4vw,34px); margin:0; color:#fff; letter-spacing:1px;
     -webkit-text-stroke:1.5px var(--ink); text-shadow:2px 3px 0 var(--ink);
   }
@@ -456,6 +465,42 @@
     .spot-panel{ max-width:min(94vw,420px); width:100%; }
   }
 
+  /* ---------- PICTORIAL DIVISION / MULTIPLICATION GAME ---------- */
+  #screen-divmul{ justify-content:flex-start; overflow-y:auto; padding-bottom:14px; background:linear-gradient(160deg,var(--sky) 0%,var(--mint) 45%,var(--lavender) 100%); }
+  .dm-question{
+    z-index:2; width:min(720px,92vw); margin:22px auto 10px; padding:12px 18px; background:#fff;
+    border:4px solid var(--ink); border-radius:20px; box-shadow:5px 5px 0 var(--ink);
+    font-size:clamp(15px,3vw,22px); line-height:1.45; color:var(--ink); text-align:center; word-break:keep-all;
+    font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; font-weight:800; flex-shrink:0;
+  }
+  .dm-scene{
+    z-index:2; flex-shrink:0; width:max(260px,min(94vw,560px,calc((100vh - 420px) * 1.538)));
+    aspect-ratio:400/260; background:rgba(255,255,255,0.72); border:5px solid var(--ink); border-radius:22px;
+    box-shadow:6px 6px 0 var(--ink); overflow:hidden;
+  }
+  .dm-scene svg{ width:100%; height:100%; display:block; }
+  .sitem{ transition:transform .55s cubic-bezier(.3,.7,.3,1); }
+  .dm-station{ transition:opacity .35s ease; }
+  .dm-station.dm-hidden{ opacity:0; }
+  .dm-bubble{ opacity:0; transition:opacity .25s ease; font-family:'Do Hyeon',sans-serif; fill:#1A1A2E; stroke:#fff; stroke-width:4px; paint-order:stroke; text-anchor:middle; }
+  .dm-bubble.on{ opacity:1; }
+  .dm-feedback{ z-index:2; min-height:64px; margin:8px 0 2px; text-align:center; color:var(--accent); font-weight:700; font-size:clamp(13px,2.2vw,16px); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 4vw; flex-shrink:0; }
+  .dm-feedback .dm-eq{ font-size:clamp(24px,5.4vw,36px); color:var(--ink); -webkit-text-stroke:0; }
+  .dm-feedback .dm-ex{ font-size:clamp(12px,2.2vw,15px); color:var(--text); font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; }
+  .dm-choices{ z-index:2; display:flex; gap:clamp(10px,2.6vw,20px); margin-top:4px; flex-shrink:0; }
+  .dm-choice{
+    min-width:clamp(88px,22vw,150px); padding:12px 10px; border:4px solid var(--ink); border-radius:18px; background:#FFE14D;
+    color:var(--ink); font-size:clamp(18px,4vw,26px); font-weight:800; box-shadow:5px 5px 0 var(--ink);
+  }
+  .dm-choice:active{ transform:translateY(4px); box-shadow:1px 1px 0 var(--ink); }
+  .dm-choice.correct{ background:#5CFF9E; }
+  .dm-choice.wrong{ background:#ddd; opacity:.55; }
+  .dm-hint{
+    z-index:2; margin-top:12px; padding:10px 20px; border:4px solid var(--ink); border-radius:18px; background:#3DC8FF;
+    color:var(--ink); font-size:clamp(14px,2.6vw,17px); font-weight:800; box-shadow:4px 4px 0 var(--ink); flex-shrink:0;
+  }
+  .dm-hint:active{ transform:translateY(3px); box-shadow:1px 1px 0 var(--ink); }
+
   @media (max-width:480px){
     .doors-row{ gap:8px; }
     .equation-banner{ padding:14px 20px; letter-spacing:1px; }
@@ -497,6 +542,11 @@
         <div class="card-icon-badge" id="spot-card-badge"></div>
         <h2>틀린그림 찾기!</h2>
         <p>다른 그림 5개를 찾아봐요</p>
+      </button>
+      <button class="game-card card-divmul" id="card-divmul-game">
+        <div class="card-icon-badge" id="divmul-card-badge"></div>
+        <h2>나누기 곱하기!</h2>
+        <p>피자를 그림으로 나눠요</p>
       </button>
     </div>
     <div class="lobby-credit">얼굴 일러스트: Ashley Seo (CC BY 4.0), via DiceBear</div>
@@ -590,6 +640,27 @@
     </div>
   </section>
 
+  <!-- DIVISION / MULTIPLICATION DIFFICULTY -->
+  <section class="screen" id="screen-difficulty-divmul">
+    <div class="bg-deco"><span></span><span></span><span></span><span></span></div>
+    <button class="back-btn" id="diff-divmul-back">← 돌아가기</button>
+    <h2>난이도를 골라주세요</h2>
+    <div class="diff-grid">
+      <button class="diff-card tier1" data-diff="easy">
+        <span class="diff-badge">🍕</span><b>초급</b>
+        <small>나눠 갖기 · 묶어 세기<br>작은 수 (16개까지)</small>
+      </button>
+      <button class="diff-card tier2" data-diff="normal">
+        <span class="diff-badge">🍩</span><b>중급</b>
+        <small>나눠 갖기 · 몇 명에게? · 곱하기<br>조금 더 큰 수 (36개까지)</small>
+      </button>
+      <button class="diff-card tier3" data-diff="hard">
+        <span class="diff-badge">🎂</span><b>고급</b>
+        <small>남는 것이 있는 나눗셈<br>큰 수 (60개까지)</small>
+      </button>
+    </div>
+  </section>
+
   <!-- GAME -->
   <section class="screen" id="screen-game">
     <button class="back-btn" id="game-back">← 나가기</button>
@@ -662,6 +733,21 @@
       <div class="spot-panel" data-side="right"><svg id="spot-svg-right" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg"></svg></div>
     </div>
     <div class="fade-overlay" id="spot-fade-overlay"></div>
+  </section>
+
+  <!-- DIVISION / MULTIPLICATION GAME -->
+  <section class="screen" id="screen-divmul">
+    <button class="back-btn" id="divmul-back">← 나가기</button>
+    <div class="game-topbar">
+      <div class="stage-indicator">스테이지 <span id="divmul-stage-num">1</span> / 10</div>
+      <div class="progress-dots" id="divmul-progress-dots"></div>
+    </div>
+    <div class="dm-question" id="dm-question"></div>
+    <div class="dm-scene"><svg id="dm-svg" viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg"></svg></div>
+    <div class="dm-feedback" id="dm-feedback"></div>
+    <div class="dm-choices" id="dm-choices"></div>
+    <button class="dm-hint" id="dm-hint">👀 그림으로 보기</button>
+    <div class="fade-overlay" id="divmul-fade-overlay"></div>
   </section>
 
   <!-- ENDING -->
@@ -834,6 +920,7 @@
   document.getElementById('child-reunion').innerHTML = childRunningSVG();
   document.getElementById('lobby-mascot').innerHTML = lobbyMascotSVG();
   document.getElementById('spot-card-badge').innerHTML = spotBadgeIconSVG();
+  document.getElementById('divmul-card-badge').innerHTML = dmBadgeIconSVG();
 
   /* ============ spot-the-difference: scene shape library ============ */
   var SPOT_PALETTE = ['#FF9EB8','#7EC8E3','#FFE38A','#B7A6E8','#9EE6C0','#FF7FA6','#6FE0B8','#FFC26B','#C79BFF','#6FB3FF','#FF9B7A'];
@@ -1018,6 +1105,198 @@
       + '<rect x="0" y="248" width="' + SPOT_VB_W + '" height="52" fill="#BFEFC9"/>';
   }
 
+  /* ============ divmul: pictorial division / multiplication ============ */
+  var DM_KINDS = {
+    pizza:{name:'피자', topic:'피자는', unit:'조각'},
+    cookie:{name:'쿠키', topic:'쿠키는', unit:'개'},
+    apple:{name:'사과', topic:'사과는', unit:'개'},
+    candy:{name:'사탕', topic:'사탕은', unit:'개'},
+    donut:{name:'도넛', topic:'도넛은', unit:'개'}
+  };
+  var DM_BASE = { pizza:46, cookie:10, apple:10, candy:14, donut:10 };
+  var DM_SKINS = ['#FFE4C0','#F3C9A0','#E5B58C'];
+  var DM_HAIRS = ['#6b4a2e','#2A1200','#B5651D','#3B2A55'];
+  var DM_SHIRTS = ['#FF9EB8','#7EC8E3','#FFE38A','#B7A6E8','#9EE6C0','#FFB27A','#6FB3FF','#FF7FA6'];
+  var DM_PLATE_WEDGE = { a0:-Math.PI/2 - 0.5, a1:-Math.PI/2 + 0.5 };
+
+  function dmWedge(r, a0, a1){
+    var m = (a0 + a1) / 2, cx = 0.6*r*Math.cos(m), cy = 0.6*r*Math.sin(m);
+    function P(x, y){ return (x-cx).toFixed(1) + ',' + (y-cy).toFixed(1); }
+    var x0 = r*Math.cos(a0), y0 = r*Math.sin(a0), x1 = r*Math.cos(a1), y1 = r*Math.sin(a1);
+    var large = (a1 - a0) > Math.PI ? 1 : 0;
+    var arcTo = 'A' + r + ',' + r + ' 0 ' + large + ' 1 ' + P(x1, y1);
+    return '<path d="M' + P(0,0) + ' L' + P(x0,y0) + ' ' + arcTo + ' Z" fill="#FFC93C"/>'
+      + '<path d="M' + P(x0,y0) + ' ' + arcTo + '" stroke="#D98A3D" stroke-width="' + (0.16*r).toFixed(1) + '" fill="none" stroke-linecap="round"/>'
+      + '<circle cx="' + (0.1*r*Math.cos(m)).toFixed(1) + '" cy="' + (0.1*r*Math.sin(m)).toFixed(1) + '" r="' + (0.13*r).toFixed(1) + '" fill="#E5533D"/>';
+  }
+
+  function dmItemMarkup(kind, w){
+    switch(kind){
+      case 'pizza': return dmWedge(46, w.a0, w.a1);
+      case 'cookie': return '<circle r="10" fill="#D9A066"/><circle cx="-3" cy="-3" r="1.8" fill="#6B4226"/><circle cx="4" cy="-1" r="1.8" fill="#6B4226"/><circle cx="-1" cy="4" r="1.8" fill="#6B4226"/>';
+      case 'apple': return '<circle r="10" fill="#FF5A5F"/><ellipse cx="3" cy="-11" rx="4" ry="2.2" fill="#4CAF50" transform="rotate(-30 3 -11)"/><circle cx="-4" cy="-3" r="2.2" fill="#fff" opacity="0.5"/>';
+      case 'candy': return '<polygon points="-16,-6 -8,0 -16,6" fill="#FF8FD1"/><polygon points="16,-6 8,0 16,6" fill="#FF8FD1"/><circle r="9" fill="#FF8FD1"/><path d="M-6,-6 Q0,0 6,6" stroke="#fff" stroke-width="2.4" fill="none"/>';
+      default: return '<path fill-rule="evenodd" d="M-10,0a10,10 0 1,0 20,0a10,10 0 1,0 -20,0 M-4,0a4,4 0 1,0 8,0a4,4 0 1,0 -8,0" fill="#FFB84D"/><rect x="-7" y="-6" width="3" height="1.6" rx="0.8" fill="#fff"/><rect x="4" y="-4" width="3" height="1.6" rx="0.8" fill="#7EC8E3"/><rect x="-2" y="6" width="3" height="1.6" rx="0.8" fill="#FF5A9E"/>';
+    }
+  }
+
+  function dmPersonMarkup(idx){
+    var skin = DM_SKINS[idx % DM_SKINS.length], hair = DM_HAIRS[(idx*2+1) % DM_HAIRS.length], shirt = DM_SHIRTS[idx % DM_SHIRTS.length];
+    return '<ellipse cx="0" cy="-26" rx="15" ry="11" fill="' + shirt + '"/>'
+      + '<circle cx="0" cy="-50" r="15" fill="' + skin + '"/>'
+      + '<path d="M-15,-52 A15,15 0 0 1 15,-52 Q0,-61 -15,-52Z" fill="' + hair + '"/>'
+      + '<circle cx="-5" cy="-48" r="1.8" fill="#3B2A22"/><circle cx="5" cy="-48" r="1.8" fill="#3B2A22"/>'
+      + '<path d="M-5,-43 Q0,-38 5,-43" stroke="#3B2A22" stroke-width="1.8" fill="none" stroke-linecap="round"/>'
+      + '<circle cx="-9" cy="-44" r="2.6" fill="#FF9EB8" opacity="0.55"/><circle cx="9" cy="-44" r="2.6" fill="#FF9EB8" opacity="0.55"/>';
+  }
+
+  function dmLayoutStations(count, mode){
+    var out = [], j;
+    if(mode === 'person'){
+      var sp = 400 / count, sc = Math.min(1, (sp/2 - 4) / 34);
+      for(j=0;j<count;j++){ out.push({ cx:sp*(j+0.5), cy:190, sc:sc, face:true, hidden:false }); }
+      return out;
+    }
+    var rows = count <= 4 ? 1 : 2, cols = Math.ceil(count / rows), sp2 = 400 / cols;
+    var sc2 = Math.min(1.25, (sp2/2 - 4) / 34);
+    var cys = rows === 1 ? [135] : [88, 190];
+    for(j=0;j<count;j++){
+      var r = Math.floor(j / cols), c = j % cols;
+      var inRow = r < rows - 1 ? cols : count - cols*(rows-1);
+      out.push({ cx:200 + (c - (inRow-1)/2)*sp2, cy:cys[r], sc:sc2, face:false, hidden:false });
+    }
+    return out;
+  }
+
+  function dmSlot(k, K){
+    var cols = K <= 3 ? K : Math.ceil(K/2), sp = Math.min(15, 56/cols);
+    var r = Math.floor(k / cols), c = k % cols;
+    var inRow = r < Math.ceil(K/cols) - 1 ? cols : K - cols*r;
+    return { x:(c - (inRow-1)/2)*sp, y:9 - r*sp*0.95, rad:sp*0.55 };
+  }
+
+  function dmPileLayout(N, pie){
+    var homes = [], i;
+    if(pie){
+      var span = 2*Math.PI / N;
+      for(i=0;i<N;i++){
+        var a0 = -Math.PI/2 + i*span + 0.02, a1 = -Math.PI/2 + (i+1)*span - 0.02, m = (a0 + a1)/2;
+        homes.push({ x:200 + 0.6*46*Math.cos(m), y:56 + 0.6*46*Math.sin(m), s:1, w:{a0:a0, a1:a1}, midDeg:m*180/Math.PI });
+      }
+      return homes;
+    }
+    var cols = N <= 6 ? N : N <= 12 ? 6 : N <= 24 ? 8 : 11, rows = Math.ceil(N / cols);
+    var sx = Math.min(30, 340/cols), sy = Math.min(28, 84/rows), sp = Math.min(sx, sy);
+    for(i=0;i<N;i++){
+      var r = Math.floor(i / cols), c = i % cols, inRow = r < rows - 1 ? cols : N - cols*(rows-1);
+      homes.push({ x:200 + (c - (inRow-1)/2)*sx, y:56 + (r - (rows-1)/2)*sp, s:Math.min(sp*0.48, 15), w:null, midDeg:0 });
+    }
+    return homes;
+  }
+
+  function dmBuildProblem(diff){
+    var types = diff === 'easy' ? ['share','multiply'] : ['share','group','multiply'];
+    var guard = 0;
+    while(guard < 300){
+      guard++;
+      var type = types[pick(0, types.length-1)];
+      var M, K, q, r = 0, N, answer, key;
+      if(diff === 'easy'){ M = pick(2,4); q = pick(2,4); K = pick(2,4); }
+      else if(diff === 'normal'){ M = type === 'multiply' ? pick(2,5) : pick(2,6); q = pick(2,6); K = pick(2,6); }
+      else {
+        M = type === 'multiply' ? pick(3,7) : pick(3,7); q = pick(3,7); K = type === 'multiply' ? pick(3,9) : pick(3,8);
+        if(type !== 'multiply' && Math.random() < 0.5){ r = pick(1, (type === 'share' ? M : K) - 1); }
+      }
+      if(type === 'share'){ N = M*q + r; answer = q; key = 's' + N + '/' + M; }
+      else if(type === 'group'){ N = K*q + r; answer = q; key = 'g' + N + '/' + K; }
+      else { N = M*K; answer = M*K; key = 'm' + M + 'x' + K; }
+      if(state.used.has(key)) continue;
+      state.used.add(key);
+      var pool = ['cookie','apple','candy','donut'];
+      if(type === 'multiply' || N <= 12){ pool.push('pizza','pizza','pizza'); }
+      return { type:type, kind:pool[pick(0, pool.length-1)], N:N, M:M, K:K, q:q, r:r, answer:answer };
+    }
+    return { type:'multiply', kind:'cookie', N:6, M:2, K:3, q:0, r:0, answer:6 };
+  }
+
+  function dmQuestion(p){
+    var k = DM_KINDS[p.kind], eul = k.unit === '조각' ? '을' : '를';
+    var rem = p.r ? ' 남는 것은 그대로 둬요.' : '';
+    if(p.type === 'share'){
+      if(p.kind === 'pizza'){ return '피자 한 판을 ' + p.N + '조각으로 잘랐어요. ' + p.M + '명이 똑같이 나눠 먹으면 한 명이 몇 조각씩 먹을 수 있을까요?' + rem; }
+      return k.name + ' ' + p.N + k.unit + eul + ' ' + p.M + '명이 똑같이 나눠 가져요.' + rem + ' 한 명이 몇 ' + k.unit + '씩 가질 수 있을까요?';
+    }
+    if(p.type === 'group'){
+      if(p.kind === 'pizza'){ return '피자 한 판을 ' + p.N + '조각으로 잘랐어요. 한 명에게 ' + p.K + '조각씩 주면 몇 명에게 나눠 줄 수 있을까요?' + rem; }
+      return k.name + ' ' + p.N + k.unit + eul + ' 한 명에게 ' + p.K + k.unit + '씩 나눠 줘요.' + rem + ' 몇 명에게 줄 수 있을까요?';
+    }
+    return '한 접시에 ' + k.name + ' ' + p.K + k.unit + '씩 담겨 있어요. 접시가 ' + p.M + '개 있으면 ' + k.topic + ' 모두 몇 ' + k.unit + '일까요?';
+  }
+
+  function dmBuildLayout(p){
+    var L = { items:[], stations:[], bubbles:[], pie:false }, base = DM_BASE[p.kind], pf = p.kind === 'pizza' ? 1.7 : 1, i, j, k;
+    if(p.type === 'multiply'){
+      L.stations = dmLayoutStations(p.M, 'plate');
+      for(j=0;j<p.M;j++){
+        var st = L.stations[j];
+        for(k=0;k<p.K;k++){
+          var sl = dmSlot(k, p.K), tx = st.cx + st.sc*sl.x, ty = st.cy + st.sc*sl.y, ts = st.sc*sl.rad/base*pf;
+          L.items.push({ kind:p.kind, w:DM_PLATE_WEDGE, hx:tx, hy:ty, hs:ts, hr:0, tx:tx, ty:ty, ts:ts, tr:0, station:-1, reveal:-1 });
+        }
+        L.bubbles.push({ x:st.cx, y:st.cy - 22*st.sc - 2, size:Math.round(16*Math.max(st.sc, 0.9)), text:(j+1)*p.K });
+      }
+      return L;
+    }
+    var share = p.type === 'share';
+    var persons = share ? p.M : p.q, per = share ? p.q : p.K;
+    L.pie = p.kind === 'pizza';
+    var homes = dmPileLayout(p.N, L.pie);
+    L.stations = dmLayoutStations(persons, 'person');
+    if(!share){ L.stations.forEach(function(s){ s.hidden = true; }); }
+    for(i=0;i<p.N;i++){
+      var h = homes[i], hs = L.pie ? 1 : h.s / base;
+      var it = { kind:p.kind, w:h.w, hx:h.x, hy:h.y, hs:hs, hr:0, tx:h.x, ty:h.y, ts:hs, tr:0, station:-1, reveal:-1 };
+      if(i < persons*per){
+        var sIdx = share ? i % persons : Math.floor(i / per), slot = share ? Math.floor(i / persons) : i % per;
+        var s2 = L.stations[sIdx], sl2 = dmSlot(slot, per);
+        it.station = sIdx;
+        it.tx = s2.cx + s2.sc*sl2.x; it.ty = s2.cy + s2.sc*sl2.y; it.ts = s2.sc*sl2.rad/base*pf;
+        it.tr = L.pie ? -90 - h.midDeg : 0;
+        if(!share && slot === 0){ it.reveal = sIdx; }
+      }
+      L.items.push(it);
+    }
+    return L;
+  }
+
+  function dmTransform(x, y, r, s){
+    return 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) rotate(' + r.toFixed(1) + 'deg) scale(' + s.toFixed(3) + ')';
+  }
+
+  function dmSvgMarkup(p, L){
+    var out = '';
+    if(L.pie){ out += '<circle cx="200" cy="56" r="52" fill="#F6E7D0" stroke="#E3CFA8" stroke-width="3"/>'; }
+    L.stations.forEach(function(st, j){
+      out += '<g class="dm-station' + (st.hidden ? ' dm-hidden' : '') + '" transform="translate(' + st.cx.toFixed(1) + ',' + st.cy + ') scale(' + st.sc.toFixed(3) + ')">'
+        + (st.face ? dmPersonMarkup(j) : '')
+        + '<ellipse cx="0" cy="12" rx="34" ry="10" fill="#fff" stroke="#D9D2E9" stroke-width="2.5"/></g>';
+    });
+    L.items.forEach(function(it, i){
+      out += '<g class="sitem" style="transform:' + dmTransform(it.hx, it.hy, it.hr, it.hs) + '">' + dmItemMarkup(it.kind, it.w) + '</g>';
+    });
+    L.bubbles.forEach(function(b){
+      out += '<text class="dm-bubble" x="' + b.x.toFixed(1) + '" y="' + b.y.toFixed(1) + '" font-size="' + b.size + '">' + b.text + '</text>';
+    });
+    return out;
+  }
+
+  function dmBadgeIconSVG(){
+    return '<svg viewBox="0 0 48 48" width="72%" height="72%" xmlns="http://www.w3.org/2000/svg">'
+      + '<path d="M24 6 L40 38 Q24 46 8 38 Z" fill="#FFC93C" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>'
+      + '<path d="M10 35 Q24 44 38 35" stroke="#D98A3D" stroke-width="5" fill="none" stroke-linecap="round"/>'
+      + '<circle cx="24" cy="22" r="3.5" fill="#E5533D"/><circle cx="19" cy="30" r="2.8" fill="#E5533D"/><circle cx="29" cy="30" r="2.8" fill="#E5533D"/></svg>';
+  }
+
   /* ============ screen management ============ */
   function showScreen(name){
     document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
@@ -1033,6 +1312,12 @@
   document.getElementById('card-spot-game').addEventListener('click', function(){ showScreen('difficulty-spot'); });
   document.getElementById('diff-spot-back').addEventListener('click', function(){ showScreen('lobby'); });
   document.getElementById('spot-back').addEventListener('click', function(){
+    clearPendingTimers();
+    showScreen('lobby');
+  });
+  document.getElementById('card-divmul-game').addEventListener('click', function(){ showScreen('difficulty-divmul'); });
+  document.getElementById('diff-divmul-back').addEventListener('click', function(){ showScreen('lobby'); });
+  document.getElementById('divmul-back').addEventListener('click', function(){
     clearPendingTimers();
     showScreen('lobby');
   });
@@ -1070,6 +1355,11 @@
       startGame('spot', card.dataset.diff);
     });
   });
+  document.querySelectorAll('#screen-difficulty-divmul .diff-card').forEach(function(card){
+    card.addEventListener('click', function(){
+      startGame('divmul', card.dataset.diff);
+    });
+  });
 
   /* ============ progress dots ============ */
   var dotsWrap = document.getElementById('progress-dots');
@@ -1081,6 +1371,10 @@
   for(var d3=0; d3<10; d3++){
     spotDotsWrap.appendChild(document.createElement('span'));
   }
+  var dmDotsWrap = document.getElementById('divmul-progress-dots');
+  for(var d4=0; d4<10; d4++){
+    dmDotsWrap.appendChild(document.createElement('span'));
+  }
   function updateDots(el){
     var dots = el.children;
     for(var i=0;i<dots.length;i++){
@@ -1090,7 +1384,7 @@
   }
 
   /* ============ game state & logic ============ */
-  var state = { gameType:'math', difficulty:'easy', hanjaLevel:'9', englishLevel:'1', spotDifficulty:'easy', opSequence:null, stage:0, totalStages:10, used:null, current:null, locked:false, wrongCount:0 };
+  var state = { gameType:'math', difficulty:'easy', hanjaLevel:'9', englishLevel:'1', spotDifficulty:'easy', divmulDifficulty:'easy', opSequence:null, stage:0, totalStages:10, used:null, current:null, locked:false, wrongCount:0 };
 
   var pendingTimers = [];
   function setTrackedTimeout(fn, ms){
@@ -1107,8 +1401,9 @@
     pendingTimers = [];
   }
 
-  var LEVEL_PROGRESSION = { math:['easy','normal','hard'], hanja:['9','8','7'], english:['1','2','3','4'], spot:['easy','normal','hard'] };
+  var LEVEL_PROGRESSION = { math:['easy','normal','hard'], hanja:['9','8','7'], english:['1','2','3','4'], spot:['easy','normal','hard'], divmul:['easy','normal','hard'] };
   function getCurrentLevel(){
+    if(state.gameType === 'divmul') return state.divmulDifficulty;
     if(state.gameType === 'math') return state.difficulty;
     if(state.gameType === 'hanja') return state.hanjaLevel;
     if(state.gameType === 'english') return state.englishLevel;
@@ -1475,12 +1770,19 @@
       state.englishLevel = level;
     } else if(gameType === 'spot'){
       state.spotDifficulty = level;
+    } else if(gameType === 'divmul'){
+      state.divmulDifficulty = level;
     } else {
       state.hanjaLevel = level;
     }
     if(gameType === 'spot'){
       showScreen('spot');
       renderSpotStage();
+      return;
+    }
+    if(gameType === 'divmul'){
+      showScreen('divmul');
+      renderDivmulStage();
       return;
     }
     showScreen('game');
@@ -1988,6 +2290,155 @@
 
   spotPanelEls.forEach(function(panel){
     panel.addEventListener('click', onSpotPanelClick);
+  });
+
+  /* ============ divmul game runtime ============ */
+  var dmSvgEl = document.getElementById('dm-svg');
+  var dmQuestionEl = document.getElementById('dm-question');
+  var dmFeedbackEl = document.getElementById('dm-feedback');
+  var dmChoicesEl = document.getElementById('dm-choices');
+  var dmHintBtn = document.getElementById('dm-hint');
+  var dmStageNumEl = document.getElementById('divmul-stage-num');
+  var dmFadeOverlay = document.getElementById('divmul-fade-overlay');
+  var dmState = { problem:null, layout:null, solved:false, busy:false, locked:false };
+
+  function dmRenderScene(){
+    dmSvgEl.innerHTML = dmSvgMarkup(dmState.problem, dmState.layout);
+    dmState.solved = false;
+  }
+
+  function dmChoiceValues(p){
+    var ans = p.answer, pool = [ans-2, ans-1, ans+1, ans+2];
+    if(p.type === 'multiply'){ pool.push(p.M + p.K); }
+    var seen = {}, cand = [];
+    pool.forEach(function(v){ if(v > 0 && v !== ans && !seen[v]){ seen[v] = true; cand.push(v); } });
+    var picks = spotShuffle(cand).slice(0, 2);
+    picks.push(ans);
+    return spotShuffle(picks);
+  }
+
+  function renderDivmulStage(){
+    var p = dmBuildProblem(state.divmulDifficulty);
+    dmState.problem = p;
+    dmState.layout = dmBuildLayout(p);
+    dmState.busy = false;
+    dmState.locked = false;
+    dmRenderScene();
+    dmQuestionEl.textContent = dmQuestion(p);
+    dmFeedbackEl.textContent = '';
+    var suffix = p.type === 'group' ? '명' : DM_KINDS[p.kind].unit;
+    dmChoicesEl.innerHTML = dmChoiceValues(p).map(function(v){
+      return '<button class="dm-choice" data-val="' + v + '">' + v + suffix + '</button>';
+    }).join('');
+    dmHintBtn.textContent = '👀 그림으로 ' + (p.type === 'share' ? '나눠보기' : p.type === 'group' ? '묶어보기' : '세어보기');
+    dmStageNumEl.textContent = state.stage + 1;
+    updateDots(dmDotsWrap);
+  }
+
+  function dmPlaySolve(done){
+    var p = dmState.problem, L = dmState.layout;
+    dmState.busy = true;
+    dmState.solved = true;
+    var itemEls = dmSvgEl.querySelectorAll('.sitem');
+    var stationEls = dmSvgEl.querySelectorAll('.dm-station');
+    var bubbleEls = dmSvgEl.querySelectorAll('.dm-bubble');
+    var end;
+    if(p.type === 'multiply'){
+      L.bubbles.forEach(function(b, j){
+        setTrackedTimeout(function(){ bubbleEls[j].classList.add('on'); }, 250 + j*650);
+      });
+      end = 250 + L.bubbles.length*650 + 300;
+    } else {
+      var moving = [];
+      L.items.forEach(function(it, i){ if(it.station >= 0){ moving.push({ it:it, i:i }); } });
+      var d = Math.max(50, Math.min(150, 2400 / moving.length));
+      moving.forEach(function(m, k){
+        setTrackedTimeout(function(){
+          if(m.it.reveal >= 0){ stationEls[m.it.reveal].classList.remove('dm-hidden'); }
+          itemEls[m.i].style.transform = dmTransform(m.it.tx, m.it.ty, m.it.tr, m.it.ts);
+        }, 200 + k*d);
+      });
+      end = 200 + moving.length*d + 700;
+    }
+    setTrackedTimeout(function(){
+      dmState.busy = false;
+      if(done){ done(); }
+    }, end);
+  }
+
+  function dmShowEquation(){
+    var p = dmState.problem, unit = DM_KINDS[p.kind].unit;
+    var eul = unit === '조각' ? '을' : '를', ga = unit === '조각' ? '이' : '가';
+    var eq, ex;
+    if(p.type === 'share'){
+      eq = p.N + ' ÷ ' + p.M + ' = ' + p.q + (p.r ? ' … ' + p.r : '');
+      ex = p.N + unit + eul + ' ' + p.M + '명이 나누면 한 명이 ' + p.q + unit + '씩!' + (p.r ? ' ' + p.r + unit + ga + ' 남아요.' : '');
+    } else if(p.type === 'group'){
+      eq = p.N + ' ÷ ' + p.K + ' = ' + p.q + (p.r ? ' … ' + p.r : '');
+      ex = p.K + unit + '씩 묶으면 ' + p.q + '묶음, ' + p.q + '명에게 줄 수 있어요!' + (p.r ? ' ' + p.r + unit + ga + ' 남아요.' : '');
+    } else {
+      eq = p.K + ' × ' + p.M + ' = ' + p.answer;
+      ex = new Array(p.M).fill(p.K).join(' + ') + ' = ' + p.answer;
+    }
+    dmFeedbackEl.innerHTML = '<span class="dm-eq">' + eq + '</span><span class="dm-ex">' + ex + '</span>';
+  }
+
+  function advanceDivmulStage(){
+    state.stage++;
+    if(state.stage >= state.totalStages){
+      showPoopIntro();
+      return;
+    }
+    dmFadeOverlay.classList.add('active');
+    setTrackedTimeout(function(){
+      renderDivmulStage();
+      requestAnimationFrame(function(){ dmFadeOverlay.classList.remove('active'); });
+    }, 450);
+  }
+
+  dmChoicesEl.addEventListener('click', function(e){
+    var btn = e.target.closest('.dm-choice');
+    if(!btn || dmState.locked || dmState.busy) return;
+    var p = dmState.problem;
+    if(Number(btn.dataset.val) === p.answer){
+      dmState.locked = true;
+      btn.classList.add('correct');
+      var finish = function(){
+        dmShowEquation();
+        setTrackedTimeout(advanceDivmulStage, 2000);
+      };
+      if(dmState.solved){ finish(); } else { dmPlaySolve(finish); }
+    } else {
+      state.wrongCount++;
+      btn.classList.add('wrong');
+      btn.disabled = true;
+      dmState.locked = true;
+      var verb = p.type === 'share' ? '나눠서' : p.type === 'group' ? '묶어서' : '세어서';
+      if(dmState.solved){
+        dmFeedbackEl.textContent = '그림을 다시 보고 골라볼까요?';
+        dmState.locked = false;
+      } else {
+        dmFeedbackEl.textContent = '앗! 그림으로 ' + verb + ' 보여줄게요.';
+        dmPlaySolve(function(){
+          setTrackedTimeout(function(){
+            dmRenderScene();
+            dmFeedbackEl.textContent = '이제 다시 골라볼까요?';
+            dmState.locked = false;
+          }, 1200);
+        });
+      }
+    }
+  });
+
+  dmHintBtn.addEventListener('click', function(){
+    if(dmState.locked || dmState.busy) return;
+    if(dmState.solved){
+      dmState.busy = true;
+      dmRenderScene();
+      setTrackedTimeout(function(){ dmPlaySolve(); }, 250);
+    } else {
+      dmPlaySolve();
+    }
   });
 
 })();
