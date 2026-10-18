@@ -627,15 +627,15 @@
     <div class="diff-grid">
       <button class="diff-card tier1" data-diff="easy">
         <span class="diff-badge">🔍</span><b>초급</b>
-        <small>그림 12개 · 큰 차이<br>다른 그림 5개 찾기</small>
+        <small>방 그림 · 큰 차이<br>다른 그림 5개 찾기</small>
       </button>
       <button class="diff-card tier2" data-diff="normal">
         <span class="diff-badge">🧐</span><b>중급</b>
-        <small>그림 15개 · 꼼꼼히!<br>다른 그림 5개 찾기</small>
+        <small>방 그림 · 꼼꼼히!<br>다른 그림 5개 찾기</small>
       </button>
       <button class="diff-card tier3" data-diff="hard">
         <span class="diff-badge">🦅</span><b>고급</b>
-        <small>그림 18개 · 매의 눈<br>다른 그림 5개 찾기</small>
+        <small>방 그림 · 매의 눈<br>다른 그림 5개 찾기</small>
       </button>
     </div>
   </section>
@@ -922,103 +922,147 @@
   document.getElementById('spot-card-badge').innerHTML = spotBadgeIconSVG();
   document.getElementById('divmul-card-badge').innerHTML = dmBadgeIconSVG();
 
-  /* ============ spot-the-difference: scene shape library ============ */
+  /* ============ spot-the-difference: one illustrated room scene ============ */
   var SPOT_PALETTE = ['#FF9EB8','#7EC8E3','#FFE38A','#B7A6E8','#9EE6C0','#FF7FA6','#6FE0B8','#FFC26B','#C79BFF','#6FB3FF','#FF9B7A'];
+  var SPOT_VB_W = 400, SPOT_VB_H = 300;
 
-  var SPOT_TYPES = {
-    sun:{rotatable:true, flippable:false, variants:1},
-    cloud:{rotatable:false, flippable:false, variants:1},
-    tree:{rotatable:false, flippable:false, variants:2},
-    flower:{rotatable:true, flippable:false, variants:2},
-    star:{rotatable:true, flippable:false, variants:1},
-    heart:{rotatable:true, flippable:false, variants:1},
-    balloon:{rotatable:false, flippable:false, variants:1},
-    butterfly:{rotatable:true, flippable:true, variants:2},
-    mushroom:{rotatable:false, flippable:false, variants:2},
-    house:{rotatable:false, flippable:false, variants:2},
-    fish:{rotatable:false, flippable:true, variants:1},
-    rainbow:{rotatable:false, flippable:false, variants:1},
-    ladybug:{rotatable:false, flippable:false, variants:2},
-    kite:{rotatable:true, flippable:true, variants:1}
+  /* props are drawn base-at-origin (sit on a surface at y=0, extend upward) except
+     wall-mounted types (frame, clock) which are centered on their mounting point */
+  var ROOM_PROPS = {
+    book:{rotatable:false, flippable:false, variants:2},
+    clock:{rotatable:false, flippable:false, variants:2},
+    frame:{rotatable:true, flippable:false, variants:2},
+    plant:{rotatable:false, flippable:false, variants:2},
+    lamp:{rotatable:false, flippable:false, variants:1},
+    cup:{rotatable:false, flippable:true, variants:1},
+    teddy:{rotatable:true, flippable:false, variants:2},
+    ball:{rotatable:false, flippable:false, variants:2},
+    blocks:{rotatable:false, flippable:false, variants:1},
+    car:{rotatable:false, flippable:true, variants:1},
+    shoe:{rotatable:false, flippable:true, variants:1},
+    cushion:{rotatable:true, flippable:false, variants:2}
   };
-  var SPOT_TYPE_NAMES = Object.keys(SPOT_TYPES);
 
-  function spotStarPoints(r1, r2){
-    var pts = [];
-    for(var i=0;i<10;i++){
-      var r = i % 2 === 0 ? r1 : r2;
-      var ang = (Math.PI/5) * i - Math.PI/2;
-      pts.push((r*Math.cos(ang)).toFixed(1) + ',' + (r*Math.sin(ang)).toFixed(1));
-    }
-    return pts.join(' ');
+  var ROOM_SLOT_COMPAT = {
+    wall:  ['frame','clock'],
+    shelf: ['book','clock','plant','ball','blocks'],
+    desk:  ['lamp','cup','book','blocks'],
+    bed:   ['teddy','cushion'],
+    floor: ['ball','car','blocks','shoe','teddy','cushion'],
+    sill:  ['plant','cup']
+  };
+
+  var ROOM_SLOTS = [
+    {x:150,y:45,s:1.0,kind:'wall'}, {x:340,y:50,s:1.0,kind:'wall'},
+    {x:165,y:110,s:0.85,kind:'shelf'}, {x:215,y:110,s:0.85,kind:'shelf'}, {x:265,y:110,s:0.85,kind:'shelf'}, {x:315,y:110,s:0.85,kind:'shelf'},
+    {x:280,y:203,s:0.85,kind:'desk'}, {x:320,y:203,s:0.85,kind:'desk'}, {x:358,y:203,s:0.85,kind:'desk'},
+    {x:78,y:182,s:1.1,kind:'bed'},
+    {x:150,y:248,s:1.1,kind:'floor'}, {x:198,y:272,s:1.1,kind:'floor'}, {x:242,y:246,s:1.1,kind:'floor'}, {x:188,y:292,s:1.0,kind:'floor'},
+    {x:40,y:98,s:0.65,kind:'sill'}, {x:78,y:98,s:0.65,kind:'sill'}
+  ];
+
+  var ROOM_WALLS = ['#FFF3E6','#E8F3FF','#F3FFEF','#FFF0F6','#F3F0FF'];
+  var ROOM_FLOORS = ['#E8D2A6','#D9C49A','#E3C9A0'];
+  var ROOM_RUGS = ['#FFB4C6','#9ED6C9','#FFD98A','#B8C9F5','#F3A6A6'];
+  var ROOM_CURTAINS = ['#FF9EB8','#7EC8E3','#FFD166','#B7A6E8','#9EE6C0'];
+
+  function pickRoomColors(){
+    return {
+      wall: ROOM_WALLS[pick(0, ROOM_WALLS.length - 1)],
+      floor: ROOM_FLOORS[pick(0, ROOM_FLOORS.length - 1)],
+      rug: ROOM_RUGS[pick(0, ROOM_RUGS.length - 1)],
+      curtain: ROOM_CURTAINS[pick(0, ROOM_CURTAINS.length - 1)]
+    };
   }
-  var SPOT_STAR_PTS = spotStarPoints(12, 5);
 
-  function spotShapeMarkup(type, color, variant){
+  function roomBackgroundMarkup(c){
+    return '<rect width="400" height="300" fill="' + c.wall + '"/>'
+      + '<rect x="0" y="205" width="400" height="95" fill="' + c.floor + '"/>'
+      + '<ellipse cx="200" cy="255" rx="95" ry="30" fill="' + c.rug + '" opacity="0.85"/>'
+      + '<rect x="18" y="22" width="80" height="78" rx="4" fill="#BFE3F5" stroke="#fff" stroke-width="5"/>'
+      + '<line x1="58" y1="22" x2="58" y2="100" stroke="#fff" stroke-width="4"/>'
+      + '<line x1="18" y1="61" x2="98" y2="61" stroke="#fff" stroke-width="4"/>'
+      + '<path d="M10,14 Q8,70 16,100 L30,100 Q22,60 26,14 Z" fill="' + c.curtain + '"/>'
+      + '<path d="M106,14 Q108,70 100,100 L86,100 Q94,60 90,14 Z" fill="' + c.curtain + '"/>'
+      + '<rect x="6" y="10" width="106" height="6" rx="3" fill="#A9784C"/>'
+      + '<rect x="14" y="168" width="118" height="42" rx="10" fill="#fff" stroke="#E3DCF0" stroke-width="3"/>'
+      + '<rect x="14" y="168" width="118" height="16" rx="8" fill="#FFD9E6"/>'
+      + '<rect x="255" y="205" width="130" height="10" fill="#C99A6B"/>'
+      + '<rect x="262" y="215" width="10" height="28" fill="#A9784C"/>'
+      + '<rect x="368" y="215" width="10" height="28" fill="#A9784C"/>'
+      + '<rect x="130" y="112" width="250" height="10" fill="#B9865A"/>'
+      + '<rect x="130" y="112" width="10" height="70" fill="#A9784C"/>'
+      + '<rect x="370" y="112" width="10" height="70" fill="#A9784C"/>';
+  }
+
+  function roomPropMarkup(type, color, variant){
     switch(type){
-      case 'sun': {
-        var rays = '';
-        for(var i=0;i<8;i++){
-          rays += '<rect x="-2" y="-19" width="4" height="9" rx="2" fill="' + color + '" transform="rotate(' + (i*45) + ')"/>';
+      case 'book': {
+        var n = variant === 1 ? 3 : 2, m = '';
+        for(var i=0;i<n;i++){
+          var yy = -2 - i*7;
+          m += '<rect x="-12" y="' + (yy-7) + '" width="24" height="7" rx="1.5" fill="' + color + '"/><rect x="-12" y="' + (yy-1.3) + '" width="24" height="1.3" fill="rgba(0,0,0,0.15)"/>';
         }
-        return rays + '<circle r="10" fill="' + color + '"/>';
+        return m;
       }
-      case 'cloud':
-        return '<ellipse cx="-8" cy="2" rx="10" ry="7" fill="' + color + '"/><ellipse cx="8" cy="2" rx="10" ry="7" fill="' + color + '"/><ellipse cx="0" cy="-4" rx="12" ry="9" fill="' + color + '"/>';
-      case 'tree':
+      case 'clock': {
+        var face = variant === 1
+          ? '<rect x="-14" y="-28" width="28" height="28" rx="4" fill="#fff" stroke="' + color + '" stroke-width="4"/>'
+          : '<circle cy="-14" r="14" fill="#fff" stroke="' + color + '" stroke-width="4"/>';
+        return face + '<line x1="0" y1="-14" x2="0" y2="-21" stroke="#3B2A22" stroke-width="2" stroke-linecap="round"/><line x1="0" y1="-14" x2="5" y2="-11" stroke="#3B2A22" stroke-width="2" stroke-linecap="round"/><circle cy="-14" r="1.6" fill="#3B2A22"/>';
+      }
+      case 'frame':
         if(variant === 1){
-          return '<rect x="-3" y="6" width="6" height="14" rx="2" fill="#8B5E34"/><polygon points="0,-20 14,8 -14,8" fill="' + color + '"/><polygon points="0,-8 11,14 -11,14" fill="' + color + '"/>';
+          return '<circle r="16" fill="' + color + '"/><circle r="12" fill="#FBF6EC"/><circle cx="-3" cy="2" r="5" fill="#FFD166"/><path d="M-9,8 Q0,-2 9,8 Z" fill="#9EC9A3"/>';
         }
-        return '<rect x="-3" y="6" width="6" height="14" rx="2" fill="#8B5E34"/><circle cx="0" cy="-4" r="13" fill="' + color + '"/><circle cx="-9" cy="4" r="9" fill="' + color + '"/><circle cx="9" cy="4" r="9" fill="' + color + '"/>';
-      case 'flower': {
-        var n = variant === 1 ? 6 : 5;
-        var petals = '';
-        for(var p=0;p<n;p++){
-          petals += '<g transform="rotate(' + (p*(360/n)) + ')"><ellipse cx="0" cy="-9" rx="4.5" ry="7" fill="' + color + '"/></g>';
+        return '<rect x="-13" y="-16" width="26" height="32" rx="3" fill="' + color + '"/><rect x="-9" y="-12" width="18" height="24" fill="#FBF6EC"/><path d="M-9,8 L-2,-2 L4,4 L9,-6 L9,8 Z" fill="#9EC9A3"/><circle cx="2" cy="-6" r="2.4" fill="#FFD166"/>';
+      case 'plant': {
+        var pot = '<path d="M-9,0 L9,0 L7,-11 L-7,-11 Z" fill="#C97A4D"/>';
+        if(variant === 1){
+          var spikes = '';
+          for(var sI=0;sI<5;sI++){
+            spikes += '<ellipse cx="0" cy="-20" rx="2.6" ry="12" fill="' + color + '" transform="rotate(' + (-32 + sI*16) + ' 0 -11)"/>';
+          }
+          return pot + spikes;
         }
-        return '<rect x="-1.5" y="4" width="3" height="14" fill="#6FB380"/>' + petals + '<circle r="4" fill="#FFE38A"/>';
+        return pot + '<ellipse cx="0" cy="-19" rx="5.5" ry="12" fill="' + color + '"/><ellipse cx="-7" cy="-13" rx="5" ry="9" fill="' + color + '" transform="rotate(-25 -7 -13)"/><ellipse cx="7" cy="-13" rx="5" ry="9" fill="' + color + '" transform="rotate(25 7 -13)"/>';
       }
-      case 'star':
-        return '<polygon points="' + SPOT_STAR_PTS + '" fill="' + color + '"/>';
-      case 'heart':
-        return '<path d="M0,9 C-14,-3 -9,-15 0,-7 C9,-15 14,-3 0,9Z" fill="' + color + '"/>';
-      case 'balloon':
-        return '<path d="M0,14 Q3,20 0,25" stroke="#8578A8" stroke-width="1.4" fill="none"/><ellipse cx="0" cy="-2" rx="9" ry="12" fill="' + color + '"/><polygon points="-2,10 2,10 0,14" fill="' + color + '"/>';
-      case 'butterfly': {
-        var dots = variant === 1 ? '<circle cx="-7" cy="-5" r="2" fill="#fff" opacity="0.7"/><circle cx="7" cy="-5" r="2" fill="#fff" opacity="0.7"/>' : '';
-        return '<ellipse cx="-7" cy="-5" rx="7" ry="9" fill="' + color + '" transform="rotate(-15)"/><ellipse cx="7" cy="-5" rx="7" ry="9" fill="' + color + '" transform="rotate(15)"/><ellipse cx="-6" cy="6" rx="5" ry="6" fill="' + color + '" opacity="0.85" transform="rotate(-10)"/><ellipse cx="6" cy="6" rx="5" ry="6" fill="' + color + '" opacity="0.85" transform="rotate(10)"/>' + dots + '<rect x="-1.2" y="-10" width="2.4" height="20" rx="1.2" fill="#5B4B7A"/>';
+      case 'lamp':
+        return '<ellipse cy="-1" rx="7" ry="2.4" fill="#8578A8"/><rect x="-1.6" y="-17" width="3.2" height="16" fill="#8578A8"/><path d="M-9,-17 L9,-17 L6,-27 L-6,-27 Z" fill="' + color + '"/>';
+      case 'cup':
+        return '<rect x="-7" y="-14" width="14" height="14" rx="2" fill="' + color + '"/><path d="M7,-11 Q14,-11 14,-7 Q14,-3 7,-4" stroke="' + color + '" stroke-width="2.6" fill="none"/>';
+      case 'teddy': {
+        var bow = variant === 1 ? '<path d="M-4,-13 L0,-10 L4,-13 L4,-9 L0,-11 L-4,-9 Z" fill="#E5533D"/>' : '';
+        return '<ellipse cy="-9" rx="10" ry="9" fill="' + color + '"/><circle cy="-21" r="7.2" fill="' + color + '"/><circle cx="-6" cy="-26" r="3" fill="' + color + '"/><circle cx="6" cy="-26" r="3" fill="' + color + '"/>' + bow + '<circle cx="-2.6" cy="-22" r="1" fill="#3B2A22"/><circle cx="2.6" cy="-22" r="1" fill="#3B2A22"/><ellipse cy="-19" rx="2" ry="1.4" fill="#3B2A22"/>';
       }
-      case 'mushroom': {
-        var spots = variant === 1 ? '<circle cx="-6" cy="-6" r="2" fill="#fff"/><circle cx="5" cy="-9" r="2" fill="#fff"/><circle cx="0" cy="-2" r="1.8" fill="#fff"/>' : '';
-        return '<rect x="-4" y="2" width="8" height="10" rx="3" fill="#FFF3E0"/><path d="M-12,2 Q0,-16 12,2 Z" fill="' + color + '"/>' + spots;
+      case 'ball': {
+        var r = 11, cy = -r, pat = variant === 1
+          ? '<circle cx="-4" cy="' + (cy-4) + '" r="1.8" fill="#fff"/><circle cx="4" cy="' + (cy+3) + '" r="1.8" fill="#fff"/><circle cx="3" cy="' + (cy-6) + '" r="1.8" fill="#fff"/>'
+          : '<path d="M-11,' + cy + ' A11,11 0 0 1 11,' + cy + '" stroke="#fff" stroke-width="2.6" fill="none"/>';
+        return '<circle cy="' + cy + '" r="' + r + '" fill="' + color + '"/>' + pat;
       }
-      case 'house': {
-        var win = variant === 1 ? '<rect x="3" y="0" width="6" height="6" fill="#DCEEF7"/>' : '<circle cx="6" cy="3" r="3" fill="#DCEEF7"/>';
-        return '<rect x="-11" y="-2" width="22" height="16" fill="' + color + '"/><polygon points="-14,-2 0,-16 14,-2" fill="#C97A4D"/><rect x="-3" y="4" width="6" height="10" fill="#5B4B7A"/>' + win;
+      case 'blocks':
+        return '<rect x="-9" y="-9" width="18" height="9" rx="1" fill="' + color + '"/><rect x="-7" y="-17" width="14" height="8" rx="1" fill="#fff" stroke="' + color + '" stroke-width="2"/>';
+      case 'car':
+        return '<rect x="-14" y="-10" width="28" height="8" rx="3" fill="' + color + '"/><path d="M-9,-10 L-5,-16 L7,-16 L11,-10 Z" fill="' + color + '"/><circle cx="-8" cy="-1" r="4" fill="#3B2A22"/><circle cx="8" cy="-1" r="4" fill="#3B2A22"/><circle cx="-8" cy="-1" r="1.6" fill="#999"/><circle cx="8" cy="-1" r="1.6" fill="#999"/>';
+      case 'shoe':
+        return '<path d="M-12,0 L12,0 Q14,-6 8,-7 L-2,-9 Q-6,-11 -9,-8 L-12,-6 Z" fill="' + color + '"/><rect x="-12" y="-1.5" width="24" height="2" fill="#3B2A22" opacity="0.3"/>';
+      case 'cushion': {
+        var pattern = variant === 1
+          ? '<circle cx="-5" cy="-13" r="1.8" fill="#fff" opacity="0.6"/><circle cx="5" cy="-9" r="1.8" fill="#fff" opacity="0.6"/><circle cx="-3" cy="-6" r="1.8" fill="#fff" opacity="0.6"/>'
+          : '<line x1="-10" y1="-18" x2="-10" y2="-4" stroke="#fff" stroke-width="2" opacity="0.5"/><line x1="0" y1="-20" x2="0" y2="-2" stroke="#fff" stroke-width="2" opacity="0.5"/><line x1="10" y1="-18" x2="10" y2="-4" stroke="#fff" stroke-width="2" opacity="0.5"/>';
+        return '<rect x="-13" y="-22" width="26" height="22" rx="7" fill="' + color + '"/>' + pattern;
       }
-      case 'fish':
-        return '<polygon points="10,0 18,-6 18,6" fill="' + color + '"/><ellipse cx="0" cy="0" rx="12" ry="7" fill="' + color + '"/><circle cx="-6" cy="-1" r="1.6" fill="#3B2A22"/>';
-      case 'rainbow':
-        return '<path d="M-16,8 A16,16 0 0 1 16,8" stroke="' + color + '" stroke-width="4" fill="none"/><path d="M-11,8 A11,11 0 0 1 11,8" stroke="#FFE38A" stroke-width="4" fill="none"/><path d="M-6,8 A6,6 0 0 1 6,8" stroke="#9EE6C0" stroke-width="4" fill="none"/>';
-      case 'ladybug': {
-        var spotCount = variant === 1 ? 4 : 2;
-        var sdots = '<circle cx="-4" cy="1" r="1.6" fill="#3B2A22"/><circle cx="4" cy="1" r="1.6" fill="#3B2A22"/>';
-        if(spotCount === 4){ sdots += '<circle cx="-4" cy="6" r="1.6" fill="#3B2A22"/><circle cx="4" cy="6" r="1.6" fill="#3B2A22"/>'; }
-        return '<circle cx="0" cy="0" r="10" fill="' + color + '"/><path d="M0,-10 A10,10 0 0 1 0,10 Z" fill="#000" opacity="0.15"/><circle cx="0" cy="-8" r="4" fill="#3B2A22"/>' + sdots;
-      }
-      case 'kite':
-        return '<path d="M0,14 Q4,20 0,26 Q-4,32 0,38" stroke="#8578A8" stroke-width="1.4" fill="none"/><polygon points="0,-14 10,0 0,14 -10,0" fill="' + color + '"/>';
       default:
         return '<circle r="10" fill="' + color + '"/>';
     }
   }
 
   var SPOT_DIFF_CFG = {
-    easy:  { count:12, cols:4, rows:3, hitR:30, scaleDelta:0.4,  rotateDelta:45, removeMax:2 },
-    normal:{ count:15, cols:5, rows:3, hitR:24, scaleDelta:0.28, rotateDelta:28, removeMax:2 },
-    hard:  { count:18, cols:6, rows:3, hitR:19, scaleDelta:0.18, rotateDelta:16, removeMax:1 }
+    easy:  { count:12, hitR:30, scaleDelta:0.4,  rotateDelta:40, removeMax:2 },
+    normal:{ count:14, hitR:24, scaleDelta:0.28, rotateDelta:26, removeMax:2 },
+    hard:  { count:16, hitR:19, scaleDelta:0.18, rotateDelta:16, removeMax:1 }
   };
-  var SPOT_VB_W = 400, SPOT_VB_H = 300, SPOT_TOP_MARGIN = 30;
 
   function spotShuffle(arr){
     for(var i=arr.length-1;i>0;i--){
@@ -1030,26 +1074,19 @@
 
   function buildSpotScene(difficulty){
     var cfg = SPOT_DIFF_CFG[difficulty] || SPOT_DIFF_CFG.easy;
-    var cellW = SPOT_VB_W / cfg.cols, cellH = (SPOT_VB_H - SPOT_TOP_MARGIN) / cfg.rows;
-    var cells = [];
-    for(var r=0;r<cfg.rows;r++){
-      for(var c=0;c<cfg.cols;c++){ cells.push({r:r,c:c}); }
-    }
-    cells = spotShuffle(cells).slice(0, cfg.count);
+    var slotIdx = spotShuffle(ROOM_SLOTS.map(function(_, i){ return i; })).slice(0, cfg.count);
 
-    var objects = cells.map(function(cell){
-      var type = SPOT_TYPE_NAMES[pick(0, SPOT_TYPE_NAMES.length - 1)];
-      var meta = SPOT_TYPES[type];
+    var objects = slotIdx.map(function(si){
+      var slot = ROOM_SLOTS[si];
+      var pool = ROOM_SLOT_COMPAT[slot.kind];
+      var type = pool[pick(0, pool.length - 1)];
+      var meta = ROOM_PROPS[type];
       var variant = pick(0, meta.variants - 1);
       var color = SPOT_PALETTE[pick(0, SPOT_PALETTE.length - 1)];
-      var jx = (Math.random() - 0.5) * cellW * 0.4;
-      var jy = (Math.random() - 0.5) * cellH * 0.4;
-      var x = cell.c * cellW + cellW / 2 + jx;
-      var y = SPOT_TOP_MARGIN + cell.r * cellH + cellH / 2 + jy;
-      var rot = meta.rotatable ? pick(-20, 20) : 0;
-      var scale = 0.85 + Math.random() * 0.5;
+      var scale = slot.s * (0.88 + Math.random() * 0.24);
+      var rot = meta.rotatable ? pick(-14, 14) : 0;
       var flip = meta.flippable && Math.random() < 0.5;
-      return { type:type, variant:variant, color:color, x:x, y:y, rot:rot, scale:scale, flip:flip, hidden:false };
+      return { type:type, variant:variant, color:color, x:slot.x, y:slot.y, rot:rot, scale:scale, flip:flip, hidden:false };
     });
 
     var idxPool = spotShuffle(objects.map(function(_, i){ return i; }));
@@ -1061,7 +1098,7 @@
     var diffs = [];
     var removeCount = 0;
     diffIdx.forEach(function(i){
-      var obj = objects[i], rObj = rightObjects[i], meta = SPOT_TYPES[obj.type];
+      var obj = objects[i], rObj = rightObjects[i], meta = ROOM_PROPS[obj.type];
       var kinds = ['color', 'scale'];
       if(meta.rotatable){ kinds.push('rotate'); }
       if(meta.flippable){ kinds.push('flip'); }
@@ -1088,21 +1125,15 @@
       diffs.push({ x:obj.x, y:obj.y, r:cfg.hitR, found:false });
     });
 
-    return { left:objects, right:rightObjects, diffs:diffs };
+    return { left:objects, right:rightObjects, diffs:diffs, colors:pickRoomColors() };
   }
 
   function renderSpotObjects(objects){
     return objects.filter(function(o){ return !o.hidden; }).map(function(o){
       var sx = o.flip ? -1 : 1;
       return '<g transform="translate(' + o.x + ',' + o.y + ') rotate(' + o.rot + ') scale(' + (sx*o.scale) + ',' + o.scale + ')">'
-        + spotShapeMarkup(o.type, o.color, o.variant) + '</g>';
+        + roomPropMarkup(o.type, o.color, o.variant) + '</g>';
     }).join('');
-  }
-
-  function spotSceneBackground(gradId){
-    return '<defs><linearGradient id="' + gradId + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#CFEFFF"/><stop offset="100%" stop-color="#E6DEFF"/></linearGradient></defs>'
-      + '<rect width="' + SPOT_VB_W + '" height="' + SPOT_VB_H + '" fill="url(#' + gradId + ')"/>'
-      + '<rect x="0" y="248" width="' + SPOT_VB_W + '" height="52" fill="#BFEFC9"/>';
   }
 
   /* ============ divmul: pictorial division / multiplication ============ */
@@ -2209,8 +2240,9 @@
     spotState.diffs = scene.diffs;
     spotState.foundCount = 0;
     spotState.locked = false;
-    spotSvgLeft.innerHTML = spotSceneBackground('spotSkyL') + renderSpotObjects(scene.left);
-    spotSvgRight.innerHTML = spotSceneBackground('spotSkyR') + renderSpotObjects(scene.right);
+    var bg = roomBackgroundMarkup(scene.colors);
+    spotSvgLeft.innerHTML = bg + renderSpotObjects(scene.left);
+    spotSvgRight.innerHTML = bg + renderSpotObjects(scene.right);
     spotFeedback.textContent = '다른 부분 5개를 찾아 눌러보세요!';
     spotStageNumEl.textContent = state.stage + 1;
     updateDots(spotDotsWrap);
