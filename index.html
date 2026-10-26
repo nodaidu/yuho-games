@@ -115,8 +115,8 @@
   .game-card.card-spot:active{ transform:translateY(6px) rotate(3deg); box-shadow:2px 2px 0 var(--ink); }
   .game-card.card-divmul{ background:#FFA94D; }
   .game-card.card-divmul:active{ transform:translateY(6px) rotate(-2deg); box-shadow:2px 2px 0 var(--ink); }
-  .game-card.card-tetris{ background:#9B7FFF; }
-  .game-card.card-tetris:active{ transform:translateY(6px) rotate(2deg); box-shadow:2px 2px 0 var(--ink); }
+  .game-card.card-block{ background:#9B7FFF; }
+  .game-card.card-block:active{ transform:translateY(6px) rotate(2deg); box-shadow:2px 2px 0 var(--ink); }
   .lobby-credit{
     position:absolute; bottom:10px; left:0; width:100%; text-align:center; z-index:1;
     font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; font-size:10px; color:#fff; opacity:0.7;
@@ -131,8 +131,8 @@
   .back-btn:active{ transform:translateY(4px); box-shadow:1px 1px 0 var(--ink); }
 
   /* ---------- DIFFICULTY ---------- */
-  #screen-difficulty, #screen-difficulty-hanja, #screen-difficulty-english, #screen-difficulty-spot, #screen-difficulty-divmul, #screen-difficulty-tetris{ justify-content:center; align-items:center; gap:6vh; }
-  #screen-difficulty h2, #screen-difficulty-hanja h2, #screen-difficulty-english h2, #screen-difficulty-spot h2, #screen-difficulty-divmul h2, #screen-difficulty-tetris h2{
+  #screen-difficulty, #screen-difficulty-hanja, #screen-difficulty-english, #screen-difficulty-spot, #screen-difficulty-divmul{ justify-content:center; align-items:center; gap:6vh; }
+  #screen-difficulty h2, #screen-difficulty-hanja h2, #screen-difficulty-english h2, #screen-difficulty-spot h2, #screen-difficulty-divmul h2 h2{
     z-index:1; font-size:clamp(24px,4.4vw,34px); margin:0; color:#fff; letter-spacing:1px;
     -webkit-text-stroke:1.5px var(--ink); text-shadow:2px 3px 0 var(--ink);
   }
@@ -513,36 +513,45 @@
   }
   .dm-hint:active{ transform:translateY(3px); box-shadow:1px 1px 0 var(--ink); }
 
-  /* ---------- TETRIS ---------- */
-  #screen-tetris{ justify-content:flex-start; padding-top:14px; background:linear-gradient(160deg,var(--sky) 0%,var(--mint) 45%,var(--lavender) 100%); }
-  .tetris-wrap{ z-index:2; display:flex; gap:clamp(10px,2.4vw,20px); align-items:flex-start; justify-content:center; width:min(640px,94vw); flex:1; min-height:0; }
-  .tetris-board-area{ flex-shrink:0; height:min(54vh,500px); aspect-ratio:10/18; }
-  .tetris-board{
-    width:100%; height:100%; display:grid; grid-template-columns:repeat(10,1fr); grid-template-rows:repeat(18,1fr);
-    background:#1A1A2E; border:5px solid var(--ink); border-radius:14px; box-shadow:6px 6px 0 var(--ink); overflow:hidden;
+  /* ---------- BLOCK PUZZLE ---------- */
+  #screen-block{
+    justify-content:flex-start; gap:clamp(10px,2vh,18px); padding-top:clamp(56px,9vh,72px); touch-action:none;
+    background:linear-gradient(160deg,var(--sky) 0%,var(--mint) 45%,var(--lavender) 100%);
   }
-  .tetris-cell{ background:rgba(255,255,255,0.04); box-shadow:inset 0 0 0 1px rgba(255,255,255,0.04); }
-  .tetris-cell.filled{ box-shadow:inset 0 0 0 2px rgba(255,255,255,0.35), inset 0 0 0 1px rgba(0,0,0,0.2); }
-  .tetris-side{ display:flex; flex-direction:column; gap:8px; width:clamp(88px,22vw,140px); flex-shrink:0; }
-  .tetris-stat{
-    background:#fff; border:3px solid var(--ink); border-radius:12px; padding:6px 8px; text-align:center;
+  .blk-top{ z-index:2; display:flex; gap:12px; }
+  .blk-stat{
+    background:#fff; border:3px solid var(--ink); border-radius:14px; padding:4px 18px; text-align:center; min-width:84px;
     font-weight:800; font-size:clamp(11px,2vw,13px); color:var(--text); box-shadow:3px 3px 0 var(--ink);
     font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
   }
-  .tetris-stat span{ display:block; font-size:clamp(16px,3vw,20px); color:var(--ink); font-family:'Do Hyeon',sans-serif; }
-  .tetris-next-label{ text-align:center; font-size:clamp(10px,1.8vw,12px); font-weight:700; color:var(--text); font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; }
-  .tetris-next{
-    aspect-ratio:1/1; background:#1A1A2E; border:3px solid var(--ink); border-radius:10px; display:grid;
-    grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(4,1fr); box-shadow:3px 3px 0 var(--ink);
+  .blk-stat span{ display:block; font-size:clamp(20px,4vw,26px); color:var(--ink); font-family:'Do Hyeon',sans-serif; }
+  .blk-board{
+    z-index:2; width:min(94vw,56vh,480px); aspect-ratio:1/1; display:grid; gap:3px; padding:6px;
+    grid-template-columns:repeat(10,1fr); grid-template-rows:repeat(10,1fr);
+    background:#2E2A4F; border:5px solid var(--ink); border-radius:16px; box-shadow:6px 6px 0 var(--ink);
   }
-  .tetris-next .tetris-cell{ background:transparent; box-shadow:none; }
-  .tetris-controls{ z-index:2; display:flex; flex-wrap:wrap; gap:8px; justify-content:center; align-items:center; margin:10px 0 6px; flex-shrink:0; }
-  .tetris-btn{
-    min-width:50px; min-height:50px; border:4px solid var(--ink); border-radius:14px; background:#fff; color:var(--ink);
-    font-size:19px; font-weight:800; box-shadow:4px 4px 0 var(--ink);
+  .blk-cell{ border-radius:6px; background:rgba(255,255,255,0.09); }
+  .blk-cell.filled, .blk-cell.ghost{ box-shadow:inset 0 -4px 0 rgba(0,0,0,0.18), inset 0 3px 0 rgba(255,255,255,0.45); }
+  .blk-cell.ghost{ opacity:0.5; }
+  .blk-cell.will-clear{ outline:3px solid #FFE14D; outline-offset:-3px; }
+  .blk-cell.clearing{ animation:blkClear .32s ease-out forwards; }
+  @keyframes blkClear{ 0%{ transform:scale(1); filter:brightness(1.6); } 100%{ transform:scale(0.2); opacity:0; } }
+  .blk-tray{ z-index:2; display:flex; width:min(96vw,520px); height:clamp(110px,20vh,170px); }
+  .blk-slot{ flex:1; display:flex; align-items:center; justify-content:center; }
+  .blk-piece{ display:grid; gap:var(--gap); cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; }
+  .blk-piece.no-fit{ opacity:0.35; }
+  .blk-piece.dragging{ position:fixed; z-index:50; pointer-events:none; filter:drop-shadow(4px 6px 0 rgba(26,26,46,0.25)); }
+  .blk-pc-cell{ width:var(--cs); height:var(--cs); border-radius:calc(var(--cs) * 0.18); box-shadow:inset 0 -3px 0 rgba(0,0,0,0.18), inset 0 2px 0 rgba(255,255,255,0.45); outline:2px solid rgba(26,26,46,0.55); outline-offset:-1px; }
+  .blk-pc-cell.empty{ visibility:hidden; }
+  #blk-gameover{ z-index:60; }
+  #blk-gameover.show{ pointer-events:auto; }
+  #blk-retry-btn, #blk-home-btn{
+    border:4px solid var(--ink); border-radius:22px; padding:12px 26px; color:var(--ink);
+    font-weight:800; font-size:clamp(14px,2.4vw,18px); box-shadow:5px 5px 0 var(--ink);
   }
-  .tetris-btn:active{ transform:translateY(3px); box-shadow:1px 1px 0 var(--ink); }
-  .tetris-btn-drop{ min-width:auto; padding:0 16px; background:#FFE14D; font-size:clamp(12px,2.2vw,14px); font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; }
+  #blk-retry-btn{ background:#FFE14D; }
+  #blk-home-btn{ background:#3DC8FF; }
+  #blk-retry-btn:active, #blk-home-btn:active{ transform:translateY(4px); box-shadow:1px 1px 0 var(--ink); }
 
   @media (max-width:480px){
     .doors-row{ gap:8px; }
@@ -591,10 +600,10 @@
         <h2>나누기 곱하기!</h2>
         <p>피자를 그림으로 나눠요</p>
       </button>
-      <button class="game-card card-tetris" id="card-tetris-game">
-        <div class="card-icon-badge" id="tetris-card-badge"></div>
-        <h2>테트리스!</h2>
-        <p>블록을 맞춰 줄을 지워요</p>
+      <button class="game-card card-block" id="card-block-game">
+        <div class="card-icon-badge" id="block-card-badge"></div>
+        <h2>블록 퍼즐!</h2>
+        <p>블록을 끌어 줄을 채워요</p>
       </button>
     </div>
     <div class="lobby-credit">얼굴 일러스트: Ashley Seo (CC BY 4.0), via DiceBear</div>
@@ -709,27 +718,6 @@
     </div>
   </section>
 
-  <!-- TETRIS DIFFICULTY -->
-  <section class="screen" id="screen-difficulty-tetris">
-    <div class="bg-deco"><span></span><span></span><span></span><span></span></div>
-    <button class="back-btn" id="diff-tetris-back">← 돌아가기</button>
-    <h2>속도를 골라주세요</h2>
-    <div class="diff-grid">
-      <button class="diff-card tier1" data-diff="easy">
-        <span class="diff-badge">🐢</span><b>초급</b>
-        <small>천천히 내려와요</small>
-      </button>
-      <button class="diff-card tier2" data-diff="normal">
-        <span class="diff-badge">🚶</span><b>중급</b>
-        <small>보통 속도예요</small>
-      </button>
-      <button class="diff-card tier3" data-diff="hard">
-        <span class="diff-badge">🐇</span><b>고급</b>
-        <small>빠르게 내려와요</small>
-      </button>
-    </div>
-  </section>
-
   <!-- GAME -->
   <section class="screen" id="screen-game">
     <button class="back-btn" id="game-back">← 나가기</button>
@@ -820,34 +808,23 @@
     <div class="fade-overlay" id="divmul-fade-overlay"></div>
   </section>
 
-  <!-- TETRIS -->
-  <section class="screen" id="screen-tetris">
-    <button class="back-btn" id="tetris-back">← 나가기</button>
-    <div class="tetris-wrap">
-      <div class="tetris-board-area"><div class="tetris-board" id="tetris-board"></div></div>
-      <div class="tetris-side">
-        <div class="tetris-stat">점수<span id="tetris-score">0</span></div>
-        <div class="tetris-stat">줄<span id="tetris-lines">0</span></div>
-        <div class="tetris-stat">레벨<span id="tetris-level">1</span></div>
-        <div class="tetris-next-label">다음 블록</div>
-        <div class="tetris-next" id="tetris-next"></div>
-      </div>
+  <!-- BLOCK PUZZLE -->
+  <section class="screen" id="screen-block">
+    <button class="back-btn" id="block-back">← 나가기</button>
+    <div class="blk-top">
+      <div class="blk-stat">점수<span id="blk-score">0</span></div>
+      <div class="blk-stat">최고<span id="blk-best">0</span></div>
     </div>
-    <div class="tetris-controls">
-      <button class="tetris-btn" id="tet-left">◀</button>
-      <button class="tetris-btn" id="tet-rotate">회전</button>
-      <button class="tetris-btn" id="tet-right">▶</button>
-      <button class="tetris-btn" id="tet-down">▼</button>
-      <button class="tetris-btn tetris-btn-drop" id="tet-drop">빨리 내리기</button>
-    </div>
-    <div class="poop-gameover" id="tetris-gameover">
+    <div class="blk-board" id="blk-board"></div>
+    <div class="blk-tray" id="blk-tray"></div>
+    <div class="poop-gameover" id="blk-gameover">
       <div class="poop-gameover-card">
-        <div class="go-emoji">🧱</div>
-        <h3>게임 종료!</h3>
-        <p id="tetris-final-score">점수: 0</p>
-        <div class="poop-intro-btns">
-          <button id="tetris-retry-btn">다시하기 ▶</button>
-          <button id="tetris-home-btn">나가기 →</button>
+        <div class="go-emoji">🧩</div>
+        <h3>더 이상 놓을 곳이 없어요!</h3>
+        <p id="blk-final-score">점수: 0</p>
+        <div class="poop-intro-btns" style="margin-top:16px">
+          <button id="blk-retry-btn">다시하기 ▶</button>
+          <button id="blk-home-btn">나가기 →</button>
         </div>
       </div>
     </div>
@@ -1746,14 +1723,14 @@
       + '<circle cx="24" cy="22" r="3.5" fill="#E5533D"/><circle cx="19" cy="30" r="2.8" fill="#E5533D"/><circle cx="29" cy="30" r="2.8" fill="#E5533D"/></svg>';
   }
 
-  function tetrisBadgeIconSVG(){
+  function blockBadgeIconSVG(){
+    var cell = function(x, y, c){ return '<rect x="' + x + '" y="' + y + '" width="12" height="12" rx="3" fill="' + c + '" stroke="#1A1A2E" stroke-width="2.5"/>'; };
     return '<svg viewBox="0 0 48 48" width="74%" height="74%" xmlns="http://www.w3.org/2000/svg">'
-      + '<rect x="4" y="20" width="12" height="12" rx="2" fill="#5CFF9E" stroke="#1A1A2E" stroke-width="2.5"/>'
-      + '<rect x="16" y="20" width="12" height="12" rx="2" fill="#5CFF9E" stroke="#1A1A2E" stroke-width="2.5"/>'
-      + '<rect x="16" y="8" width="12" height="12" rx="2" fill="#FF9EB8" stroke="#1A1A2E" stroke-width="2.5"/>'
-      + '<rect x="28" y="8" width="12" height="12" rx="2" fill="#FF9EB8" stroke="#1A1A2E" stroke-width="2.5"/></svg>';
+      + cell(6, 6, '#FF7FA6') + cell(18, 6, '#FF7FA6') + cell(6, 18, '#FF7FA6')
+      + cell(30, 18, '#3DC8FF') + cell(30, 30, '#3DC8FF') + cell(18, 30, '#3DC8FF')
+      + cell(6, 30, '#FFC93C') + '</svg>';
   }
-  document.getElementById('tetris-card-badge').innerHTML = tetrisBadgeIconSVG();
+  document.getElementById('block-card-badge').innerHTML = blockBadgeIconSVG();
 
   /* ============ screen management ============ */
   function showScreen(name){
@@ -1779,14 +1756,16 @@
     clearPendingTimers();
     showScreen('lobby');
   });
-  document.getElementById('card-tetris-game').addEventListener('click', function(){ showScreen('difficulty-tetris'); });
-  document.getElementById('diff-tetris-back').addEventListener('click', function(){ showScreen('lobby'); });
-  document.getElementById('tetris-back').addEventListener('click', function(){
-    tetStop();
+  document.getElementById('card-block-game').addEventListener('click', function(){
+    showScreen('block');
+    blkStart();
+  });
+  document.getElementById('block-back').addEventListener('click', function(){
+    blkStop();
     showScreen('lobby');
   });
-  document.getElementById('tetris-home-btn').addEventListener('click', function(){
-    tetStop();
+  document.getElementById('blk-home-btn').addEventListener('click', function(){
+    blkStop();
     showScreen('lobby');
   });
   document.getElementById('game-back').addEventListener('click', function(){
@@ -1826,12 +1805,6 @@
   document.querySelectorAll('#screen-difficulty-divmul .diff-card').forEach(function(card){
     card.addEventListener('click', function(){
       startGame('divmul', card.dataset.diff);
-    });
-  });
-  document.querySelectorAll('#screen-difficulty-tetris .diff-card').forEach(function(card){
-    card.addEventListener('click', function(){
-      showScreen('tetris');
-      tetStart(card.dataset.diff);
     });
   });
 
@@ -1922,6 +1895,11 @@
     sfxTone(ctx, 'sine', 2638, t, 0.25, 0.08);
     sfxTone(ctx, 'sine', 1047, t + 0.28, 0.8, 0.35);
     sfxTone(ctx, 'sine', 2094, t + 0.28, 0.3, 0.08);
+  }
+  // short pop when a block is placed
+  function playBlockPop(){
+    var ctx = getSfxCtx(); if(!ctx) return;
+    sfxTone(ctx, 'sine', 520, ctx.currentTime, 0.12, 0.25, 780);
   }
   // 띠~: low buzzer that sags slightly
   function playBuzz(){
@@ -2994,275 +2972,303 @@
     }
   });
 
-  /* ============ tetris ============ */
-  var TET_COLS = 10, TET_ROWS = 18;
-  var TETRO_DEFS = {
-    I:{ mat:[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], color:'#3DC8FF' },
-    O:{ mat:[[1,1],[1,1]], color:'#FFE14D' },
-    T:{ mat:[[0,1,0],[1,1,1],[0,0,0]], color:'#B597F0' },
-    S:{ mat:[[0,1,1],[1,1,0],[0,0,0]], color:'#5CFF9E' },
-    Z:{ mat:[[1,1,0],[0,1,1],[0,0,0]], color:'#FF6F4D' },
-    J:{ mat:[[1,0,0],[1,1,1],[0,0,0]], color:'#6FB3FF' },
-    L:{ mat:[[0,0,1],[1,1,1],[0,0,0]], color:'#FFC26B' }
-  };
-  var TETRO_NAMES = Object.keys(TETRO_DEFS);
-  var TET_DIFF_CFG = {
-    easy:{ base:800, step:40, min:220 },
-    normal:{ base:620, step:42, min:170 },
-    hard:{ base:460, step:44, min:130 }
-  };
-  var TET_LINE_SCORE = {1:10,2:30,3:50,4:100};
+  /* ============ block puzzle: drag 3 pieces onto a 10x10 board ============ */
+  var BLK_N = 10;
+  // fixed orientations only: pieces never rotate, so every orientation is its own shape
+  var BLK_PATTERNS = [
+    ['####'], ['#','#','#','#'], ['##','##'],
+    ['#.','#.','##'], ['.#','.#','##'], ['##','#.','#.'], ['##','.#','.#'],
+    ['###','#..'], ['###','..#'], ['#..','###'], ['..#','###'],
+    ['###','.#.'], ['.#.','###'], ['#.','##','#.'], ['.#','##','.#'],
+    ['.##','##.'], ['##.','.##'], ['#.','##','.#'], ['.#','##','#.'],
+    ['#####'], ['#','#','#','#','#'],
+    ['###','#..','#..'], ['###','..#','..#'], ['#..','#..','###'], ['..#','..#','###'],
+    ['.#.','###','.#.'], ['###','.#.','.#.']
+  ];
+  var BLK_SHAPES = BLK_PATTERNS.map(function(rows){
+    var cells = [];
+    rows.forEach(function(row, r){
+      for(var c=0;c<row.length;c++){ if(row[c] === '#'){ cells.push([r, c]); } }
+    });
+    return { cells:cells, h:rows.length, w:rows[0].length, size:cells.length };
+  });
+  var BLK_SIZE_WEIGHTS = { 4:3, 5:2 };
+  var BLK_COLORS = ['#FF7FA6','#FFC93C','#5CD98E','#3DC8FF','#9B7FFF','#FF9B5C','#4FD1C5'];
+  var BLK_BEST_KEY = 'yuho-block-best';
 
-  var tetris = { board:null, cur:null, next:null, bag:[], score:0, lines:0, level:1, running:false, timerId:null, interval:800, diff:'easy' };
-  var tetCellEls = [], tetNextCellEls = [];
+  var blk = { board:[], tray:[null,null,null], score:0, best:0, over:false, drag:null };
+  var blkBoardEl = document.getElementById('blk-board');
+  var blkTrayEl = document.getElementById('blk-tray');
+  var blkCellEls = [];
 
-  function tetRotateCW(mat){
-    var n = mat.length, out = [];
-    for(var r=0;r<n;r++){ out.push(new Array(n).fill(0)); }
-    for(var r2=0;r2<n;r2++){
-      for(var c2=0;c2<n;c2++){ out[c2][n-1-r2] = mat[r2][c2]; }
+  function blkRandomPiece(){
+    var total = 0, k;
+    for(k in BLK_SIZE_WEIGHTS){ total += BLK_SIZE_WEIGHTS[k]; }
+    var roll = Math.random() * total, size = 1;
+    for(k in BLK_SIZE_WEIGHTS){
+      roll -= BLK_SIZE_WEIGHTS[k];
+      if(roll < 0){ size = Number(k); break; }
     }
-    return out;
-  }
-  function tetCloneMat(mat){ return mat.map(function(row){ return row.slice(); }); }
-
-  function tetNewBoard(){
-    var b = [];
-    for(var r=0;r<TET_ROWS;r++){ b.push(new Array(TET_COLS).fill(null)); }
-    return b;
+    var pool = BLK_SHAPES.filter(function(s){ return s.size === size; });
+    return { shape:pool[pick(0, pool.length - 1)], color:BLK_COLORS[pick(0, BLK_COLORS.length - 1)] };
   }
 
-  function tetDrawBag(){
-    if(tetris.bag.length === 0){ tetris.bag = spotShuffle(TETRO_NAMES.slice()); }
-    return tetris.bag.pop();
-  }
-
-  function tetSpawnState(name){
-    var def = TETRO_DEFS[name];
-    var mat = tetCloneMat(def.mat);
-    var col = Math.floor((TET_COLS - mat.length) / 2);
-    return { name:name, mat:mat, color:def.color, row:0, col:col };
-  }
-
-  function tetCanPlace(mat, row, col){
-    for(var r=0;r<mat.length;r++){
-      for(var c=0;c<mat[r].length;c++){
-        if(!mat[r][c]) continue;
-        var br = row + r, bc = col + c;
-        if(bc < 0 || bc >= TET_COLS || br >= TET_ROWS) return false;
-        if(br >= 0 && tetris.board[br][bc]) return false;
-      }
+  function blkCanPlace(shape, row, col){
+    for(var i=0;i<shape.cells.length;i++){
+      var r = row + shape.cells[i][0], c = col + shape.cells[i][1];
+      if(r < 0 || c < 0 || r >= BLK_N || c >= BLK_N) return false;
+      if(blk.board[r*BLK_N + c]) return false;
     }
     return true;
   }
 
-  function tetMergePiece(){
-    var p = tetris.cur;
-    for(var r=0;r<p.mat.length;r++){
-      for(var c=0;c<p.mat[r].length;c++){
-        if(!p.mat[r][c]) continue;
-        var br = p.row + r, bc = p.col + c;
-        if(br >= 0 && br < TET_ROWS){ tetris.board[br][bc] = p.color; }
-      }
-    }
-  }
-
-  function tetClearLines(){
-    var newBoard = [], cleared = 0;
-    for(var r=0;r<TET_ROWS;r++){
-      if(tetris.board[r].every(function(cell){ return cell; })){ cleared++; }
-      else { newBoard.push(tetris.board[r]); }
-    }
-    while(newBoard.length < TET_ROWS){ newBoard.unshift(new Array(TET_COLS).fill(null)); }
-    tetris.board = newBoard;
-    return cleared;
-  }
-
-  function tetApplyClear(cleared){
-    if(cleared <= 0) return;
-    tetris.lines += cleared;
-    tetris.score += (TET_LINE_SCORE[cleared] || 100) * tetris.level;
-    var newLevel = Math.floor(tetris.lines / 10) + 1;
-    if(newLevel !== tetris.level){
-      tetris.level = newLevel;
-      var cfg = TET_DIFF_CFG[tetris.diff];
-      tetris.interval = Math.max(cfg.min, cfg.base - (tetris.level - 1) * cfg.step);
-      tetRestartTimer();
-    }
-  }
-
-  function tetTryMove(dr, dc){
-    var p = tetris.cur;
-    if(tetCanPlace(p.mat, p.row + dr, p.col + dc)){
-      p.row += dr; p.col += dc;
-      return true;
+  function blkFitsAnywhere(shape){
+    for(var r=0;r<=BLK_N - shape.h;r++){
+      for(var c=0;c<=BLK_N - shape.w;c++){ if(blkCanPlace(shape, r, c)) return true; }
     }
     return false;
   }
 
-  function tetTryRotate(){
-    var p = tetris.cur;
-    if(p.name === 'O') return;
-    var rotated = tetRotateCW(p.mat);
-    var kicks = [0,-1,1,-2,2];
-    for(var i=0;i<kicks.length;i++){
-      if(tetCanPlace(rotated, p.row, p.col + kicks[i])){
-        p.mat = rotated; p.col += kicks[i];
-        return;
-      }
+  // rows and columns that would be full if `shape` were placed at (row, col)
+  function blkFullLines(shape, row, col){
+    var filled = blk.board.slice();
+    if(shape){ shape.cells.forEach(function(rc){ filled[(row + rc[0])*BLK_N + col + rc[1]] = true; }); }
+    var rows = [], cols = [], r, c, full;
+    for(r=0;r<BLK_N;r++){
+      full = true;
+      for(c=0;c<BLK_N;c++){ if(!filled[r*BLK_N + c]){ full = false; break; } }
+      if(full) rows.push(r);
     }
-  }
-
-  function tetSpawnNext(){
-    var name = tetris.next || tetDrawBag();
-    tetris.cur = tetSpawnState(name);
-    tetris.next = tetDrawBag();
-    tetRenderNext();
-    if(!tetCanPlace(tetris.cur.mat, tetris.cur.row, tetris.cur.col)){
-      tetGameOver();
+    for(c=0;c<BLK_N;c++){
+      full = true;
+      for(r=0;r<BLK_N;r++){ if(!filled[r*BLK_N + c]){ full = false; break; } }
+      if(full) cols.push(c);
     }
+    return { rows:rows, cols:cols };
   }
 
-  function tetLockPiece(){
-    tetMergePiece();
-    var cleared = tetClearLines();
-    tetApplyClear(cleared);
-    tetSpawnNext();
-  }
-
-  function tetTick(){
-    if(!tetris.running) return;
-    if(!tetTryMove(1, 0)){ tetLockPiece(); }
-    tetRenderBoard();
-    tetRenderStats();
-  }
-
-  function tetSoftDrop(){
-    if(!tetris.running) return;
-    if(!tetTryMove(1, 0)){ tetLockPiece(); }
-    tetRenderBoard();
-    tetRenderStats();
-  }
-
-  function tetHardDrop(){
-    if(!tetris.running) return;
-    while(tetTryMove(1, 0)){}
-    tetLockPiece();
-    tetRenderBoard();
-    tetRenderStats();
-  }
-
-  function tetBuildBoardDom(){
-    var boardEl = document.getElementById('tetris-board');
-    for(var i=0;i<TET_ROWS*TET_COLS;i++){
+  function blkBuildBoardDom(){
+    blkBoardEl.innerHTML = '';
+    blkCellEls = [];
+    for(var i=0;i<BLK_N*BLK_N;i++){
       var d = document.createElement('div');
-      d.className = 'tetris-cell';
-      boardEl.appendChild(d);
-      tetCellEls.push(d);
-    }
-    var nextEl = document.getElementById('tetris-next');
-    for(var j=0;j<16;j++){
-      var nd = document.createElement('div');
-      nd.className = 'tetris-cell';
-      nextEl.appendChild(nd);
-      tetNextCellEls.push(nd);
+      d.className = 'blk-cell';
+      blkBoardEl.appendChild(d);
+      blkCellEls.push(d);
     }
   }
 
-  function tetRenderBoard(){
-    var disp = tetris.board.map(function(row){ return row.slice(); });
-    var p = tetris.cur;
-    if(p){
-      for(var r=0;r<p.mat.length;r++){
-        for(var c=0;c<p.mat[r].length;c++){
-          if(!p.mat[r][c]) continue;
-          var br = p.row + r, bc = p.col + c;
-          if(br >= 0 && br < TET_ROWS && bc >= 0 && bc < TET_COLS){ disp[br][bc] = p.color; }
-        }
+  function blkRenderBoard(){
+    blkCellEls.forEach(function(el, i){
+      var color = blk.board[i];
+      el.classList.remove('ghost','will-clear');
+      el.classList.toggle('filled', !!color);
+      el.style.background = color || '';
+    });
+  }
+
+  function blkPieceEl(piece, idx){
+    var el = document.createElement('div');
+    el.className = 'blk-piece';
+    el.dataset.idx = idx;
+    el.style.gridTemplateColumns = 'repeat(' + piece.shape.w + ', var(--cs))';
+    el.style.gridTemplateRows = 'repeat(' + piece.shape.h + ', var(--cs))';
+    var on = {};
+    piece.shape.cells.forEach(function(rc){ on[rc[0] + ',' + rc[1]] = true; });
+    for(var r=0;r<piece.shape.h;r++){
+      for(var c=0;c<piece.shape.w;c++){
+        var cell = document.createElement('div');
+        cell.className = on[r + ',' + c] ? 'blk-pc-cell' : 'blk-pc-cell empty';
+        if(on[r + ',' + c]){ cell.style.background = piece.color; }
+        el.appendChild(cell);
       }
     }
-    for(var rr=0;rr<TET_ROWS;rr++){
-      for(var cc=0;cc<TET_COLS;cc++){
-        var el = tetCellEls[rr*TET_COLS + cc], val = disp[rr][cc];
-        if(val){ el.style.background = val; el.classList.add('filled'); }
-        else { el.style.background = ''; el.classList.remove('filled'); }
+    el.addEventListener('pointerdown', blkOnPointerDown);
+    return el;
+  }
+
+  function blkBoardMetrics(){
+    var a = blkCellEls[0].getBoundingClientRect(), b = blkCellEls[1].getBoundingClientRect();
+    return { left:a.left, top:a.top, size:a.width, pitch:b.left - a.left };
+  }
+
+  function blkRenderTray(){
+    blkTrayEl.innerHTML = '';
+    var m = blkBoardMetrics();
+    var slotW = blkTrayEl.getBoundingClientRect().width / 3;
+    var cs = Math.min(m.size * 0.62, (slotW - 16) / 5.4);
+    blk.tray.forEach(function(piece, i){
+      var slot = document.createElement('div');
+      slot.className = 'blk-slot';
+      if(piece){
+        var el = blkPieceEl(piece, i);
+        el.style.setProperty('--cs', cs + 'px');
+        el.style.setProperty('--gap', Math.max(1, cs * 0.08) + 'px');
+        if(!blk.over && !blkFitsAnywhere(piece.shape)){ el.classList.add('no-fit'); }
+        slot.appendChild(el);
       }
+      blkTrayEl.appendChild(slot);
+    });
+  }
+
+  function blkRenderStats(){
+    document.getElementById('blk-score').textContent = blk.score;
+    document.getElementById('blk-best').textContent = blk.best;
+  }
+
+  function blkDeal(){
+    blk.tray = [blkRandomPiece(), blkRandomPiece(), blkRandomPiece()];
+  }
+
+  function blkCheckGameOver(){
+    var any = blk.tray.some(function(p){ return p && blkFitsAnywhere(p.shape); });
+    if(any) return;
+    blk.over = true;
+    if(blk.score > blk.best){
+      blk.best = blk.score;
+      try { localStorage.setItem(BLK_BEST_KEY, String(blk.best)); } catch(e){}
     }
+    blkRenderStats();
+    setTrackedTimeout(function(){
+      playBuzz();
+      document.getElementById('blk-final-score').textContent = '점수: ' + blk.score + '  (최고 ' + blk.best + ')';
+      document.getElementById('blk-gameover').classList.add('show');
+    }, 500);
   }
 
-  function tetRenderNext(){
-    tetNextCellEls.forEach(function(el){ el.style.background = ''; });
-    var def = TETRO_DEFS[tetris.next];
-    if(!def) return;
-    var mat = def.mat, n = mat.length, offset = Math.floor((4 - n) / 2);
-    for(var r=0;r<n;r++){
-      for(var c=0;c<n;c++){
-        if(mat[r][c]){
-          var idx = (r + offset) * 4 + (c + offset);
-          if(tetNextCellEls[idx]){ tetNextCellEls[idx].style.background = def.color; }
-        }
-      }
+  function blkStart(){
+    clearPendingTimers();
+    try { blk.best = Number(localStorage.getItem(BLK_BEST_KEY)) || 0; } catch(e){ blk.best = 0; }
+    blk.board = new Array(BLK_N*BLK_N).fill(null);
+    blk.score = 0;
+    blk.over = false;
+    blk.drag = null;
+    document.getElementById('blk-gameover').classList.remove('show');
+    blkDeal();
+    blkRenderBoard();
+    blkRenderStats();
+    blkRenderTray();
+  }
+
+  function blkStop(){
+    clearPendingTimers();
+    if(blk.drag && blk.drag.el.parentNode){ blk.drag.el.remove(); }
+    blk.drag = null;
+  }
+
+  function blkClearPreview(){
+    blkCellEls.forEach(function(el, i){
+      el.classList.remove('ghost','will-clear');
+      if(!blk.board[i]){ el.style.background = ''; }
+    });
+  }
+
+  // board cell the dragged piece's top-left cell is over (may be off the board)
+  function blkDragTarget(){
+    var d = blk.drag, m = blkBoardMetrics(), r = d.el.getBoundingClientRect();
+    return {
+      row: Math.round((r.top - m.top) / m.pitch),
+      col: Math.round((r.left - m.left) / m.pitch)
+    };
+  }
+
+  function blkMoveDrag(x, y){
+    var d = blk.drag;
+    d.el.style.left = (x - d.w / 2) + 'px';
+    d.el.style.top = (y - d.h - d.lift) + 'px';
+    blkClearPreview();
+    var t = blkDragTarget(), shape = blk.tray[d.idx].shape;
+    d.valid = blkCanPlace(shape, t.row, t.col);
+    d.row = t.row; d.col = t.col;
+    if(!d.valid) return;
+    shape.cells.forEach(function(rc){
+      var el = blkCellEls[(t.row + rc[0])*BLK_N + t.col + rc[1]];
+      el.classList.add('ghost');
+      el.style.background = blk.tray[d.idx].color;
+    });
+    var lines = blkFullLines(shape, t.row, t.col);
+    lines.rows.forEach(function(r){ for(var c=0;c<BLK_N;c++){ blkCellEls[r*BLK_N + c].classList.add('will-clear'); } });
+    lines.cols.forEach(function(c){ for(var r=0;r<BLK_N;r++){ blkCellEls[r*BLK_N + c].classList.add('will-clear'); } });
+  }
+
+  function blkOnPointerDown(e){
+    if(blk.over || blk.drag) return;
+    var src = e.currentTarget, idx = Number(src.dataset.idx), piece = blk.tray[idx];
+    if(!piece) return;
+    e.preventDefault();
+    var m = blkBoardMetrics();
+    var el = blkPieceEl(piece, idx);
+    el.classList.add('dragging');
+    el.style.setProperty('--cs', m.size + 'px');
+    el.style.setProperty('--gap', (m.pitch - m.size) + 'px');
+    document.body.appendChild(el);
+    src.style.visibility = 'hidden';
+    var w = piece.shape.w * m.pitch, h = piece.shape.h * m.pitch;
+    // on touch, lift the piece above the finger so it stays visible
+    blk.drag = { el:el, src:src, idx:idx, w:w, h:h, lift: e.pointerType === 'mouse' ? -h / 2 : 36, valid:false, pointerId:e.pointerId };
+    blkMoveDrag(e.clientX, e.clientY);
+    window.addEventListener('pointermove', blkOnPointerMove);
+    window.addEventListener('pointerup', blkOnPointerUp);
+    window.addEventListener('pointercancel', blkOnPointerUp);
+  }
+
+  function blkOnPointerMove(e){
+    if(!blk.drag || e.pointerId !== blk.drag.pointerId) return;
+    e.preventDefault();
+    blkMoveDrag(e.clientX, e.clientY);
+  }
+
+  function blkOnPointerUp(e){
+    var d = blk.drag;
+    if(!d || e.pointerId !== d.pointerId) return;
+    window.removeEventListener('pointermove', blkOnPointerMove);
+    window.removeEventListener('pointerup', blkOnPointerUp);
+    window.removeEventListener('pointercancel', blkOnPointerUp);
+    d.el.remove();
+    blk.drag = null;
+    blkClearPreview();
+    if(e.type === 'pointercancel' || !d.valid){
+      d.src.style.visibility = '';
+      return;
     }
+    blkPlace(d.idx, d.row, d.col);
   }
 
-  function tetRenderStats(){
-    document.getElementById('tetris-score').textContent = tetris.score;
-    document.getElementById('tetris-lines').textContent = tetris.lines;
-    document.getElementById('tetris-level').textContent = tetris.level;
+  function blkPlace(idx, row, col){
+    var piece = blk.tray[idx], shape = piece.shape;
+    shape.cells.forEach(function(rc){ blk.board[(row + rc[0])*BLK_N + col + rc[1]] = piece.color; });
+    blk.tray[idx] = null;
+    blk.score += shape.size;
+
+    var lines = blkFullLines(null, 0, 0), count = lines.rows.length + lines.cols.length;
+    var clearIdx = [];
+    lines.rows.forEach(function(r){ for(var c=0;c<BLK_N;c++){ clearIdx.push(r*BLK_N + c); } });
+    lines.cols.forEach(function(c){ for(var r=0;r<BLK_N;r++){ clearIdx.push(r*BLK_N + c); } });
+    blkRenderBoard();
+    if(count){
+      // cleared cells just disappear; nothing above them moves down
+      blk.score += 10 * count * count;
+      playDingDong();
+      clearIdx.forEach(function(i){ blkCellEls[i].classList.add('clearing'); blk.board[i] = null; });
+      setTrackedTimeout(function(){
+        clearIdx.forEach(function(i){ blkCellEls[i].classList.remove('clearing'); });
+        blkRenderBoard();
+      }, 320);
+    } else {
+      playBlockPop();
+    }
+
+    if(blk.tray.every(function(p){ return !p; })){ blkDeal(); }
+    blkRenderStats();
+    blkRenderTray();
+    blkCheckGameOver();
   }
 
-  function tetRestartTimer(){
-    if(tetris.timerId){ clearInterval(tetris.timerId); }
-    tetris.timerId = setInterval(tetTick, tetris.interval);
-  }
-
-  function tetKeyDown(e){
-    if(!tetris.running) return;
-    if(e.key === 'ArrowLeft'){ tetTryMove(0,-1); tetRenderBoard(); e.preventDefault(); }
-    else if(e.key === 'ArrowRight'){ tetTryMove(0,1); tetRenderBoard(); e.preventDefault(); }
-    else if(e.key === 'ArrowDown'){ tetSoftDrop(); e.preventDefault(); }
-    else if(e.key === 'ArrowUp'){ tetTryRotate(); tetRenderBoard(); e.preventDefault(); }
-    else if(e.key === ' '){ tetHardDrop(); e.preventDefault(); }
-  }
-
-  function tetStart(diff){
-    tetris.diff = diff;
-    var cfg = TET_DIFF_CFG[diff];
-    tetris.board = tetNewBoard();
-    tetris.score = 0; tetris.lines = 0; tetris.level = 1;
-    tetris.interval = cfg.base;
-    tetris.bag = [];
-    tetris.next = tetDrawBag();
-    tetris.running = true;
-    document.getElementById('tetris-gameover').classList.remove('show');
-    tetSpawnNext();
-    tetRenderBoard();
-    tetRenderStats();
-    tetRestartTimer();
-    window.addEventListener('keydown', tetKeyDown);
-  }
-
-  function tetStop(){
-    tetris.running = false;
-    if(tetris.timerId){ clearInterval(tetris.timerId); tetris.timerId = null; }
-    window.removeEventListener('keydown', tetKeyDown);
-  }
-
-  function tetGameOver(){
-    tetris.running = false;
-    if(tetris.timerId){ clearInterval(tetris.timerId); tetris.timerId = null; }
-    window.removeEventListener('keydown', tetKeyDown);
-    document.getElementById('tetris-final-score').textContent = '점수: ' + tetris.score;
-    document.getElementById('tetris-gameover').classList.add('show');
-  }
-
-  tetBuildBoardDom();
-  document.getElementById('tet-left').addEventListener('click', function(){ if(!tetris.running) return; tetTryMove(0,-1); tetRenderBoard(); });
-  document.getElementById('tet-right').addEventListener('click', function(){ if(!tetris.running) return; tetTryMove(0,1); tetRenderBoard(); });
-  document.getElementById('tet-rotate').addEventListener('click', function(){ if(!tetris.running) return; tetTryRotate(); tetRenderBoard(); });
-  document.getElementById('tet-down').addEventListener('click', function(){ tetSoftDrop(); });
-  document.getElementById('tet-drop').addEventListener('click', function(){ tetHardDrop(); });
-  document.getElementById('tetris-retry-btn').addEventListener('click', function(){ tetStart(tetris.diff); });
+  blkBuildBoardDom();
+  document.getElementById('blk-retry-btn').addEventListener('click', blkStart);
+  window.addEventListener('resize', function(){
+    if(document.getElementById('screen-block').classList.contains('active') && !blk.drag){ blkRenderTray(); }
+  });
 
 })();
 </script>
