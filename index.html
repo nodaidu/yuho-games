@@ -527,7 +527,7 @@
   .blk-stat span{ display:block; font-size:clamp(20px,4vw,26px); color:var(--ink); font-family:'Do Hyeon',sans-serif; }
   .blk-board{
     z-index:2; width:min(94vw,56vh,480px); aspect-ratio:1/1; display:grid; gap:3px; padding:6px;
-    grid-template-columns:repeat(10,1fr); grid-template-rows:repeat(10,1fr);
+    grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr);
     background:#2E2A4F; border:5px solid var(--ink); border-radius:16px; box-shadow:6px 6px 0 var(--ink);
   }
   .blk-cell{ border-radius:6px; background:rgba(255,255,255,0.09); }
@@ -536,7 +536,7 @@
   .blk-cell.will-clear{ outline:3px solid #FFE14D; outline-offset:-3px; }
   .blk-cell.clearing{ animation:blkClear .32s ease-out forwards; }
   @keyframes blkClear{ 0%{ transform:scale(1); filter:brightness(1.6); } 100%{ transform:scale(0.2); opacity:0; } }
-  .blk-tray{ z-index:2; display:flex; width:min(96vw,520px); height:clamp(110px,20vh,170px); }
+  .blk-tray{ z-index:2; display:flex; gap:6px; width:min(98vw,560px); height:clamp(130px,24vh,210px); }
   .blk-slot{ flex:1; display:flex; align-items:center; justify-content:center; }
   .blk-piece{ display:grid; gap:var(--gap); cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; }
   .blk-piece.no-fit{ opacity:0.35; }
@@ -2972,8 +2972,8 @@
     }
   });
 
-  /* ============ block puzzle: drag 3 pieces onto a 10x10 board ============ */
-  var BLK_N = 10;
+  /* ============ block puzzle: drag 3 pieces onto an 8x8 board ============ */
+  var BLK_N = 8;
   // fixed orientations only: pieces never rotate, so every orientation is its own shape
   var BLK_PATTERNS = [
     ['####'], ['#','#','#','#'], ['##','##'],
@@ -2983,7 +2983,23 @@
     ['.##','##.'], ['##.','.##'], ['#.','##','.#'], ['.#','##','#.'],
     ['#####'], ['#','#','#','#','#'],
     ['###','#..','#..'], ['###','..#','..#'], ['#..','#..','###'], ['..#','..#','###'],
-    ['.#.','###','.#.'], ['###','.#.','.#.']
+    ['.#.','###','.#.'], ['###','.#.','.#.'], ['.#.','.#.','###'], ['#..','###','#..'], ['..#','###','..#'],
+    // U
+    ['#.#','###'], ['###','#.#'], ['##','#.','##'], ['##','.#','##'],
+    // P
+    ['##','##','#.'], ['##','##','.#'], ['#.','##','##'], ['.#','##','##'],
+    ['###','##.'], ['###','.##'], ['##.','###'], ['.##','###'],
+    // W (stairs)
+    ['#..','##.','.##'], ['..#','.##','##.'], ['##.','.##','..#'], ['.##','##.','#..'],
+    // S / Z
+    ['##.','.#.','.##'], ['.##','.#.','##.'], ['#..','###','..#'], ['..#','###','#..'],
+    // long L
+    ['#...','####'], ['...#','####'], ['####','#...'], ['####','...#'],
+    ['#.','#.','#.','##'], ['.#','.#','.#','##'], ['##','#.','#.','#.'], ['##','.#','.#','.#'],
+    // Y
+    ['.#..','####'], ['..#.','####'], ['####','.#..'], ['####','..#.'],
+    // N
+    ['##..','.###'], ['..##','###.'], ['###.','..##'], ['.###','##..']
   ];
   var BLK_SHAPES = BLK_PATTERNS.map(function(rows){
     var cells = [];
@@ -2992,7 +3008,7 @@
     });
     return { cells:cells, h:rows.length, w:rows[0].length, size:cells.length };
   });
-  var BLK_SIZE_WEIGHTS = { 4:3, 5:2 };
+  var BLK_SIZE_WEIGHTS = { 4:2, 5:3 };
   var BLK_COLORS = ['#FF7FA6','#FFC93C','#5CD98E','#3DC8FF','#9B7FFF','#FF9B5C','#4FD1C5'];
   var BLK_BEST_KEY = 'yuho-block-best';
 
@@ -3095,8 +3111,11 @@
   function blkRenderTray(){
     blkTrayEl.innerHTML = '';
     var m = blkBoardMetrics();
-    var slotW = blkTrayEl.getBoundingClientRect().width / 3;
-    var cs = Math.min(m.size * 0.62, (slotW - 16) / 5.4);
+    // one cell size for all three pieces: as big as the widest / tallest piece allows
+    var trayRect = blkTrayEl.getBoundingClientRect(), slotW = (trayRect.width - 12) / 3;
+    var maxW = 1, maxH = 1;
+    blk.tray.forEach(function(p){ if(p){ maxW = Math.max(maxW, p.shape.w); maxH = Math.max(maxH, p.shape.h); } });
+    var cs = Math.min(m.size * 0.85, (slotW - 8) / (maxW * 1.08), (trayRect.height - 8) / (maxH * 1.08));
     blk.tray.forEach(function(piece, i){
       var slot = document.createElement('div');
       slot.className = 'blk-slot';
