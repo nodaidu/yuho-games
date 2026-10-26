@@ -95,7 +95,7 @@
   .game-card:nth-child(5){ transform:rotate(-2deg); }
   .game-card:nth-child(6){ transform:rotate(2deg); }
   @media (min-width:820px){
-    .game-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); width:min(900px,92vw); }
+    .game-grid{ grid-template-columns:repeat(4,minmax(0,1fr)); width:min(1040px,94vw); }
     .game-card{ min-height:clamp(150px,22vh,210px); }
   }
   .game-card .card-icon-badge{
@@ -117,6 +117,25 @@
   .game-card.card-divmul:active{ transform:translateY(6px) rotate(-2deg); box-shadow:2px 2px 0 var(--ink); }
   .game-card.card-block{ background:#9B7FFF; }
   .game-card.card-block:active{ transform:translateY(6px) rotate(2deg); box-shadow:2px 2px 0 var(--ink); }
+  .lobby-break-hint{
+    z-index:1; margin-top:clamp(14px,3vh,26px); background:#fff; border:3px solid var(--ink); border-radius:18px;
+    padding:8px 18px; box-shadow:4px 4px 0 var(--ink); font-weight:800; color:var(--ink); text-align:center;
+    font-size:clamp(13px,2.2vw,16px); font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  }
+  .break-choices{ display:flex; gap:clamp(10px,2.4vw,18px); flex-wrap:wrap; justify-content:center; margin:4px 0 18px; }
+  .break-btn{
+    width:clamp(96px,24vw,140px); border:4px solid var(--ink); border-radius:20px; padding:12px 6px 10px; color:var(--ink);
+    display:flex; flex-direction:column; align-items:center; gap:6px; box-shadow:5px 5px 0 var(--ink);
+    font-weight:800; font-size:clamp(13px,2.4vw,16px);
+  }
+  .break-btn:active{ transform:translateY(4px); box-shadow:1px 1px 0 var(--ink); }
+  .break-btn .break-icon{
+    width:clamp(46px,10vw,60px); height:clamp(46px,10vw,60px); border-radius:50%; background:#fff; border:3px solid var(--ink);
+    display:flex; align-items:center; justify-content:center; font-size:clamp(24px,5vw,32px);
+  }
+  .break-btn[data-break="poop"]{ background:#FFE14D; }
+  .break-btn[data-break="spot"]{ background:#FF7FA6; }
+  .break-btn[data-break="block"]{ background:#9B7FFF; }
   .lobby-credit{
     position:absolute; bottom:10px; left:0; width:100%; text-align:center; z-index:1;
     font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; font-size:10px; color:#fff; opacity:0.7;
@@ -400,7 +419,7 @@
   .poop-score{ font-weight:800; font-size:clamp(14px,2.4vw,18px); color:var(--ink); background:var(--white); border:3px solid var(--ink); padding:7px 17px; border-radius:18px; box-shadow:4px 4px 0 var(--ink); }
   .poop-stage{ position:relative; flex:1; width:100%; overflow:hidden; touch-action:none; cursor:pointer; }
   .poop-intro{
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    position:absolute; inset:0; display:flex; align-items:safe center; justify-content:center; overflow-y:auto; padding:12px 0;
     background:rgba(255,255,255,0.92); opacity:0; pointer-events:none; transition:opacity .35s ease; z-index:9;
   }
   .poop-intro.show{ opacity:1; pointer-events:auto; }
@@ -410,11 +429,6 @@
   .poop-intro-card p{ margin:6px 0 16px; font-size:clamp(14px,2.4vw,18px); color:var(--text-soft); font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; }
   #poop-intro-stats{ margin:6px 0 2px; font-weight:800; color:#3D82E0; font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; }
   .poop-intro-btns{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
-  #poop-start-btn{
-    border:4px solid var(--ink); border-radius:22px; padding:13px 30px; background:#FFE14D; color:var(--ink);
-    font-weight:800; font-size:clamp(14px,2.4vw,18px); box-shadow:5px 5px 0 var(--ink);
-  }
-  #poop-start-btn:active{ transform:translateY(4px); box-shadow:1px 1px 0 var(--ink); }
   #poop-next-level-btn{
     border:4px solid var(--ink); border-radius:22px; padding:13px 26px; background:#3DC8FF; color:var(--ink);
     font-weight:800; font-size:clamp(14px,2.4vw,18px); box-shadow:5px 5px 0 var(--ink);
@@ -545,13 +559,12 @@
   .blk-pc-cell.empty{ visibility:hidden; }
   #blk-gameover{ z-index:60; }
   #blk-gameover.show{ pointer-events:auto; }
-  #blk-retry-btn, #blk-home-btn{
+  #blk-home-btn{
     border:4px solid var(--ink); border-radius:22px; padding:12px 26px; color:var(--ink);
     font-weight:800; font-size:clamp(14px,2.4vw,18px); box-shadow:5px 5px 0 var(--ink);
   }
-  #blk-retry-btn{ background:#FFE14D; }
   #blk-home-btn{ background:#3DC8FF; }
-  #blk-retry-btn:active, #blk-home-btn:active{ transform:translateY(4px); box-shadow:1px 1px 0 var(--ink); }
+  #blk-home-btn:active{ transform:translateY(4px); box-shadow:1px 1px 0 var(--ink); }
 
   @media (max-width:480px){
     .doors-row{ gap:8px; }
@@ -590,22 +603,13 @@
         <h2>영어를 찾아라!</h2>
         <p>영단어와 뜻을 맞혀요</p>
       </button>
-      <button class="game-card card-spot" id="card-spot-game">
-        <div class="card-icon-badge" id="spot-card-badge"></div>
-        <h2>틀린그림 찾기!</h2>
-        <p>다른 그림 5개를 찾아봐요</p>
-      </button>
       <button class="game-card card-divmul" id="card-divmul-game">
         <div class="card-icon-badge" id="divmul-card-badge"></div>
         <h2>나누기 곱하기!</h2>
         <p>피자를 그림으로 나눠요</p>
       </button>
-      <button class="game-card card-block" id="card-block-game">
-        <div class="card-icon-badge" id="block-card-badge"></div>
-        <h2>블록 퍼즐!</h2>
-        <p>블록을 끌어 줄을 채워요</p>
-      </button>
     </div>
+    <div class="lobby-break-hint">학습 게임을 끝내면 쉬어가는 게임 💩 🔍 🧩 을 할 수 있어요!</div>
     <div class="lobby-credit">얼굴 일러스트: Ashley Seo (CC BY 4.0), via DiceBear</div>
   </section>
 
@@ -781,7 +785,7 @@
   <section class="screen" id="screen-spot">
     <button class="back-btn" id="spot-back">← 나가기</button>
     <div class="game-topbar">
-      <div class="stage-indicator">스테이지 <span id="spot-stage-num">1</span> / 10</div>
+      <div class="stage-indicator">그림 <span id="spot-stage-num">1</span> / 3</div>
       <div class="progress-dots" id="spot-progress-dots"></div>
     </div>
     <div class="spot-found-row" id="spot-found-indicator"></div>
@@ -823,8 +827,7 @@
         <h3>더 이상 놓을 곳이 없어요!</h3>
         <p id="blk-final-score">점수: 0</p>
         <div class="poop-intro-btns" style="margin-top:16px">
-          <button id="blk-retry-btn">다시하기 ▶</button>
-          <button id="blk-home-btn">나가기 →</button>
+          <button id="blk-home-btn">끝내기 →</button>
         </div>
       </div>
     </div>
@@ -840,7 +843,7 @@
         <div class="child-reunion" id="child-reunion"></div>
       </div>
       <h2>🚽 드디어 성공! 💩</h2>
-      <p>10개의 문을 지나 화장실을 찾았어요! 응가 성공, 최고예요!</p>
+      <p>공부도 하고 놀이도 했어요! 응가 성공, 오늘도 최고예요!</p>
       <button id="ending-home-btn">메인으로 돌아가기</button>
     </div>
     <div class="confetti-layer" id="confetti-layer"></div>
@@ -862,10 +865,14 @@
           <div class="poop-intro-emoji">🎉</div>
           <h3>10문제 클리어!</h3>
           <p id="poop-intro-stats">틀린 문제: 0개</p>
-          <p>쉬어가는 시간, 똥을 피해볼까요?</p>
+          <p>잘했어요! 쉬어가는 게임을 골라요</p>
+          <div class="break-choices">
+            <button class="break-btn" data-break="poop"><span class="break-icon">💩</span>똥 피하기</button>
+            <button class="break-btn" data-break="spot"><span class="break-icon" id="spot-card-badge"></span>틀린그림 찾기</button>
+            <button class="break-btn" data-break="block"><span class="break-icon" id="block-card-badge"></span>블록 퍼즐</button>
+          </div>
           <div class="poop-intro-btns">
-            <button id="poop-start-btn">시작하기 ▶</button>
-            <button id="poop-next-level-btn">다음 난이도 →</button>
+            <button id="poop-next-level-btn">다음 난이도로 계속 공부하기 →</button>
           </div>
         </div>
       </div>
@@ -1744,8 +1751,7 @@
   document.getElementById('diff-hanja-back').addEventListener('click', function(){ showScreen('lobby'); });
   document.getElementById('card-english-game').addEventListener('click', function(){ showScreen('difficulty-english'); });
   document.getElementById('diff-english-back').addEventListener('click', function(){ showScreen('lobby'); });
-  document.getElementById('card-spot-game').addEventListener('click', function(){ showScreen('difficulty-spot'); });
-  document.getElementById('diff-spot-back').addEventListener('click', function(){ showScreen('lobby'); });
+  document.getElementById('diff-spot-back').addEventListener('click', function(){ showPoopIntro(); });
   document.getElementById('spot-back').addEventListener('click', function(){
     clearPendingTimers();
     showScreen('lobby');
@@ -1756,17 +1762,13 @@
     clearPendingTimers();
     showScreen('lobby');
   });
-  document.getElementById('card-block-game').addEventListener('click', function(){
-    showScreen('block');
-    blkStart();
-  });
   document.getElementById('block-back').addEventListener('click', function(){
     blkStop();
     showScreen('lobby');
   });
   document.getElementById('blk-home-btn').addEventListener('click', function(){
     blkStop();
-    showScreen('lobby');
+    showEnding();
   });
   document.getElementById('game-back').addEventListener('click', function(){
     if('speechSynthesis' in window){ window.speechSynthesis.cancel(); }
@@ -1814,8 +1816,9 @@
     var dot = document.createElement('span');
     dotsWrap.appendChild(dot);
   }
+  var SPOT_BREAK_STAGES = 3; // spot-the-difference is a short break: 3 rooms
   var spotDotsWrap = document.getElementById('spot-progress-dots');
-  for(var d3=0; d3<10; d3++){
+  for(var d3=0; d3<SPOT_BREAK_STAGES; d3++){
     spotDotsWrap.appendChild(document.createElement('span'));
   }
   var dmDotsWrap = document.getElementById('divmul-progress-dots');
@@ -1848,7 +1851,7 @@
     pendingTimers = [];
   }
 
-  var LEVEL_PROGRESSION = { math:['easy','normal','hard'], hanja:['8','7-2','7'], english:['1','2','3','4'], spot:['easy','normal','hard'], divmul:['easy','normal','hard'] };
+  var LEVEL_PROGRESSION = { math:['easy','normal','hard'], hanja:['8','7-2','7'], english:['1','2','3','4'], divmul:['easy','normal','hard'] };
   function getCurrentLevel(){
     if(state.gameType === 'divmul') return state.divmulDifficulty;
     if(state.gameType === 'math') return state.difficulty;
@@ -2545,9 +2548,15 @@
     poopIntroEl.classList.add('show');
   }
 
-  document.getElementById('poop-start-btn').addEventListener('click', function(){
-    poopIntroEl.classList.remove('show');
-    startPoopGame();
+  // after a learning game: the child picks one rest game, which then ends at the celebration screen
+  document.querySelectorAll('.break-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      poopIntroEl.classList.remove('show');
+      var kind = btn.dataset.break;
+      if(kind === 'poop'){ startPoopGame(); }
+      else if(kind === 'spot'){ showScreen('difficulty-spot'); }
+      else { showScreen('block'); blkStart(); }
+    });
   });
   poopNextLevelBtn.addEventListener('click', function(){
     var next = getNextLevel();
@@ -2746,8 +2755,8 @@
 
   function advanceSpotStage(){
     state.stage++;
-    if(state.stage >= state.totalStages){
-      showPoopIntro();
+    if(state.stage >= SPOT_BREAK_STAGES){
+      showEnding();
       return;
     }
     spotFadeOverlay.classList.add('active');
@@ -3284,7 +3293,6 @@
   }
 
   blkBuildBoardDom();
-  document.getElementById('blk-retry-btn').addEventListener('click', blkStart);
   window.addEventListener('resize', function(){
     if(document.getElementById('screen-block').classList.contains('active') && !blk.drag){ blkRenderTray(); }
   });
