@@ -95,7 +95,7 @@
   .game-card:nth-child(5){ transform:rotate(-2deg); }
   .game-card:nth-child(6){ transform:rotate(2deg); }
   @media (min-width:820px){
-    .game-grid{ grid-template-columns:repeat(4,minmax(0,1fr)); width:min(1040px,94vw); }
+    .game-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); width:min(900px,92vw); }
     .game-card{ min-height:clamp(150px,22vh,210px); }
   }
   .game-card .card-icon-badge{
@@ -114,6 +114,10 @@
   .game-card.card-spot{ background:#FF7FA6; }
   .game-card.card-spot:active{ transform:translateY(6px) rotate(3deg); box-shadow:2px 2px 0 var(--ink); }
   .game-card.card-divmul{ background:#FFA94D; }
+  .game-card.card-clock{ background:#C79BFF; }
+  .game-card.card-clock:active{ transform:translateY(6px) rotate(-2deg); box-shadow:2px 2px 0 var(--ink); }
+  .game-card.card-money{ background:#FF9B7A; }
+  .game-card.card-money:active{ transform:translateY(6px) rotate(2deg); box-shadow:2px 2px 0 var(--ink); }
   .game-card.card-divmul:active{ transform:translateY(6px) rotate(-2deg); box-shadow:2px 2px 0 var(--ink); }
   .game-card.card-block{ background:#9B7FFF; }
   .game-card.card-block:active{ transform:translateY(6px) rotate(2deg); box-shadow:2px 2px 0 var(--ink); }
@@ -136,6 +140,8 @@
   .break-btn[data-break="poop"]{ background:#FFE14D; }
   .break-btn[data-break="spot"]{ background:#FF7FA6; }
   .break-btn[data-break="block"]{ background:#9B7FFF; }
+  .break-btn[data-break="pairs"]{ background:#5CD98E; }
+  .break-btn[data-break="maze"]{ background:#3DC8FF; }
   .lobby-credit{
     position:absolute; bottom:10px; left:0; width:100%; text-align:center; z-index:1;
     font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; font-size:10px; color:#fff; opacity:0.7;
@@ -150,8 +156,8 @@
   .back-btn:active{ transform:translateY(4px); box-shadow:1px 1px 0 var(--ink); }
 
   /* ---------- DIFFICULTY ---------- */
-  #screen-difficulty, #screen-difficulty-hanja, #screen-difficulty-english, #screen-difficulty-spot, #screen-difficulty-divmul{ justify-content:center; align-items:center; gap:6vh; }
-  #screen-difficulty h2, #screen-difficulty-hanja h2, #screen-difficulty-english h2, #screen-difficulty-spot h2, #screen-difficulty-divmul h2 h2{
+  #screen-difficulty, #screen-difficulty-hanja, #screen-difficulty-english, #screen-difficulty-spot, #screen-difficulty-divmul, #screen-difficulty-clock, #screen-difficulty-money{ justify-content:center; align-items:center; gap:6vh; }
+  #screen-difficulty h2, #screen-difficulty-hanja h2, #screen-difficulty-english h2, #screen-difficulty-spot h2, #screen-difficulty-divmul h2, #screen-difficulty-clock h2, #screen-difficulty-money h2{
     z-index:1; font-size:clamp(24px,4.4vw,34px); margin:0; color:#fff; letter-spacing:1px;
     -webkit-text-stroke:1.5px var(--ink); text-shadow:2px 3px 0 var(--ink);
   }
@@ -527,6 +533,48 @@
   }
   .dm-hint:active{ transform:translateY(3px); box-shadow:1px 1px 0 var(--ink); }
 
+  /* ---------- CLOCK & MONEY QUIZ ---------- */
+  #screen-quiz{ justify-content:flex-start; overflow-y:auto; padding-bottom:14px; background:linear-gradient(160deg,var(--sky) 0%,var(--mint) 45%,var(--lavender) 100%); }
+  .quiz-clock-choice{ padding:4px; min-width:auto; background:#fff; }
+  .quiz-clock-choice svg{ width:clamp(86px,25vw,130px); height:clamp(86px,25vw,130px); display:block; }
+
+  /* ---------- PAIR MATCHING ---------- */
+  #screen-pairs, #screen-maze{
+    justify-content:flex-start; gap:clamp(8px,1.6vh,14px); padding-top:clamp(56px,9vh,72px);
+    background:linear-gradient(160deg,var(--sky) 0%,var(--mint) 45%,var(--lavender) 100%);
+  }
+  .pairs-msg, .maze-msg{
+    z-index:2; background:#fff; border:3px solid var(--ink); border-radius:16px; padding:7px 16px; box-shadow:4px 4px 0 var(--ink);
+    font-weight:800; color:var(--ink); font-size:clamp(14px,2.6vw,18px); font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; text-align:center;
+  }
+  .pairs-grid{
+    z-index:2; display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(8px,2vw,14px);
+    width:min(92vw, calc((100vh - 190px) / 1.8), 460px);
+  }
+  @media (min-aspect-ratio:1/1){
+    .pairs-grid{ grid-template-columns:repeat(4,1fr); width:min(92vw, calc(100vh - 190px), 620px); }
+  }
+  .pair-card{ aspect-ratio:3/4; border:none; background:none; padding:0; perspective:600px; }
+  .pair-inner{ position:relative; display:block; width:100%; height:100%; transition:transform .35s ease; transform-style:preserve-3d; }
+  .pair-card.flipped .pair-inner{ transform:rotateY(180deg); }
+  .pair-back, .pair-front{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center; border:4px solid var(--ink); border-radius:16px;
+    backface-visibility:hidden; -webkit-backface-visibility:hidden; box-shadow:4px 4px 0 var(--ink);
+  }
+  .pair-back{
+    background:repeating-linear-gradient(45deg,#FF9EB8 0 10px,#FFB4C6 10px 20px); color:#fff;
+    font-size:clamp(26px,7vw,40px); font-family:'Do Hyeon',sans-serif; -webkit-text-stroke:1.5px var(--ink);
+  }
+  .pair-front{ background:#fff; transform:rotateY(180deg); font-size:clamp(32px,9vw,54px); }
+  .pair-card.matched .pair-front{ background:#E3FFE9; border-color:#2E9E5B; }
+
+  /* ---------- MAZE ---------- */
+  .maze-box{
+    z-index:2; width:min(92vw, calc((100vh - 170px) * 0.78), 470px); aspect-ratio:296/376;
+    border:5px solid var(--ink); border-radius:18px; box-shadow:6px 6px 0 var(--ink); overflow:hidden; background:#FFF8E7;
+  }
+  .maze-box svg{ display:block; width:100%; height:100%; touch-action:none; }
+
   /* ---------- BLOCK PUZZLE ---------- */
   #screen-block{
     justify-content:flex-start; gap:clamp(10px,2vh,18px); padding-top:clamp(56px,9vh,72px); touch-action:none;
@@ -608,8 +656,18 @@
         <h2>나누기 곱하기!</h2>
         <p>피자를 그림으로 나눠요</p>
       </button>
+      <button class="game-card card-clock" id="card-clock-game">
+        <div class="card-icon-badge" id="clock-card-badge"></div>
+        <h2>시계를 읽어라!</h2>
+        <p>몇 시 몇 분인지 맞혀요</p>
+      </button>
+      <button class="game-card card-money" id="card-money-game">
+        <div class="card-icon-badge" id="money-card-badge"></div>
+        <h2>돈을 세어라!</h2>
+        <p>동전 세기와 거스름돈</p>
+      </button>
     </div>
-    <div class="lobby-break-hint">학습 게임을 끝내면 쉬어가는 게임 💩 🔍 🧩 을 할 수 있어요!</div>
+    <div class="lobby-break-hint">학습 게임을 끝내면 쉬어가는 게임 💩 🔍 🧩 🃏 🌀 을 할 수 있어요!</div>
     <div class="lobby-credit">얼굴 일러스트: Ashley Seo (CC BY 4.0), via DiceBear</div>
   </section>
 
@@ -722,6 +780,48 @@
     </div>
   </section>
 
+  <!-- CLOCK DIFFICULTY -->
+  <section class="screen" id="screen-difficulty-clock">
+    <div class="bg-deco"><span></span><span></span><span></span><span></span></div>
+    <button class="back-btn" id="diff-clock-back">← 돌아가기</button>
+    <h2>난이도를 골라주세요</h2>
+    <div class="diff-grid">
+      <button class="diff-card tier1" data-diff="easy">
+        <span class="diff-badge">🕐</span><b>초급</b>
+        <small>정각 읽기<br>3시, 7시 ...</small>
+      </button>
+      <button class="diff-card tier2" data-diff="normal">
+        <span class="diff-badge">🕧</span><b>중급</b>
+        <small>30분 읽기<br>3시 30분 ...</small>
+      </button>
+      <button class="diff-card tier3" data-diff="hard">
+        <span class="diff-badge">⏰</span><b>고급</b>
+        <small>5분 단위로 읽기<br>3시 25분 ...</small>
+      </button>
+    </div>
+  </section>
+
+  <!-- MONEY DIFFICULTY -->
+  <section class="screen" id="screen-difficulty-money">
+    <div class="bg-deco"><span></span><span></span><span></span><span></span></div>
+    <button class="back-btn" id="diff-money-back">← 돌아가기</button>
+    <h2>난이도를 골라주세요</h2>
+    <div class="diff-grid">
+      <button class="diff-card tier1" data-diff="easy">
+        <span class="diff-badge">🪙</span><b>초급</b>
+        <small>10원·100원 세기<br>500원까지</small>
+      </button>
+      <button class="diff-card tier2" data-diff="normal">
+        <span class="diff-badge">💰</span><b>중급</b>
+        <small>모든 동전 세기<br>1000원까지</small>
+      </button>
+      <button class="diff-card tier3" data-diff="hard">
+        <span class="diff-badge">🛒</span><b>고급</b>
+        <small>거스름돈 계산<br>1000원 내고 사기</small>
+      </button>
+    </div>
+  </section>
+
   <!-- GAME -->
   <section class="screen" id="screen-game">
     <button class="back-btn" id="game-back">← 나가기</button>
@@ -812,6 +912,35 @@
     <div class="fade-overlay" id="divmul-fade-overlay"></div>
   </section>
 
+  <!-- CLOCK & MONEY QUIZ -->
+  <section class="screen" id="screen-quiz">
+    <button class="back-btn" id="quiz-back">← 나가기</button>
+    <div class="game-topbar">
+      <div class="stage-indicator">스테이지 <span id="quiz-stage-num">1</span> / 10</div>
+      <div class="progress-dots" id="quiz-progress-dots"></div>
+    </div>
+    <div class="dm-question" id="quiz-question"></div>
+    <div class="dm-scene"><svg id="quiz-svg" viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg"></svg></div>
+    <div class="dm-feedback" id="quiz-feedback"></div>
+    <div class="dm-choices" id="quiz-choices"></div>
+    <div class="fade-overlay" id="quiz-fade-overlay"></div>
+  </section>
+
+  <!-- PAIR MATCHING -->
+  <section class="screen" id="screen-pairs">
+    <button class="back-btn" id="pairs-back">← 나가기</button>
+    <div class="stage-indicator" style="z-index:2">뒤집은 횟수 <span id="pairs-moves">0</span></div>
+    <div class="pairs-msg" id="pairs-msg"></div>
+    <div class="pairs-grid" id="pairs-grid"></div>
+  </section>
+
+  <!-- MAZE -->
+  <section class="screen" id="screen-maze">
+    <button class="back-btn" id="maze-back">← 나가기</button>
+    <div class="maze-msg" id="maze-msg"></div>
+    <div class="maze-box"><svg id="maze-svg" xmlns="http://www.w3.org/2000/svg"></svg></div>
+  </section>
+
   <!-- BLOCK PUZZLE -->
   <section class="screen" id="screen-block">
     <button class="back-btn" id="block-back">← 나가기</button>
@@ -870,6 +999,8 @@
             <button class="break-btn" data-break="poop"><span class="break-icon">💩</span>똥 피하기</button>
             <button class="break-btn" data-break="spot"><span class="break-icon" id="spot-card-badge"></span>틀린그림 찾기</button>
             <button class="break-btn" data-break="block"><span class="break-icon" id="block-card-badge"></span>블록 퍼즐</button>
+            <button class="break-btn" data-break="pairs"><span class="break-icon">🃏</span>짝 맞추기</button>
+            <button class="break-btn" data-break="maze"><span class="break-icon">🌀</span>미로 찾기</button>
           </div>
           <div class="poop-intro-btns">
             <button id="poop-next-level-btn">다음 난이도로 계속 공부하기 →</button>
@@ -1757,6 +1888,16 @@
     showScreen('lobby');
   });
   document.getElementById('card-divmul-game').addEventListener('click', function(){ showScreen('difficulty-divmul'); });
+  document.getElementById('card-clock-game').addEventListener('click', function(){ showScreen('difficulty-clock'); });
+  document.getElementById('diff-clock-back').addEventListener('click', function(){ showScreen('lobby'); });
+  document.getElementById('card-money-game').addEventListener('click', function(){ showScreen('difficulty-money'); });
+  document.getElementById('diff-money-back').addEventListener('click', function(){ showScreen('lobby'); });
+  ['quiz-back','pairs-back','maze-back'].forEach(function(id){
+    document.getElementById(id).addEventListener('click', function(){
+      clearPendingTimers();
+      showScreen('lobby');
+    });
+  });
   document.getElementById('diff-divmul-back').addEventListener('click', function(){ showScreen('lobby'); });
   document.getElementById('divmul-back').addEventListener('click', function(){
     clearPendingTimers();
@@ -1809,6 +1950,16 @@
       startGame('divmul', card.dataset.diff);
     });
   });
+  document.querySelectorAll('#screen-difficulty-clock .diff-card').forEach(function(card){
+    card.addEventListener('click', function(){
+      startGame('clock', card.dataset.diff);
+    });
+  });
+  document.querySelectorAll('#screen-difficulty-money .diff-card').forEach(function(card){
+    card.addEventListener('click', function(){
+      startGame('money', card.dataset.diff);
+    });
+  });
 
   /* ============ progress dots ============ */
   var dotsWrap = document.getElementById('progress-dots');
@@ -1834,7 +1985,7 @@
   }
 
   /* ============ game state & logic ============ */
-  var state = { gameType:'math', difficulty:'easy', hanjaLevel:'8', englishLevel:'1', spotDifficulty:'easy', divmulDifficulty:'easy', opSequence:null, stage:0, totalStages:10, used:null, current:null, locked:false, wrongCount:0 };
+  var state = { gameType:'math', difficulty:'easy', hanjaLevel:'8', englishLevel:'1', spotDifficulty:'easy', divmulDifficulty:'easy', quizDifficulty:'easy', opSequence:null, stage:0, totalStages:10, used:null, current:null, locked:false, wrongCount:0 };
 
   var pendingTimers = [];
   function setTrackedTimeout(fn, ms){
@@ -1851,9 +2002,10 @@
     pendingTimers = [];
   }
 
-  var LEVEL_PROGRESSION = { math:['easy','normal','hard'], hanja:['8','7-2','7'], english:['1','2','3','4'], divmul:['easy','normal','hard'] };
+  var LEVEL_PROGRESSION = { math:['easy','normal','hard'], hanja:['8','7-2','7'], english:['1','2','3','4'], divmul:['easy','normal','hard'], clock:['easy','normal','hard'], money:['easy','normal','hard'] };
   function getCurrentLevel(){
     if(state.gameType === 'divmul') return state.divmulDifficulty;
+    if(state.gameType === 'clock' || state.gameType === 'money') return state.quizDifficulty;
     if(state.gameType === 'math') return state.difficulty;
     if(state.gameType === 'hanja') return state.hanjaLevel;
     if(state.gameType === 'english') return state.englishLevel;
@@ -2299,6 +2451,8 @@
       state.spotDifficulty = level;
     } else if(gameType === 'divmul'){
       state.divmulDifficulty = level;
+    } else if(gameType === 'clock' || gameType === 'money'){
+      state.quizDifficulty = level;
     } else {
       state.hanjaLevel = level;
     }
@@ -2310,6 +2464,11 @@
     if(gameType === 'divmul'){
       showScreen('divmul');
       renderDivmulStage();
+      return;
+    }
+    if(gameType === 'clock' || gameType === 'money'){
+      showScreen('quiz');
+      renderQuizStage();
       return;
     }
     showScreen('game');
@@ -2555,6 +2714,8 @@
       var kind = btn.dataset.break;
       if(kind === 'poop'){ startPoopGame(); }
       else if(kind === 'spot'){ showScreen('difficulty-spot'); }
+      else if(kind === 'pairs'){ showScreen('pairs'); pairsStart(); }
+      else if(kind === 'maze'){ showScreen('maze'); mazeStart(); }
       else { showScreen('block'); blkStart(); }
     });
   });
@@ -2979,6 +3140,467 @@
     } else {
       dmPlaySolve();
     }
+  });
+
+  /* ============ clock reading & money counting (shared quiz screen) ============ */
+  var quizSvgEl = document.getElementById('quiz-svg');
+  var quizQuestionEl = document.getElementById('quiz-question');
+  var quizFeedbackEl = document.getElementById('quiz-feedback');
+  var quizChoicesEl = document.getElementById('quiz-choices');
+  var quizStageNumEl = document.getElementById('quiz-stage-num');
+  var quizDotsWrap = document.getElementById('quiz-progress-dots');
+  var quizFadeOverlay = document.getElementById('quiz-fade-overlay');
+  for(var dq=0; dq<10; dq++){ quizDotsWrap.appendChild(document.createElement('span')); }
+  var quizState = { problem:null, locked:false };
+  var QUIZ_INK = '#1A1A2E';
+
+  // true when the last syllable has a final consonant (picks 을/를, 이/가)
+  function hasBatchim(word){
+    var code = word.charCodeAt(word.length - 1) - 0xAC00;
+    return code >= 0 && code <= 11171 && code % 28 !== 0;
+  }
+
+  /* ---- clock ---- */
+  function clockText(h, m){ return m === 0 ? h + '시' : h + '시 ' + m + '분'; }
+
+  // clock face centred on 0,0 with radius 100
+  function clockFaceMarkup(h, m){
+    var out = '<circle r="96" fill="#fff" stroke="' + QUIZ_INK + '" stroke-width="7"/>'
+      + '<circle r="86" fill="none" stroke="#FFE14D" stroke-width="5"/>';
+    for(var t=0; t<60; t++){
+      var big = t % 5 === 0, a = t * 6 * Math.PI / 180, r1 = big ? 70 : 75, r2 = 80;
+      out += '<line x1="' + (r1*Math.sin(a)).toFixed(1) + '" y1="' + (-r1*Math.cos(a)).toFixed(1) + '" x2="' + (r2*Math.sin(a)).toFixed(1) + '" y2="' + (-r2*Math.cos(a)).toFixed(1) + '" stroke="' + QUIZ_INK + '" stroke-width="' + (big ? 3 : 1.4) + '" stroke-linecap="round"/>';
+    }
+    for(var n=1; n<=12; n++){
+      var na = n * 30 * Math.PI / 180;
+      out += '<text x="' + (55*Math.sin(na)).toFixed(1) + '" y="' + (-55*Math.cos(na) + 8).toFixed(1) + '" text-anchor="middle" font-size="23" font-family="Do Hyeon, sans-serif" fill="' + QUIZ_INK + '">' + n + '</text>';
+    }
+    var ha = ((h % 12) + m / 60) * 30, ma = m * 6;
+    out += '<line x1="0" y1="10" x2="0" y2="-74" stroke="#3D82E0" stroke-width="6" stroke-linecap="round" transform="rotate(' + ma + ')"/>'
+      + '<line x1="0" y1="8" x2="0" y2="-44" stroke="' + QUIZ_INK + '" stroke-width="10" stroke-linecap="round" transform="rotate(' + ha + ')"/>'
+      + '<circle r="7" fill="#FF7FA6" stroke="' + QUIZ_INK + '" stroke-width="2.5"/>';
+    return out;
+  }
+  function clockSVG(h, m){
+    return '<svg viewBox="-104 -104 208 208" xmlns="http://www.w3.org/2000/svg">' + clockFaceMarkup(h, m) + '</svg>';
+  }
+  function clockBadgeIconSVG(){
+    return '<svg viewBox="-104 -104 208 208" width="74%" height="74%" xmlns="http://www.w3.org/2000/svg">'
+      + '<circle r="96" fill="#fff" stroke="' + QUIZ_INK + '" stroke-width="14"/>'
+      + '<line x1="0" y1="0" x2="0" y2="-62" stroke="#3D82E0" stroke-width="14" stroke-linecap="round"/>'
+      + '<line x1="0" y1="0" x2="40" y2="0" stroke="' + QUIZ_INK + '" stroke-width="18" stroke-linecap="round"/>'
+      + '<circle r="12" fill="#FF7FA6"/></svg>';
+  }
+
+  function clockMinuteFor(diff){
+    if(diff === 'easy') return 0;
+    if(diff === 'normal') return Math.random() < 0.6 ? 30 : 0;
+    var m;
+    do { m = pick(1, 11) * 5; } while(m === 30 && Math.random() < 0.7);
+    return m;
+  }
+
+  function clockBuildProblem(diff){
+    var h, m, guard = 0;
+    do { h = pick(1, 12); m = clockMinuteFor(diff); guard++; } while(state.used.has('c' + h + ':' + m) && guard < 100);
+    state.used.add('c' + h + ':' + m);
+    var cands = [];
+    function add(hh, mm){
+      hh = ((hh - 1) % 12 + 12) % 12 + 1; mm = ((mm % 60) + 60) % 60;
+      if(hh === h && mm === m) return;
+      if(cands.some(function(c){ return c.h === hh && c.m === mm; })) return;
+      cands.push({ h:hh, m:mm });
+    }
+    if(diff === 'easy'){
+      add(h + 1, 0); add(h - 1, 0); add(h + 2, 0); add(h - 3, 0);
+    } else if(m === 30){
+      add(h + 1, 30); add(h, 0); add(h - 1, 30); add(h + 1, 0);
+    } else if(m === 0){
+      add(h, 30); add(h + 1, 0); add(h - 1, 0); add(h - 1, 30);
+    } else {
+      add(h + 1, m); add(h, m + 5); add(h, m - 5); add(h, m + 10);
+      if(m / 5 >= 1 && m / 5 <= 12){ add(m / 5, h * 5); }
+    }
+    var wrong = spotShuffle(cands).slice(0, 2);
+    var choices = spotShuffle(wrong.concat([{ h:h, m:m }]));
+    var type = diff !== 'easy' && Math.random() < 0.35 ? 'pick' : 'read';
+    return { kind:'clock', h:h, m:m, type:type, choices:choices, answerIdx:choices.findIndex(function(c){ return c.h === h && c.m === m; }) };
+  }
+
+  function clockRender(p){
+    if(p.type === 'read'){
+      quizQuestionEl.textContent = '시계가 몇 시를 가리키고 있나요?';
+      quizSvgEl.innerHTML = '<g transform="translate(200,130) scale(1.16)">' + clockFaceMarkup(p.h, p.m) + '</g>';
+      quizChoicesEl.innerHTML = p.choices.map(function(c, i){
+        return '<button class="dm-choice" data-idx="' + i + '">' + clockText(c.h, c.m) + '</button>';
+      }).join('');
+    } else {
+      var t = clockText(p.h, p.m);
+      quizQuestionEl.textContent = t + (p.m === 0 ? '를' : '을') + ' 가리키는 시계를 골라요';
+      quizSvgEl.innerHTML = '<rect x="80" y="70" width="240" height="96" rx="24" fill="#fff" stroke="' + QUIZ_INK + '" stroke-width="5"/>'
+        + '<text x="200" y="134" text-anchor="middle" font-size="46" font-family="Do Hyeon, sans-serif" fill="' + QUIZ_INK + '">' + t + '</text>'
+        + '<text x="200" y="210" text-anchor="middle" font-size="17" font-weight="700" fill="#5B4B7A" font-family="Apple SD Gothic Neo, Malgun Gothic, sans-serif">짧은 바늘은 시, 긴 바늘은 분이에요</text>';
+      quizChoicesEl.innerHTML = p.choices.map(function(c, i){
+        return '<button class="dm-choice quiz-clock-choice" data-idx="' + i + '">' + clockSVG(c.h, c.m) + '</button>';
+      }).join('');
+    }
+  }
+
+  function clockExplain(p){
+    var hourPart = p.m === 0 ? '짧은 바늘: ' + p.h : '짧은 바늘: ' + p.h + '~' + (p.h % 12 + 1) + ' 사이';
+    var minPart = p.m === 0 ? '긴 바늘: 12 (정각)' : '긴 바늘: ' + (p.m / 5) + ' (' + p.m + '분)';
+    return '<span class="dm-eq">' + clockText(p.h, p.m) + '</span><span class="dm-ex">' + hourPart + ' · ' + minPart + '</span>';
+  }
+
+  /* ---- money ---- */
+  var MONEY_COINS = {
+    10:{ r:15, fill:'#E3A36C', edge:'#A8683A' },
+    50:{ r:17, fill:'#DDE2E8', edge:'#8E97A4' },
+    100:{ r:19, fill:'#E9EDF2', edge:'#8E97A4' },
+    500:{ r:23, fill:'#F1EFDF', edge:'#A39F80' }
+  };
+  var MONEY_ITEMS = [
+    { emoji:'🍭', name:'사탕' }, { emoji:'🍪', name:'과자' }, { emoji:'🧃', name:'주스' },
+    { emoji:'✏️', name:'연필' }, { emoji:'🍦', name:'아이스크림' }, { emoji:'🎈', name:'풍선' },
+    { emoji:'🍙', name:'주먹밥' }, { emoji:'📒', name:'공책' }
+  ];
+
+  function coinMarkup(v, x, y){
+    var c = MONEY_COINS[v];
+    return '<g transform="translate(' + x + ',' + y + ') scale(1.35)">'
+      + '<circle r="' + c.r + '" fill="' + c.fill + '" stroke="' + QUIZ_INK + '" stroke-width="2.5"/>'
+      + '<circle r="' + (c.r - 4) + '" fill="none" stroke="' + c.edge + '" stroke-width="1.5" stroke-dasharray="2 2"/>'
+      + '<text y="' + (c.r * 0.32).toFixed(1) + '" text-anchor="middle" font-size="' + (c.r * 0.82).toFixed(1) + '" font-family="Do Hyeon, sans-serif" fill="' + QUIZ_INK + '">' + v + '</text>'
+      + '</g>';
+  }
+  function billMarkup(x, y){
+    return '<g transform="translate(' + x + ',' + y + ') scale(1.3)">'
+      + '<rect x="-48" y="-26" width="96" height="52" rx="6" fill="#9CCFF0" stroke="' + QUIZ_INK + '" stroke-width="2.5"/>'
+      + '<rect x="-42" y="-20" width="84" height="40" rx="4" fill="none" stroke="#fff" stroke-width="1.5"/>'
+      + '<circle cx="22" cy="0" r="12" fill="#CFE8F8" stroke="#5E9CC4" stroke-width="1.5"/>'
+      + '<text x="-12" y="7" text-anchor="middle" font-size="18" font-family="Do Hyeon, sans-serif" fill="' + QUIZ_INK + '">1000원</text>'
+      + '</g>';
+  }
+  function moneyBadgeIconSVG(){
+    return '<svg viewBox="0 0 48 48" width="78%" height="78%" xmlns="http://www.w3.org/2000/svg">'
+      + '<circle cx="19" cy="27" r="14" fill="#E9EDF2" stroke="' + QUIZ_INK + '" stroke-width="3"/>'
+      + '<text x="19" y="32" text-anchor="middle" font-size="13" font-family="Do Hyeon, sans-serif" fill="' + QUIZ_INK + '">100</text>'
+      + '<circle cx="33" cy="17" r="11" fill="#E3A36C" stroke="' + QUIZ_INK + '" stroke-width="3"/>'
+      + '<text x="33" y="21" text-anchor="middle" font-size="11" font-family="Do Hyeon, sans-serif" fill="' + QUIZ_INK + '">10</text></svg>';
+  }
+
+  function moneyCoinsTotal(coins){ return coins.reduce(function(s, v){ return s + v; }, 0); }
+
+  function moneyBuildProblem(diff){
+    var guard = 0, coins, total, key;
+    if(diff === 'hard'){
+      var item, price;
+      do { item = MONEY_ITEMS[pick(0, MONEY_ITEMS.length - 1)]; price = pick(2, 19) * 50; key = 'm' + item.name + price; guard++; } while(state.used.has(key) && guard < 100);
+      state.used.add(key);
+      var change = 1000 - price;
+      var cands = [change + 100, change - 100, change + 50, change - 50, price].filter(function(v){ return v > 0 && v !== change; });
+      var choices = spotShuffle(spotShuffle(cands).slice(0, 2).concat([change]));
+      return { kind:'money', type:'change', item:item, price:price, answer:change, choices:choices, answerIdx:choices.indexOf(change) };
+    }
+    do {
+      coins = [];
+      if(diff === 'easy'){
+        var n100 = pick(1, 4), n10 = pick(1, 5);
+        for(var i=0;i<n100;i++) coins.push(100);
+        for(var j=0;j<n10;j++) coins.push(10);
+      } else {
+        var counts = { 500:pick(0,1), 100:pick(0,3), 50:pick(0,2), 10:pick(0,4) };
+        Object.keys(counts).forEach(function(v){ for(var k=0;k<counts[v];k++) coins.push(Number(v)); });
+      }
+      total = moneyCoinsTotal(coins);
+      var kinds = coins.filter(function(v, idx, a){ return a.indexOf(v) === idx; }).length;
+      key = 'm' + coins.join(',');
+      guard++;
+    } while((coins.length < 2 || coins.length > 9 || total > 1000 || (diff !== 'easy' && kinds < 2) || state.used.has(key)) && guard < 200);
+    state.used.add(key);
+    var c10 = coins.filter(function(v){ return v === 10; }).length, c100 = coins.filter(function(v){ return v === 100; }).length;
+    var candsM = [total + 100, total - 100, total + 10, total - 10, total + 50, total - 50];
+    if(diff === 'easy'){ candsM.push(c10 * 100 + c100 * 10); }
+    else if(coins.indexOf(500) !== -1){ candsM.push(total - 400); }
+    candsM = candsM.filter(function(v, idx, a){ return v > 0 && v !== total && a.indexOf(v) === idx; });
+    var choicesM = spotShuffle(spotShuffle(candsM).slice(0, 2).concat([total]));
+    return { kind:'money', type:'count', coins:coins.sort(function(a, b){ return b - a; }), answer:total, choices:choicesM, answerIdx:choicesM.indexOf(total) };
+  }
+
+  function moneyRender(p){
+    var svg = '';
+    if(p.type === 'change'){
+      var nm = p.item.name;
+      quizQuestionEl.textContent = p.price + '원짜리 ' + nm + (hasBatchim(nm) ? '을' : '를') + ' 사고 1000원을 냈어요. 거스름돈은 얼마일까요?';
+      svg += '<rect x="34" y="40" width="140" height="180" rx="20" fill="#fff" stroke="' + QUIZ_INK + '" stroke-width="4"/>'
+        + '<text x="104" y="135" text-anchor="middle" font-size="76">' + p.item.emoji + '</text>'
+        + '<rect x="54" y="160" width="100" height="40" rx="12" fill="#FFE14D" stroke="' + QUIZ_INK + '" stroke-width="3"/>'
+        + '<text x="104" y="188" text-anchor="middle" font-size="22" font-family="Do Hyeon, sans-serif" fill="' + QUIZ_INK + '">' + p.price + '원</text>'
+        + '<text x="212" y="140" text-anchor="middle" font-size="34" font-family="Do Hyeon, sans-serif" fill="#5B4B7A">←</text>'
+        + billMarkup(300, 130)
+        + '<text x="300" y="196" text-anchor="middle" font-size="16" font-weight="700" fill="#5B4B7A" font-family="Apple SD Gothic Neo, Malgun Gothic, sans-serif">낸 돈</text>';
+    } else {
+      quizQuestionEl.textContent = '동전이 모두 얼마일까요?';
+      var perRow = p.coins.length > 5 ? Math.ceil(p.coins.length / 2) : p.coins.length;
+      var rows = Math.ceil(p.coins.length / perRow), gap = 76;
+      p.coins.forEach(function(v, i){
+        var row = Math.floor(i / perRow), col = i % perRow;
+        var inRow = Math.min(perRow, p.coins.length - row * perRow);
+        var x = 200 + (col - (inRow - 1) / 2) * gap;
+        var y = 130 + (row - (rows - 1) / 2) * 92;
+        svg += coinMarkup(v, x, y);
+      });
+    }
+    quizSvgEl.innerHTML = svg;
+    quizChoicesEl.innerHTML = p.choices.map(function(v, i){
+      return '<button class="dm-choice" data-idx="' + i + '">' + v + '원</button>';
+    }).join('');
+  }
+
+  function moneyExplain(p){
+    if(p.type === 'change'){
+      return '<span class="dm-eq">1000 - ' + p.price + ' = ' + p.answer + '</span><span class="dm-ex">거스름돈은 ' + p.answer + '원이에요</span>';
+    }
+    var parts = [500, 100, 50, 10].map(function(v){
+      var n = p.coins.filter(function(c){ return c === v; }).length;
+      return n ? v + '원 ' + n + '개' : '';
+    }).filter(Boolean);
+    return '<span class="dm-eq">' + p.answer + '원</span><span class="dm-ex">' + parts.join(' + ') + '</span>';
+  }
+
+  /* ---- shared flow ---- */
+  function renderQuizStage(){
+    var p = state.gameType === 'clock' ? clockBuildProblem(state.quizDifficulty) : moneyBuildProblem(state.quizDifficulty);
+    quizState.problem = p;
+    quizState.locked = false;
+    if(p.kind === 'clock'){ clockRender(p); } else { moneyRender(p); }
+    quizFeedbackEl.textContent = '';
+    quizStageNumEl.textContent = state.stage + 1;
+    updateDots(quizDotsWrap);
+  }
+
+  function advanceQuizStage(){
+    state.stage++;
+    if(state.stage >= state.totalStages){
+      showPoopIntro();
+      return;
+    }
+    quizFadeOverlay.classList.add('active');
+    setTrackedTimeout(function(){
+      renderQuizStage();
+      requestAnimationFrame(function(){ quizFadeOverlay.classList.remove('active'); });
+    }, 450);
+  }
+
+  quizChoicesEl.addEventListener('click', function(e){
+    var btn = e.target.closest('.dm-choice');
+    if(!btn || btn.disabled || quizState.locked) return;
+    var p = quizState.problem;
+    if(Number(btn.dataset.idx) === p.answerIdx){
+      quizState.locked = true;
+      playDingDong();
+      btn.classList.add('correct');
+      quizFeedbackEl.innerHTML = p.kind === 'clock' ? clockExplain(p) : moneyExplain(p);
+      setTrackedTimeout(advanceQuizStage, 1800);
+    } else {
+      state.wrongCount++;
+      playBuzz();
+      btn.classList.add('wrong');
+      btn.disabled = true;
+      quizFeedbackEl.textContent = p.kind === 'clock' ? '짧은 바늘은 시, 긴 바늘은 분이에요. 다시 골라볼까요?' : '동전에 적힌 숫자를 하나씩 더해봐요. 다시 골라볼까요?';
+    }
+  });
+
+  document.getElementById('clock-card-badge').innerHTML = clockBadgeIconSVG();
+  document.getElementById('money-card-badge').innerHTML = moneyBadgeIconSVG();
+
+  /* ============ pair matching (rest game): 6 pairs of picture cards ============ */
+  var PAIR_EMOJIS = ['🐶','🐱','🐰','🦊','🐻','🐼','🐸','🦁','🐷','🐵','🐥','🐙'];
+  var pairsGridEl = document.getElementById('pairs-grid');
+  var pairsMovesEl = document.getElementById('pairs-moves');
+  var pairsMsgEl = document.getElementById('pairs-msg');
+  var pairs = { open:[], matched:0, moves:0, locked:false };
+
+  function pairsStart(){
+    clearPendingTimers();
+    var faces = spotShuffle(PAIR_EMOJIS.slice()).slice(0, 6);
+    var deck = spotShuffle(faces.concat(faces));
+    pairs = { open:[], matched:0, moves:0, locked:false };
+    pairsMovesEl.textContent = '0';
+    pairsMsgEl.textContent = '같은 그림 두 장을 찾아요!';
+    pairsGridEl.innerHTML = deck.map(function(face, i){
+      return '<button class="pair-card" data-face="' + face + '" data-idx="' + i + '">'
+        + '<span class="pair-inner"><span class="pair-back">?</span><span class="pair-front">' + face + '</span></span></button>';
+    }).join('');
+  }
+
+  pairsGridEl.addEventListener('click', function(e){
+    var card = e.target.closest('.pair-card');
+    if(!card || pairs.locked || card.classList.contains('flipped')) return;
+    card.classList.add('flipped');
+    pairs.open.push(card);
+    if(pairs.open.length < 2) return;
+    pairs.moves++;
+    pairsMovesEl.textContent = pairs.moves;
+    var a = pairs.open[0], b = pairs.open[1];
+    pairs.open = [];
+    if(a.dataset.face === b.dataset.face){
+      a.classList.add('matched'); b.classList.add('matched');
+      pairs.matched++;
+      if(pairs.matched === 6){
+        playDingDong();
+        pairsMsgEl.textContent = '다 찾았어요! 🎉';
+        setTrackedTimeout(showEnding, 1300);
+      } else {
+        playBlockPop();
+        pairsMsgEl.textContent = '짝을 찾았어요!';
+      }
+    } else {
+      pairs.locked = true;
+      setTrackedTimeout(function(){
+        a.classList.remove('flipped'); b.classList.remove('flipped');
+        pairs.locked = false;
+      }, 850);
+    }
+  });
+
+  /* ============ maze (rest game): walk to the toilet ============ */
+  var MAZE_COLS = 7, MAZE_ROWS = 9, MAZE_CELL = 40, MAZE_PAD = 8;
+  var mazeSvgEl = document.getElementById('maze-svg');
+  var mazeMsgEl = document.getElementById('maze-msg');
+  var maze = { walls:null, pos:null, trail:[], done:false, dragging:false };
+
+  // walls[r][c] = {n,e,s,w}; carved with a depth-first search so every cell is reachable
+  function mazeGenerate(){
+    var walls = [], seen = [], r, c;
+    for(r=0;r<MAZE_ROWS;r++){
+      walls.push([]); seen.push([]);
+      for(c=0;c<MAZE_COLS;c++){ walls[r].push({ n:true, e:true, s:true, w:true }); seen[r].push(false); }
+    }
+    var dirs = [[-1,0,'n','s'],[0,1,'e','w'],[1,0,'s','n'],[0,-1,'w','e']];
+    var stack = [[0, 0]];
+    seen[0][0] = true;
+    while(stack.length){
+      var cur = stack[stack.length - 1];
+      var options = spotShuffle(dirs.slice()).filter(function(d){
+        var nr = cur[0] + d[0], nc = cur[1] + d[1];
+        return nr >= 0 && nc >= 0 && nr < MAZE_ROWS && nc < MAZE_COLS && !seen[nr][nc];
+      });
+      if(!options.length){ stack.pop(); continue; }
+      var d = options[0], nr2 = cur[0] + d[0], nc2 = cur[1] + d[1];
+      walls[cur[0]][cur[1]][d[2]] = false;
+      walls[nr2][nc2][d[3]] = false;
+      seen[nr2][nc2] = true;
+      stack.push([nr2, nc2]);
+    }
+    return walls;
+  }
+
+  function mazeOpen(a, b){
+    var dr = b[0] - a[0], dc = b[1] - a[1], w = maze.walls[a[0]][a[1]];
+    if(Math.abs(dr) + Math.abs(dc) !== 1) return false;
+    if(dr === -1) return !w.n;
+    if(dr === 1) return !w.s;
+    if(dc === 1) return !w.e;
+    return !w.w;
+  }
+
+  function mazeRender(){
+    var W = MAZE_COLS * MAZE_CELL + MAZE_PAD * 2, H = MAZE_ROWS * MAZE_CELL + MAZE_PAD * 2, ink = '#4A3B5C';
+    mazeSvgEl.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    var out = '<rect width="' + W + '" height="' + H + '" rx="14" fill="#FFF8E7"/>';
+    var x = function(c){ return MAZE_PAD + c * MAZE_CELL; }, y = function(r){ return MAZE_PAD + r * MAZE_CELL; };
+    maze.trail.forEach(function(cell){
+      out += '<rect x="' + (x(cell[1]) + 6) + '" y="' + (y(cell[0]) + 6) + '" width="' + (MAZE_CELL - 12) + '" height="' + (MAZE_CELL - 12) + '" rx="8" fill="#FFD0DD"/>';
+    });
+    var path = '';
+    for(var r=0;r<MAZE_ROWS;r++){
+      for(var c=0;c<MAZE_COLS;c++){
+        var w = maze.walls[r][c];
+        if(w.n) path += 'M' + x(c) + ',' + y(r) + 'H' + x(c + 1);
+        if(w.w) path += 'M' + x(c) + ',' + y(r) + 'V' + y(r + 1);
+        if(r === MAZE_ROWS - 1 && w.s) path += 'M' + x(c) + ',' + y(r + 1) + 'H' + x(c + 1);
+        if(c === MAZE_COLS - 1 && w.e) path += 'M' + x(c + 1) + ',' + y(r) + 'V' + y(r + 1);
+      }
+    }
+    out += '<path d="' + path + '" stroke="' + ink + '" stroke-width="5" stroke-linecap="round" fill="none"/>';
+    var gr = MAZE_ROWS - 1, gc = MAZE_COLS - 1;
+    out += '<text x="' + (x(gc) + MAZE_CELL / 2) + '" y="' + (y(gr) + MAZE_CELL / 2 + 10) + '" text-anchor="middle" font-size="28">🚽</text>';
+    out += '<g class="maze-player" transform="translate(' + (x(maze.pos[1]) + MAZE_CELL / 2) + ',' + (y(maze.pos[0]) + MAZE_CELL / 2) + ')">'
+      + '<circle r="15" fill="#6FB3FF" stroke="' + ink + '" stroke-width="2.5"/>'
+      + '<text y="9" text-anchor="middle" font-size="24">🧒</text></g>';
+    mazeSvgEl.innerHTML = out;
+  }
+
+  function mazeStart(){
+    clearPendingTimers();
+    maze = { walls:mazeGenerate(), pos:[0, 0], trail:[[0, 0]], done:false, dragging:false };
+    mazeMsgEl.textContent = '손가락으로 길을 따라 화장실까지 가요! 🚽';
+    mazeRender();
+  }
+
+  function mazeStep(next){
+    if(maze.done || !mazeOpen(maze.pos, next)) return false;
+    var prev = maze.trail[maze.trail.length - 2];
+    if(prev && prev[0] === next[0] && prev[1] === next[1]){ maze.trail.pop(); }
+    else { maze.trail.push(next); }
+    maze.pos = next;
+    if(next[0] === MAZE_ROWS - 1 && next[1] === MAZE_COLS - 1){
+      maze.done = true;
+      playDingDong();
+      mazeMsgEl.textContent = '도착! 화장실을 찾았어요 🎉';
+      setTrackedTimeout(showEnding, 1300);
+    }
+    return true;
+  }
+
+  // move toward the cell under the finger, one open step at a time along a straight line
+  function mazeMoveToward(target){
+    var moved = false, guard = 0;
+    while(!maze.done && guard++ < MAZE_ROWS + MAZE_COLS){
+      var dr = target[0] - maze.pos[0], dc = target[1] - maze.pos[1];
+      if(dr === 0 && dc === 0) break;
+      if(dr !== 0 && dc !== 0){
+        // diagonal: try the axis the finger moved further along first
+        var first = Math.abs(dr) >= Math.abs(dc) ? [maze.pos[0] + Math.sign(dr), maze.pos[1]] : [maze.pos[0], maze.pos[1] + Math.sign(dc)];
+        var second = Math.abs(dr) >= Math.abs(dc) ? [maze.pos[0], maze.pos[1] + Math.sign(dc)] : [maze.pos[0] + Math.sign(dr), maze.pos[1]];
+        if(mazeStep(first) || mazeStep(second)){ moved = true; continue; }
+        break;
+      }
+      var next = [maze.pos[0] + Math.sign(dr), maze.pos[1] + Math.sign(dc)];
+      if(!mazeStep(next)) break;
+      moved = true;
+    }
+    if(moved){ mazeRender(); }
+  }
+
+  function mazeCellAt(clientX, clientY){
+    var rect = mazeSvgEl.getBoundingClientRect();
+    var W = MAZE_COLS * MAZE_CELL + MAZE_PAD * 2, H = MAZE_ROWS * MAZE_CELL + MAZE_PAD * 2;
+    var sx = (clientX - rect.left) / rect.width * W, sy = (clientY - rect.top) / rect.height * H;
+    var c = Math.floor((sx - MAZE_PAD) / MAZE_CELL), r = Math.floor((sy - MAZE_PAD) / MAZE_CELL);
+    return [Math.max(0, Math.min(MAZE_ROWS - 1, r)), Math.max(0, Math.min(MAZE_COLS - 1, c))];
+  }
+
+  mazeSvgEl.addEventListener('pointerdown', function(e){
+    e.preventDefault();
+    maze.dragging = true;
+    mazeMoveToward(mazeCellAt(e.clientX, e.clientY));
+  });
+  mazeSvgEl.addEventListener('pointermove', function(e){
+    if(!maze.dragging) return;
+    e.preventDefault();
+    mazeMoveToward(mazeCellAt(e.clientX, e.clientY));
+  });
+  ['pointerup','pointercancel','pointerleave'].forEach(function(t){
+    mazeSvgEl.addEventListener(t, function(){ maze.dragging = false; });
+  });
+  window.addEventListener('keydown', function(e){
+    if(!document.getElementById('screen-maze').classList.contains('active') || maze.done) return;
+    var d = { ArrowUp:[-1,0], ArrowDown:[1,0], ArrowLeft:[0,-1], ArrowRight:[0,1] }[e.key];
+    if(!d) return;
+    e.preventDefault();
+    if(mazeStep([maze.pos[0] + d[0], maze.pos[1] + d[1]])){ mazeRender(); }
   });
 
   /* ============ block puzzle: drag 3 pieces onto an 8x8 board ============ */
