@@ -438,7 +438,7 @@
 
   /* ---------- MAZE ---------- */
   .maze-box{
-    z-index:2; width:min(94vw, calc((100vh - 170px) * 0.78), 470px); width:min(94vw, calc((100dvh - 170px) * 0.78), 470px); aspect-ratio:296/380;
+    z-index:2; width:min(94vw, calc((100vh - 170px) * 0.78), 470px); width:min(94vw, calc((100dvh - 170px) * 0.78), 470px); aspect-ratio:304/400;
     border:5px solid var(--ink); border-radius:18px; box-shadow:6px 6px 0 var(--ink); overflow:hidden; background:#FFF8E7;
   }
   .maze-box svg{ display:block; width:100%; height:100%; touch-action:none; }
@@ -3067,12 +3067,13 @@
   });
 
   /* ============ maze (rest game): walk to the toilet ============ */
-  var MAZE_COLS = 10, MAZE_ROWS = 13, MAZE_CELL = 28, MAZE_PAD = 8;
+  var MAZE_COLS = 12, MAZE_ROWS = 16, MAZE_CELL = 24, MAZE_PAD = 8;
   var mazeSvgEl = document.getElementById('maze-svg');
   var mazeMsgEl = document.getElementById('maze-msg');
-  var maze = { walls:null, pos:null, trail:[], done:false, dragging:false };
+  var maze = { walls:null, pos:null, goal:null, trail:[], done:false, dragging:false };
 
-  // walls[r][c] = {n,e,s,w}; carved with a depth-first search so every cell is reachable
+  // walls[r][c] = {n,e,s,w}; carved as a growing tree so every cell is reachable.
+  // Mixing "newest cell" (long corridors) with "random cell" (forks) gives many dead ends.
   function mazeGenerate(){
     var walls = [], seen = [], r, c;
     for(r=0;r<MAZE_ROWS;r++){
@@ -3083,12 +3084,13 @@
     var stack = [[0, 0]];
     seen[0][0] = true;
     while(stack.length){
-      var cur = stack[stack.length - 1];
+      var at = Math.random() < 0.5 ? stack.length - 1 : pick(0, stack.length - 1);
+      var cur = stack[at];
       var options = spotShuffle(dirs.slice()).filter(function(d){
         var nr = cur[0] + d[0], nc = cur[1] + d[1];
         return nr >= 0 && nc >= 0 && nr < MAZE_ROWS && nc < MAZE_COLS && !seen[nr][nc];
       });
-      if(!options.length){ stack.pop(); continue; }
+      if(!options.length){ stack.splice(at, 1); continue; }
       var d = options[0], nr2 = cur[0] + d[0], nc2 = cur[1] + d[1];
       walls[cur[0]][cur[1]][d[2]] = false;
       walls[nr2][nc2][d[3]] = false;
@@ -3096,6 +3098,23 @@
       stack.push([nr2, nc2]);
     }
     return walls;
+  }
+
+  function mazeFarGoal(){
+    var dist = {}, queue = [[0, 0]], best = null;
+    dist['0,0'] = 0;
+    while(queue.length){
+      var cur = queue.shift();
+      [[-1,0],[1,0],[0,-1],[0,1]].forEach(function(d){
+        var next = [cur[0] + d[0], cur[1] + d[1]], key = next.join(',');
+        if(next[0] < 0 || next[1] < 0 || next[0] >= MAZE_ROWS || next[1] >= MAZE_COLS || key in dist) return;
+        if(!mazeOpen(cur, next)) return;
+        dist[key] = dist[cur.join(',')] + 1;
+        queue.push(next);
+      });
+      if(cur[0] >= MAZE_ROWS - Math.ceil(MAZE_ROWS / 4) && (!best || dist[cur.join(',')] > dist[best.join(',')])){ best = cur; }
+    }
+    return best;
   }
 
   function mazeOpen(a, b){
@@ -3113,7 +3132,7 @@
     var out = '<rect width="' + W + '" height="' + H + '" rx="14" fill="#FFF8E7"/>';
     var x = function(c){ return MAZE_PAD + c * MAZE_CELL; }, y = function(r){ return MAZE_PAD + r * MAZE_CELL; };
     maze.trail.forEach(function(cell){
-      out += '<rect x="' + (x(cell[1]) + 4) + '" y="' + (y(cell[0]) + 4) + '" width="' + (MAZE_CELL - 8) + '" height="' + (MAZE_CELL - 8) + '" rx="6" fill="#FFD0DD"/>';
+      out += '<rect x="' + (x(cell[1]) + 3) + '" y="' + (y(cell[0]) + 3) + '" width="' + (MAZE_CELL - 6) + '" height="' + (MAZE_CELL - 6) + '" rx="5" fill="#FFD0DD"/>';
     });
     var path = '';
     for(var r=0;r<MAZE_ROWS;r++){
@@ -3125,18 +3144,19 @@
         if(c === MAZE_COLS - 1 && w.e) path += 'M' + x(c + 1) + ',' + y(r) + 'V' + y(r + 1);
       }
     }
-    out += '<path d="' + path + '" stroke="' + ink + '" stroke-width="4" stroke-linecap="round" fill="none"/>';
-    var gr = MAZE_ROWS - 1, gc = MAZE_COLS - 1;
-    out += '<text x="' + (x(gc) + MAZE_CELL / 2) + '" y="' + (y(gr) + MAZE_CELL / 2 + 7) + '" text-anchor="middle" font-size="20">🚽</text>';
+    out += '<path d="' + path + '" stroke="' + ink + '" stroke-width="3.5" stroke-linecap="round" fill="none"/>';
+    var gr = maze.goal[0], gc = maze.goal[1];
+    out += '<text x="' + (x(gc) + MAZE_CELL / 2) + '" y="' + (y(gr) + MAZE_CELL / 2 + 6) + '" text-anchor="middle" font-size="17">🚽</text>';
     out += '<g class="maze-player" transform="translate(' + (x(maze.pos[1]) + MAZE_CELL / 2) + ',' + (y(maze.pos[0]) + MAZE_CELL / 2) + ')">'
-      + '<circle r="11" fill="#6FB3FF" stroke="' + ink + '" stroke-width="2"/>'
-      + '<text y="6" text-anchor="middle" font-size="17">🧒</text></g>';
+      + '<circle r="9.5" fill="#6FB3FF" stroke="' + ink + '" stroke-width="2"/>'
+      + '<text y="5" text-anchor="middle" font-size="14">🧒</text></g>';
     mazeSvgEl.innerHTML = out;
   }
 
   function mazeStart(){
     clearPendingTimers();
-    maze = { walls:mazeGenerate(), pos:[0, 0], trail:[[0, 0]], done:false, dragging:false };
+    maze = { walls:mazeGenerate(), pos:[0, 0], goal:null, trail:[[0, 0]], done:false, dragging:false };
+    maze.goal = mazeFarGoal();
     mazeMsgEl.textContent = '손가락으로 길을 따라 화장실까지 가요! 🚽';
     mazeRender();
   }
@@ -3147,7 +3167,7 @@
     if(prev && prev[0] === next[0] && prev[1] === next[1]){ maze.trail.pop(); }
     else { maze.trail.push(next); }
     maze.pos = next;
-    if(next[0] === MAZE_ROWS - 1 && next[1] === MAZE_COLS - 1){
+    if(next[0] === maze.goal[0] && next[1] === maze.goal[1]){
       maze.done = true;
       playDingDong();
       mazeMsgEl.textContent = '도착! 화장실을 찾았어요 🎉';
