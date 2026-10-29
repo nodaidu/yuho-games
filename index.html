@@ -3209,6 +3209,9 @@
   var BLK_N = 8;
   // fixed orientations only: pieces never rotate, so every orientation is its own shape
   var BLK_PATTERNS = [
+    // small pieces (1-3 cells) keep the board from jamming
+    ['#'], ['##'], ['#','#'], ['###'], ['#','#','#'],
+    ['##','#.'], ['##','.#'], ['#.','##'], ['.#','##'],
     ['####'], ['#','#','#','#'], ['##','##'],
     ['#.','#.','##'], ['.#','.#','##'], ['##','#.','#.'], ['##','.#','.#'],
     ['###','#..'], ['###','..#'], ['#..','###'], ['..#','###'],
@@ -3241,7 +3244,7 @@
     });
     return { cells:cells, h:rows.length, w:rows[0].length, size:cells.length };
   });
-  var BLK_SIZE_WEIGHTS = { 4:2, 5:3 };
+  var BLK_SIZE_WEIGHTS = { 1:1, 2:2, 3:3, 4:3, 5:1 };
   var BLK_COLORS = ['#FF7FA6','#FFC93C','#5CD98E','#3DC8FF','#9B7FFF','#FF9B5C','#4FD1C5'];
   var BLK_BEST_KEY = 'yuho-block-best';
 
@@ -3368,8 +3371,13 @@
     document.getElementById('blk-best').textContent = blk.best;
   }
 
+  // prefer pieces that fit somewhere on the current board, so the child rarely gets stuck
   function blkDeal(){
-    blk.tray = [blkRandomPiece(), blkRandomPiece(), blkRandomPiece()];
+    blk.tray = [0, 1, 2].map(function(){
+      var piece = blkRandomPiece();
+      for(var tries=0; tries<20 && !blkFitsAnywhere(piece.shape); tries++){ piece = blkRandomPiece(); }
+      return piece;
+    });
   }
 
   function blkCheckGameOver(){
