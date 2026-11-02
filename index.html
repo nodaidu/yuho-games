@@ -129,8 +129,8 @@
   .back-btn:active{ transform:translateY(4px); box-shadow:1px 1px 0 var(--ink); }
 
   /* ---------- DIFFICULTY ---------- */
-  #screen-difficulty, #screen-difficulty-hanja, #screen-difficulty-english, #screen-difficulty-spot, #screen-difficulty-divmul, #screen-difficulty-clock, #screen-difficulty-money, #screen-difficulty-dict, #screen-difficulty-pattern{ justify-content:center; align-items:center; gap:6vh; }
-  #screen-difficulty h2, #screen-difficulty-hanja h2, #screen-difficulty-english h2, #screen-difficulty-spot h2, #screen-difficulty-divmul h2, #screen-difficulty-clock h2, #screen-difficulty-money h2, #screen-difficulty-dict h2, #screen-difficulty-pattern h2{
+  #screen-difficulty-spot{ justify-content:center; align-items:center; gap:6vh; }
+  #screen-difficulty-spot h2, #screen-levels h2{
     z-index:1; font-size:clamp(24px,4.4vw,34px); margin:0; color:#fff; letter-spacing:1px;
     -webkit-text-stroke:1.5px var(--ink); text-shadow:2px 3px 0 var(--ink);
   }
@@ -150,15 +150,26 @@
   .diff-card .diff-badge.diff-badge-text{ font-weight:800; }
   .diff-card b{ margin-top:16px; font-size:clamp(16px,2.6vw,20px); }
   .diff-card small{ font-size:clamp(11px,1.8vw,12.5px); opacity:0.85; text-align:center; line-height:1.4; font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; }
-  /* a level the child already cleared: greyed out and not clickable */
-  .diff-card.cleared{ filter:grayscale(0.9); opacity:0.55; box-shadow:3px 3px 0 var(--ink); cursor:not-allowed; }
-  .diff-card.cleared:active{ transform:none; box-shadow:3px 3px 0 var(--ink); }
-  .diff-card .cleared-stamp{
-    display:none; position:absolute; bottom:-14px; left:50%; transform:translateX(-50%) rotate(-4deg);
-    background:#fff; border:3px solid var(--ink); border-radius:12px; padding:2px 10px; white-space:nowrap;
-    font-size:clamp(12px,2vw,14px); font-weight:800; color:var(--ink); font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  /* ---------- LEVEL PICKER: ten levels per learning game ---------- */
+  #screen-levels{ justify-content:safe center; align-items:center; gap:2vh; overflow-y:auto; padding:68px 0 14px; }
+  .level-grid{ z-index:1; display:grid; grid-template-columns:1fr 1fr; gap:10px; width:min(560px,92vw); flex-shrink:0; }
+  @media (min-width:820px){ .level-grid{ grid-template-columns:repeat(5,1fr); width:min(980px,92vw); } }
+  .level-card{
+    position:relative; border:4px solid var(--ink); border-radius:16px; padding:6px; color:var(--ink); box-shadow:0 4px 0 var(--ink);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-height:clamp(58px,10vh,92px);
   }
-  .diff-card.cleared .cleared-stamp, .diff-card.cleared-open .cleared-stamp{ display:block; }
+  .level-card:active{ transform:translateY(3px); box-shadow:0 1px 0 var(--ink); }
+  .level-card b{ font-size:clamp(16px,4.4vw,20px); }
+  .level-card small{ font-size:clamp(11px,3vw,13px); line-height:1.25; font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; word-break:keep-all; }
+  .level-card.tier1{ background:var(--tier1-a); }
+  .level-card.tier2{ background:var(--tier2-a); }
+  .level-card.tier3{ background:var(--tier3-a); }
+  .level-card.tier4{ background:var(--tier4-a); }
+  /* a level the child already cleared: greyed out and not clickable */
+  .level-card.cleared{ filter:grayscale(0.9); opacity:0.55; box-shadow:0 2px 0 var(--ink); cursor:not-allowed; }
+  .level-card.cleared:active{ transform:none; box-shadow:0 2px 0 var(--ink); }
+  .level-stamp{ display:none; position:absolute; top:-6px; right:-4px; font-size:16px; }
+  .level-card.cleared .level-stamp, .level-card.cleared-open .level-stamp{ display:block; }
   .parent-modal{
     display:none; position:absolute; inset:0; z-index:100; background:rgba(26,26,46,0.6);
     align-items:center; justify-content:center; padding:16px;
@@ -559,71 +570,12 @@
     <button class="parent-btn" id="parent-btn" aria-label="부모님 메뉴">🔒</button>
   </section>
 
-  <!-- DIFFICULTY -->
-  <section class="screen" id="screen-difficulty">
+  <!-- LEVEL PICKER -->
+  <section class="screen" id="screen-levels">
     <div class="bg-deco"><span></span><span></span><span></span><span></span></div>
-    <button class="back-btn" id="diff-back">← 돌아가기</button>
-    <h2>난이도를 골라주세요</h2>
-    <div class="diff-grid">
-      <button class="diff-card tier1" data-diff="easy">
-        <span class="diff-badge">🐣</span><b>초급</b>
-        <small>한 자릿수<br>덧셈 · 뺄셈</small>
-      </button>
-      <button class="diff-card tier2" data-diff="normal">
-        <span class="diff-badge">🐥</span><b>중급</b>
-        <small>두 자릿수(10~20)<br>+ 한 자릿수</small>
-      </button>
-      <button class="diff-card tier3" data-diff="hard">
-        <span class="diff-badge">🦉</span><b>상급</b>
-        <small>두 자릿수 + 두 자릿수<br>(합 50 이하)</small>
-      </button>
-    </div>
-  </section>
-
-  <!-- HANJA DIFFICULTY -->
-  <section class="screen" id="screen-difficulty-hanja">
-    <div class="bg-deco"><span></span><span></span><span></span><span></span></div>
-    <button class="back-btn" id="diff-hanja-back">← 돌아가기</button>
-    <h2>급수를 골라주세요</h2>
-    <div class="diff-grid">
-      <button class="diff-card tier1" data-level="8">
-        <span class="diff-badge diff-badge-text">八</span><b>8급</b>
-        <small>숫자 · 자연 · 가족 50자<br>一 山 父 母 ...</small>
-      </button>
-      <button class="diff-card tier2" data-level="7-2">
-        <span class="diff-badge diff-badge-text">七</span><b>7급Ⅱ</b>
-        <small>방향 · 생활 50자<br>上 下 家 手 ...</small>
-      </button>
-      <button class="diff-card tier3" data-level="7">
-        <span class="diff-badge diff-badge-text">七</span><b>7급</b>
-        <small>계절 · 자연 · 마을 50자<br>春 夏 天 地 ...</small>
-      </button>
-    </div>
-  </section>
-
-  <!-- ENGLISH DIFFICULTY -->
-  <section class="screen" id="screen-difficulty-english">
-    <div class="bg-deco"><span></span><span></span><span></span><span></span></div>
-    <button class="back-btn" id="diff-english-back">← 돌아가기</button>
-    <h2>레벨을 골라주세요</h2>
-    <div class="diff-grid">
-      <button class="diff-card tier1" data-level="1">
-        <span class="diff-badge">🍎</span><b>5~7세</b>
-        <small>동물 · 색깔 · 숫자<br>cat, red, one ...</small>
-      </button>
-      <button class="diff-card tier2" data-level="2">
-        <span class="diff-badge">✏️</span><b>초1~2</b>
-        <small>학교 · 가족 · 동작<br>school, run, big ...</small>
-      </button>
-      <button class="diff-card tier3" data-level="3">
-        <span class="diff-badge">📘</span><b>초3~4</b>
-        <small>날씨 · 장소 · 계절<br>weather, city, fast ...</small>
-      </button>
-      <button class="diff-card tier4" data-level="4">
-        <span class="diff-badge">🎓</span><b>초5~6</b>
-        <small>과목 · 활동 · 어휘<br>subject, hobby, exam ...</small>
-      </button>
-    </div>
+    <button class="back-btn" id="levels-back">← 돌아가기</button>
+    <h2 id="levels-title"></h2>
+    <div class="level-grid" id="level-grid"></div>
   </section>
 
   <!-- SPOT-THE-DIFFERENCE DIFFICULTY -->
@@ -643,111 +595,6 @@
       <button class="diff-card tier3" data-diff="hard">
         <span class="diff-badge">🦅</span><b>고급</b>
         <small>방 그림 · 매의 눈<br>다른 그림 5개 찾기</small>
-      </button>
-    </div>
-  </section>
-
-  <!-- DIVISION / MULTIPLICATION DIFFICULTY -->
-  <section class="screen" id="screen-difficulty-divmul">
-    <div class="bg-deco"><span></span><span></span><span></span><span></span></div>
-    <button class="back-btn" id="diff-divmul-back">← 돌아가기</button>
-    <h2>난이도를 골라주세요</h2>
-    <div class="diff-grid">
-      <button class="diff-card tier1" data-diff="easy">
-        <span class="diff-badge">🍕</span><b>초급</b>
-        <small>나눠 갖기 · 묶어 세기<br>작은 수 (16개까지)</small>
-      </button>
-      <button class="diff-card tier2" data-diff="normal">
-        <span class="diff-badge">🍩</span><b>중급</b>
-        <small>나눠 갖기 · 몇 명에게? · 곱하기<br>조금 더 큰 수 (36개까지)</small>
-      </button>
-      <button class="diff-card tier3" data-diff="hard">
-        <span class="diff-badge">🎂</span><b>고급</b>
-        <small>남는 것이 있는 나눗셈<br>큰 수 (60개까지)</small>
-      </button>
-    </div>
-  </section>
-
-  <!-- CLOCK DIFFICULTY -->
-  <section class="screen" id="screen-difficulty-clock">
-    <div class="bg-deco"><span></span><span></span><span></span><span></span></div>
-    <button class="back-btn" id="diff-clock-back">← 돌아가기</button>
-    <h2>난이도를 골라주세요</h2>
-    <div class="diff-grid">
-      <button class="diff-card tier1" data-diff="easy">
-        <span class="diff-badge">🕐</span><b>초급</b>
-        <small>정각 읽기<br>3시, 7시 ...</small>
-      </button>
-      <button class="diff-card tier2" data-diff="normal">
-        <span class="diff-badge">🕧</span><b>중급</b>
-        <small>30분 읽기<br>3시 30분 ...</small>
-      </button>
-      <button class="diff-card tier3" data-diff="hard">
-        <span class="diff-badge">⏰</span><b>고급</b>
-        <small>5분 단위로 읽기<br>3시 25분 ...</small>
-      </button>
-    </div>
-  </section>
-
-  <!-- MONEY DIFFICULTY -->
-  <section class="screen" id="screen-difficulty-money">
-    <div class="bg-deco"><span></span><span></span><span></span><span></span></div>
-    <button class="back-btn" id="diff-money-back">← 돌아가기</button>
-    <h2>난이도를 골라주세요</h2>
-    <div class="diff-grid">
-      <button class="diff-card tier1" data-diff="easy">
-        <span class="diff-badge">🪙</span><b>초급</b>
-        <small>10원·100원 세기<br>500원까지</small>
-      </button>
-      <button class="diff-card tier2" data-diff="normal">
-        <span class="diff-badge">💰</span><b>중급</b>
-        <small>모든 동전 세기<br>1000원까지</small>
-      </button>
-      <button class="diff-card tier3" data-diff="hard">
-        <span class="diff-badge">🛒</span><b>고급</b>
-        <small>거스름돈 계산<br>1000원 내고 사기</small>
-      </button>
-    </div>
-  </section>
-
-  <!-- DICTATION DIFFICULTY -->
-  <section class="screen" id="screen-difficulty-dict">
-    <div class="bg-deco"><span></span><span></span><span></span><span></span></div>
-    <button class="back-btn" id="diff-dict-back">← 돌아가기</button>
-    <h2>난이도를 골라주세요</h2>
-    <div class="diff-grid">
-      <button class="diff-card tier1" data-diff="easy">
-        <span class="diff-badge">🐣</span><b>초급</b>
-        <small>받침 없는 쉬운 단어<br>나비 · 사과 ...</small>
-      </button>
-      <button class="diff-card tier2" data-diff="normal">
-        <span class="diff-badge">🐥</span><b>중급</b>
-        <small>받침이 있는 단어<br>학교 · 연필 ...</small>
-      </button>
-      <button class="diff-card tier3" data-diff="hard">
-        <span class="diff-badge">🦉</span><b>고급</b>
-        <small>소리와 글자가 다른 단어<br>같이 · 국물 ...</small>
-      </button>
-    </div>
-  </section>
-
-  <!-- PATTERN DIFFICULTY -->
-  <section class="screen" id="screen-difficulty-pattern">
-    <div class="bg-deco"><span></span><span></span><span></span><span></span></div>
-    <button class="back-btn" id="diff-pattern-back">← 돌아가기</button>
-    <h2>난이도를 골라주세요</h2>
-    <div class="diff-grid">
-      <button class="diff-card tier1" data-diff="easy">
-        <span class="diff-badge">🐣</span><b>초급</b>
-        <small>색과 모양의 규칙<br>반복되는 그림</small>
-      </button>
-      <button class="diff-card tier2" data-diff="normal">
-        <span class="diff-badge">🐥</span><b>중급</b>
-        <small>수의 규칙<br>2씩, 5씩 커지고 작아져요</small>
-      </button>
-      <button class="diff-card tier3" data-diff="hard">
-        <span class="diff-badge">🦉</span><b>고급</b>
-        <small>어려운 규칙<br>2배 · 번갈아 변하는 수</small>
       </button>
     </div>
   </section>
@@ -1484,19 +1331,28 @@
     return homes;
   }
 
-  function dmBuildProblem(diff){
-    var types = diff === 'easy' ? ['share','multiply'] : ['share','group','multiply'];
+  var DM_ALL = ['share','group','multiply'];
+  var DM_LEVELS = {
+    1:{ types:['multiply'], M:[2,4], K:[2,5] },
+    2:{ types:['multiply'], M:[2,5], K:[2,6] },
+    3:{ types:['share','multiply'], M:[2,4], q:[2,4], K:[2,4] },
+    4:{ types:['group'], M:[2,4], q:[2,5], K:[2,4] },
+    5:{ types:DM_ALL, M:[2,5], q:[2,6], K:[2,6] },
+    6:{ types:['multiply'], M:[3,7], K:[3,9] },
+    7:{ types:['share','group'], M:[3,7], q:[3,7], K:[3,7] },
+    8:{ types:DM_ALL, M:[3,7], q:[3,7], K:[3,8] },
+    9:{ types:['share','group'], M:[3,7], q:[3,7], K:[3,8], rem:1 },
+    10:{ types:DM_ALL, M:[3,7], q:[3,7], K:[3,8], rem:0.5 }
+  };
+
+  function dmBuildProblem(level){
+    var cfg = DM_LEVELS[level], types = cfg.types;
     var guard = 0;
     while(guard < 300){
       guard++;
       var type = types[pick(0, types.length-1)];
-      var M, K, q, r = 0, N, answer, key;
-      if(diff === 'easy'){ M = pick(2,4); q = pick(2,4); K = pick(2,4); }
-      else if(diff === 'normal'){ M = type === 'multiply' ? pick(2,5) : pick(2,6); q = pick(2,6); K = pick(2,6); }
-      else {
-        M = type === 'multiply' ? pick(3,7) : pick(3,7); q = pick(3,7); K = type === 'multiply' ? pick(3,9) : pick(3,8);
-        if(type !== 'multiply' && Math.random() < 0.5){ r = pick(1, (type === 'share' ? M : K) - 1); }
-      }
+      var M = pick(cfg.M[0], cfg.M[1]), K = pick(cfg.K[0], cfg.K[1]), q = cfg.q ? pick(cfg.q[0], cfg.q[1]) : 0, r = 0, N, answer, key;
+      if(cfg.rem && type !== 'multiply' && Math.random() < cfg.rem){ r = pick(1, (type === 'share' ? M : K) - 1); }
       if(type === 'share'){ N = M*q + r; answer = q; key = 's' + N + '/' + M; }
       else if(type === 'group'){ N = K*q + r; answer = q; key = 'g' + N + '/' + K; }
       else { N = M*K; answer = M*K; key = 'm' + M + 'x' + K; }
@@ -1605,36 +1461,19 @@
   function showScreen(name){
     document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
     document.getElementById('screen-' + name).classList.add('active');
-    if(name.indexOf('difficulty') === 0 && name !== 'difficulty-spot'){ refreshClearedLevels(); }
   }
 
-  document.getElementById('card-door-game').addEventListener('click', function(){ showScreen('difficulty'); });
-  document.getElementById('diff-back').addEventListener('click', function(){ showScreen('lobby'); });
-  document.getElementById('card-hanja-game').addEventListener('click', function(){ showScreen('difficulty-hanja'); });
-  document.getElementById('diff-hanja-back').addEventListener('click', function(){ showScreen('lobby'); });
-  document.getElementById('card-english-game').addEventListener('click', function(){ showScreen('difficulty-english'); });
-  document.getElementById('diff-english-back').addEventListener('click', function(){ showScreen('lobby'); });
   document.getElementById('diff-spot-back').addEventListener('click', function(){ showBreak(breakFromLearning); });
   document.getElementById('spot-back').addEventListener('click', function(){
     clearPendingTimers();
     showScreen('lobby');
   });
-  document.getElementById('card-divmul-game').addEventListener('click', function(){ showScreen('difficulty-divmul'); });
-  document.getElementById('card-clock-game').addEventListener('click', function(){ showScreen('difficulty-clock'); });
-  document.getElementById('diff-clock-back').addEventListener('click', function(){ showScreen('lobby'); });
-  document.getElementById('card-money-game').addEventListener('click', function(){ showScreen('difficulty-money'); });
-  document.getElementById('card-dict-game').addEventListener('click', function(){ showScreen('difficulty-dict'); });
-  document.getElementById('diff-dict-back').addEventListener('click', function(){ showScreen('lobby'); });
-  document.getElementById('card-pattern-game').addEventListener('click', function(){ showScreen('difficulty-pattern'); });
-  document.getElementById('diff-pattern-back').addEventListener('click', function(){ showScreen('lobby'); });
-  document.getElementById('diff-money-back').addEventListener('click', function(){ showScreen('lobby'); });
   ['quiz-back','pairs-back','maze-back','simon-back'].forEach(function(id){
     document.getElementById(id).addEventListener('click', function(){
       clearPendingTimers();
       showScreen('lobby');
     });
   });
-  document.getElementById('diff-divmul-back').addEventListener('click', function(){ showScreen('lobby'); });
   document.getElementById('divmul-back').addEventListener('click', function(){
     clearPendingTimers();
     showScreen('lobby');
@@ -1657,53 +1496,9 @@
     showScreen('lobby');
   });
 
-  document.querySelectorAll('#screen-difficulty .diff-card').forEach(function(card){
-    card.addEventListener('click', function(){
-      if(card.classList.contains('cleared')) return;
-      startGame('math', card.dataset.diff);
-    });
-  });
-  document.querySelectorAll('#screen-difficulty-hanja .diff-card').forEach(function(card){
-    card.addEventListener('click', function(){
-      if(card.classList.contains('cleared')) return;
-      startGame('hanja', card.dataset.level);
-    });
-  });
-  document.querySelectorAll('#screen-difficulty-english .diff-card').forEach(function(card){
-    card.addEventListener('click', function(){
-      if(card.classList.contains('cleared')) return;
-      startGame('english', card.dataset.level);
-    });
-  });
   document.querySelectorAll('#screen-difficulty-spot .diff-card').forEach(function(card){
     card.addEventListener('click', function(){
       startGame('spot', card.dataset.diff);
-    });
-  });
-  document.querySelectorAll('#screen-difficulty-divmul .diff-card').forEach(function(card){
-    card.addEventListener('click', function(){
-      if(card.classList.contains('cleared')) return;
-      startGame('divmul', card.dataset.diff);
-    });
-  });
-  document.querySelectorAll('#screen-difficulty-clock .diff-card').forEach(function(card){
-    card.addEventListener('click', function(){
-      if(card.classList.contains('cleared')) return;
-      startGame('clock', card.dataset.diff);
-    });
-  });
-  ['dict','pattern'].forEach(function(game){
-    document.querySelectorAll('#screen-difficulty-' + game + ' .diff-card').forEach(function(card){
-      card.addEventListener('click', function(){
-        if(card.classList.contains('cleared')) return;
-        startGame(game, card.dataset.diff);
-      });
-    });
-  });
-  document.querySelectorAll('#screen-difficulty-money .diff-card').forEach(function(card){
-    card.addEventListener('click', function(){
-      if(card.classList.contains('cleared')) return;
-      startGame('money', card.dataset.diff);
     });
   });
 
@@ -1731,7 +1526,7 @@
   }
 
   /* ============ game state & logic ============ */
-  var state = { gameType:'math', difficulty:'easy', hanjaLevel:'8', englishLevel:'1', spotDifficulty:'easy', divmulDifficulty:'easy', quizDifficulty:'easy', opSequence:null, stage:0, totalStages:10, used:null, current:null, locked:false, wrongCount:0 };
+  var state = { gameType:'math', level:'1', spotDifficulty:'easy', opSequence:null, stage:0, totalStages:10, used:null, current:null, locked:false, wrongCount:0 };
 
   var pendingTimers = [];
   function setTrackedTimeout(fn, ms){
@@ -1748,15 +1543,20 @@
     pendingTimers = [];
   }
 
-  var LEVEL_PROGRESSION = { math:['easy','normal','hard'], hanja:['8','7-2','7'], english:['1','2','3','4'], divmul:['easy','normal','hard'], clock:['easy','normal','hard'], money:['easy','normal','hard'], dict:['easy','normal','hard'], pattern:['easy','normal','hard'] };
+  var LEVEL_KEYS = ['1','2','3','4','5','6','7','8','9','10'];
+  var LEVEL_PROGRESSION = { math:LEVEL_KEYS, hanja:LEVEL_KEYS, english:LEVEL_KEYS, divmul:LEVEL_KEYS, clock:LEVEL_KEYS, money:LEVEL_KEYS, dict:LEVEL_KEYS, pattern:LEVEL_KEYS };
+  var LEVEL_INFO = {
+    math:{ title:'숫자를 찾아라!', cards:'card-door-game', desc:['5까지 더하기 빼기','한 자리 더하기 빼기','10 만들기','10대 + 한 자리','받아올림 받아내림','몇십 더하기 빼기','두 자리 + 한 자리','두 자리 + 두 자리','받아올림 있는 두 자리','세 자리 계산'] },
+    hanja:{ title:'한자를 찾아라!', cards:'card-hanja-game', desc:['8급 50자','7급Ⅱ 앞 25자','7급Ⅱ 뒤 25자','7급 앞 25자','7급 뒤 25자','6급Ⅱ 앞 38자','6급Ⅱ 뒤 37자','6급 앞 38자','6급 뒤 37자','전체 복습'] },
+    english:{ title:'영어를 찾아라!', cards:'card-english-game', desc:['동물 · 색 · 숫자','몸 · 음식 · 옷','학교 · 집 · 동작','동물 · 자연','날씨 · 장소','기분 · 동작','장소 · 직업','과목 · 활동','요일 · 계절 · 시간','전체 복습'] },
+    divmul:{ title:'나누기 곱하기!', cards:'card-divmul-game', desc:['쉬운 곱셈','곱셈 넓히기','똑같이 나누기','묶어서 나누기','곱셈 나눗셈 섞기','큰 곱셈','큰 나눗셈','큰 수 섞기','나머지 있는 나눗셈','전체 도전'] },
+    clock:{ title:'시계를 읽어라!', cards:'card-clock-game', desc:['정각','30분','정각과 30분','15분과 45분','5분~25분','5분 단위 전체','1분 단위','몇 시간 뒤','몇 분 뒤','지난 시간 구하기'] },
+    money:{ title:'돈을 세어라!', cards:'card-money-game', desc:['같은 동전 세기','100원 + 10원','50원 + 10원','100 · 50 · 10원','500원까지 모두','지폐와 동전','물건값 더하기','거스름돈 (100원 단위)','거스름돈 (50원 단위)','5000원 거스름돈'] },
+    dict:{ title:'받아쓰기!', cards:'card-dict-game', desc:['쉬운 두 글자','쉬운 세 글자','된소리 단어','받침 두 글자','받침 세 글자 이상','어려운 모음','이어서 읽는 말','소리가 바뀌는 말','겹받침','헷갈리는 맞춤법'] },
+    pattern:{ title:'규칙을 찾아라!', cards:'card-pattern-game', desc:['번갈아 나오는 그림','세 칸 반복 그림','네 칸 반복 그림','1씩, 2씩 커지는 수','5씩, 10씩 뛰어 세기','작아지는 수','가운데 빈칸 찾기','늘어나는 간격','2배와 번갈아 변하는 수','모양과 색 따로 · 총정리'] }
+  };
   function getCurrentLevel(){
-    if(state.gameType === 'divmul') return state.divmulDifficulty;
-    if(state.gameType === 'clock' || state.gameType === 'money' || state.gameType === 'dict' || state.gameType === 'pattern') return state.quizDifficulty;
-    if(state.gameType === 'math') return state.difficulty;
-    if(state.gameType === 'hanja') return state.hanjaLevel;
-    if(state.gameType === 'english') return state.englishLevel;
-    if(state.gameType === 'spot') return state.spotDifficulty;
-    return null;
+    return state.gameType === 'spot' ? state.spotDifficulty : state.level;
   }
   function getNextLevel(){
     var seq = LEVEL_PROGRESSION[state.gameType];
@@ -1769,8 +1569,7 @@
   }
 
   /* ============ cleared levels: a finished level can't be picked again (the hardest level always stays open) ============ */
-  var CLEARED_KEY = 'yuho-cleared-levels';
-  var DIFF_SCREENS = { math:'difficulty', hanja:'difficulty-hanja', english:'difficulty-english', divmul:'difficulty-divmul', clock:'difficulty-clock', money:'difficulty-money', dict:'difficulty-dict', pattern:'difficulty-pattern' };
+  var CLEARED_KEY = 'yuho-cleared-levels-v2';
   var clearedLevels = {};
   try { clearedLevels = JSON.parse(localStorage.getItem(CLEARED_KEY)) || {}; } catch(e){ clearedLevels = {}; }
   function saveClearedLevels(){
@@ -1783,22 +1582,30 @@
     clearedLevels[game][level] = true;
     saveClearedLevels();
   }
-  function refreshClearedLevels(){
-    Object.keys(DIFF_SCREENS).forEach(function(game){
-      var seq = LEVEL_PROGRESSION[game], done = clearedLevels[game] || {};
-      document.querySelectorAll('#screen-' + DIFF_SCREENS[game] + ' .diff-card').forEach(function(card){
-        var level = card.dataset.diff || card.dataset.level;
-        var isLast = seq.indexOf(level) === seq.length - 1;
-        if(!card.querySelector('.cleared-stamp')){
-          card.insertAdjacentHTML('beforeend', '<span class="cleared-stamp"></span>');
-        }
-        card.querySelector('.cleared-stamp').textContent = isLast ? '✅ 통과 · 또 해도 돼요' : '✅ 통과했어요';
-        card.classList.toggle('cleared', !!done[level] && !isLast);
-        card.classList.toggle('cleared-open', !!done[level] && isLast);
-        card.disabled = !!done[level] && !isLast;
-      });
-    });
+  var levelsGame = 'math';
+  function openLevels(game){
+    levelsGame = game;
+    var info = LEVEL_INFO[game], done = clearedLevels[game] || {};
+    document.getElementById('levels-title').textContent = info.title;
+    document.getElementById('level-grid').innerHTML = LEVEL_KEYS.map(function(level, i){
+      var isLast = i === LEVEL_KEYS.length - 1;
+      var tier = isLast ? 4 : Math.floor(i / 3) + 1;
+      var mark = !done[level] ? '' : isLast ? ' cleared-open' : ' cleared';
+      return '<button class="level-card tier' + tier + mark + '" data-level="' + level + '"' + (mark === ' cleared' ? ' disabled' : '') + '>'
+        + '<span class="level-stamp">✅</span><b>' + level + '단계</b><small>' + info.desc[i] + '</small></button>';
+    }).join('');
+    showScreen('levels');
+    document.getElementById('screen-levels').scrollTop = 0;
   }
+  document.getElementById('level-grid').addEventListener('click', function(e){
+    var card = e.target.closest('.level-card');
+    if(card && !card.disabled){ startGame(levelsGame, card.dataset.level); }
+  });
+  document.getElementById('levels-back').addEventListener('click', function(){ showScreen('lobby'); });
+  Object.keys(LEVEL_INFO).forEach(function(game){
+    document.getElementById(LEVEL_INFO[game].cards).addEventListener('click', function(){ openLevels(game); });
+  });
+
   function pick(min,max){ return Math.floor(Math.random()*(max-min+1)) + min; }
 
   /* ============ sound effects (Web Audio, no files) ============ */
@@ -1852,30 +1659,36 @@
     return seq;
   }
 
-  function generateFact(difficulty){
+  // one candidate pair of numbers for each level; null means "roll again"
+  function mathPair(level, op){
+    var plus = op === '+', a, b, ones;
+    switch(level){
+      case 1: a = pick(1,5); b = pick(1,5); return plus || a >= b ? [a,b] : [b,a];
+      case 2: a = pick(1,9); b = pick(1,9); return plus || a >= b ? [a,b] : [b,a];
+      case 3: b = pick(1,9); return plus ? [10 - b, b] : [10, b];
+      case 4: a = pick(11,18); ones = a % 10; b = plus ? pick(1, 9 - ones) : pick(1, ones); return [a,b];
+      case 5: a = pick(11,19); ones = a % 10; b = pick(2,9); return (plus ? ones + b >= 10 : ones < b) ? [a,b] : null;
+      case 6: a = pick(1,9) * 10; b = pick(1,9) * 10; if(plus){ return a + b <= 100 ? [a,b] : null; } return a > b ? [a,b] : null;
+      case 7: a = pick(21,89); b = pick(2,9); return (plus ? a % 10 + b >= 10 : a % 10 < b) ? [a,b] : null;
+      case 8: a = pick(11,89); b = pick(11,89);
+        if(plus){ return a % 10 + b % 10 <= 9 && a + b <= 99 ? [a,b] : null; }
+        return a > b && a % 10 >= b % 10 ? [a,b] : null;
+      case 9: a = pick(15,99); b = pick(12,85);
+        if(plus){ return a % 10 + b % 10 >= 10 && a + b <= 100 ? [a,b] : null; }
+        return a > b && a % 10 < b % 10 ? [a,b] : null;
+      default: a = pick(101,799); b = pick(11,199); return plus || a > b ? [a,b] : null;
+    }
+  }
+
+  function generateFact(level){
     var guard = 0;
     var op = state.opSequence[state.stage];
     while(guard < 500){
       guard++;
-      var A, B;
-      if(difficulty === 'easy'){
-        A = pick(1,9); B = pick(1,9);
-        if(op === '-' && A < B){ var t=A; A=B; B=t; }
-      } else if(difficulty === 'normal'){
-        var two = pick(10,20), one = pick(1,9);
-        if(op === '-'){ A = two; B = one; }
-        else { if(Math.random() < 0.5){ A = two; B = one; } else { A = one; B = two; } }
-      } else { // hard
-        if(op === '+'){
-          A = pick(10,40);
-          var maxB = Math.min(40, 50-A);
-          if(maxB < 10) continue;
-          B = pick(10, maxB);
-        } else {
-          A = pick(15,49);
-          B = pick(10, A);
-        }
-      }
+      var pair = mathPair(level, op);
+      if(!pair) continue;
+      var A = pair[0], B = pair[1];
+      if(op === '+' && Math.random() < 0.5){ A = pair[1]; B = pair[0]; }
       var result = op === '+' ? A+B : A-B;
       if(A === 0 || B === 0 || result === 0) continue;
       var key = A + op + B;
@@ -1887,8 +1700,8 @@
     return { A:2, B:1, op:op, result: op === '+' ? 3 : 1 };
   }
 
-  function buildProblem(difficulty){
-    var fact = generateFact(difficulty);
+  function buildProblem(level){
+    var fact = generateFact(level);
     var slot = pick(0,2); // 0=A hidden, 1=B hidden, 2=result hidden
     var answer, dispA, dispB, dispR;
     if(slot === 0){ answer = fact.A; dispA = '⬜'; dispB = fact.B; dispR = fact.result; }
@@ -1898,13 +1711,15 @@
     return { fact:fact, slot:slot, answer:answer, text:text };
   }
 
-  function buildCandidates(answer){
+  function buildCandidates(answer, level){
     var set = {}; set[answer] = true;
     var list = [answer];
     var guard = 0;
     while(list.length < 3 && guard < 300){
       guard++;
-      var delta = pick(1,3) * (Math.random() < 0.5 ? -1 : 1);
+      // from the tens levels on, a wrong tens digit is the believable mistake
+      var unit = level === 6 || (level >= 7 && Math.random() < 0.5) ? 10 : 1;
+      var delta = pick(1,3) * unit * (Math.random() < 0.5 ? -1 : 1);
       var val = answer + delta;
       if(val < 0 || set[val]) continue;
       set[val] = true; list.push(val);
@@ -1986,6 +1801,19 @@
     ]
   };
 
+  function hanjaRows(text, cat){
+    return text.split(' ').map(function(t){
+      return { ch:t.charAt(0), hun:t.slice(1, -1), eum:t.charAt(t.length - 1), cat:cat };
+    });
+  }
+  HANJA_POOL['6-2'] = hanjaRows('角뿔각 各각각각 計셀계 界지경계 高높을고 公공평할공 共한가지공 功공공 果실과과 科과목과 光빛광 球공구 今이제금 急급할급 短짧을단 堂집당 代대신할대 對대할대 圖그림도 讀읽을독 童아이동 等무리등 樂즐길락 利이할리 理다스릴리 明밝을명 聞들을문 半반반 反돌이킬반 班나눌반 發필발 放놓을방 部떼부 分나눌분 社모일사 書글서 線줄선 雪눈설 成이룰성 省살필성 消사라질소 術재주술 始비로소시 身몸신 信믿을신 神귀신신 新새신 弱약할약 藥약약 業업업 勇날랠용 用쓸용 運옮길운 音소리음 飮마실음 意뜻의 作지을작 昨어제작 才재주재 戰싸움전 庭뜰정 第차례제 題제목제 注부을주 集모을집 窓창창 淸맑을청 體몸체 表겉표 風바람풍 幸다행행 現나타날현 形모양형 和화할화 會모일회', 'g62');
+  HANJA_POOL['6'] = hanjaRows('感느낄감 強강할강 開열개 京서울경 古예고 苦쓸고 交사귈교 區구분할구 郡고을군 根뿌리근 近가까울근 級등급급 多많을다 待기다릴대 度법도도 頭머리두 例법식례 禮예도례 路길로 綠푸를록 李오얏리 目눈목 米쌀미 美아름다울미 朴성박 番차례번 別다를별 病병병 服옷복 本근본본 死죽을사 使하여금사 席자리석 石돌석 速빠를속 孫손자손 樹나무수 習익힐습 勝이길승 式법식 失잃을실 愛사랑애 夜밤야 野들야 陽볕양 洋큰바다양 言말씀언 永길영 英꽃부리영 溫따뜻할온 園동산원 遠멀원 由말미암을유 油기름유 銀은은 衣옷의 醫의원의 者놈자 章글장 在있을재 定정할정 朝아침조 族겨레족 晝낮주 親친할친 太클태 通통할통 特특별할특 合합할합 行다닐행 向향할향 號이름호 畫그림화 黃누를황 訓가르칠훈', 'g6');
+  var HANJA_LEVELS = {
+    1:HANJA_POOL['8'], 2:HANJA_POOL['7-2'].slice(0, 25), 3:HANJA_POOL['7-2'].slice(25), 4:HANJA_POOL['7'].slice(0, 25), 5:HANJA_POOL['7'].slice(25),
+    6:HANJA_POOL['6-2'].slice(0, 38), 7:HANJA_POOL['6-2'].slice(38), 8:HANJA_POOL['6'].slice(0, 38), 9:HANJA_POOL['6'].slice(38),
+    10:HANJA_POOL['8'].concat(HANJA_POOL['7-2'], HANJA_POOL['7'], HANJA_POOL['6-2'], HANJA_POOL['6'])
+  };
+
   var ENGLISH_POOL = {
     1: [
       {en:'cat',ko:'고양이',cat:'animal'}, {en:'dog',ko:'강아지',cat:'animal'},
@@ -2036,8 +1864,34 @@
     ]
   };
 
+  function englishRows(cat, text){
+    return text.split(' ').map(function(t){
+      var part = t.split(':');
+      return { en:part[0], ko:part[1], cat:cat };
+    });
+  }
+  var ENGLISH_LEVELS = {
+    1:ENGLISH_POOL[1],
+    2:englishRows('body', 'hand:손 foot:발 eye:눈 ear:귀 nose:코 mouth:입 head:머리 arm:팔 leg:다리').concat(
+      englishRows('wear', 'hat:모자 shoes:신발 shirt:셔츠 bag:가방'),
+      englishRows('food2', 'bread:빵 egg:달걀 rice:밥 water:물 juice:주스 cake:케이크 pizza:피자 orange:오렌지 grape:포도')),
+    3:ENGLISH_POOL[2],
+    4:englishRows('animal2', 'horse:말 rabbit:토끼 tiger:호랑이 lion:사자 bear:곰 monkey:원숭이 elephant:코끼리 duck:오리 frog:개구리 sheep:양').concat(
+      englishRows('nature2', 'sea:바다 river:강 mountain:산 flower:꽃 grass:풀 sky:하늘 forest:숲 lake:호수 island:섬 stone:돌')),
+    5:ENGLISH_POOL[3],
+    6:englishRows('feeling', 'happy:행복한 sad:슬픈 angry:화난 hungry:배고픈 tired:피곤한 scared:겁먹은').concat(
+      englishRows('action2', 'read:읽다 write:쓰다 play:놀다 swim:수영하다 open:열다 close:닫다 cook:요리하다 drink:마시다 draw:그리다 dance:춤추다 listen:듣다 speak:말하다 wash:씻다 buy:사다')),
+    7:englishRows('place2', 'hospital:병원 bank:은행 market:시장 restaurant:식당 station:역 airport:공항 street:거리 store:가게 church:교회 factory:공장').concat(
+      englishRows('job', 'doctor:의사 nurse:간호사 farmer:농부 driver:운전사 singer:가수 police:경찰 firefighter:소방관 chef:요리사 scientist:과학자 pilot:조종사')),
+    8:ENGLISH_POOL[4],
+    9:englishRows('day', 'Monday:월요일 Tuesday:화요일 Wednesday:수요일 Thursday:목요일 Friday:금요일 Saturday:토요일 Sunday:일요일').concat(
+      englishRows('when', 'today:오늘 tomorrow:내일 yesterday:어제 week:주 month:개월 year:년 now:지금 later:나중에'),
+      englishRows('season2', 'spring:봄 summer:여름 fall:가을 winter:겨울'))
+  };
+  ENGLISH_LEVELS[10] = [].concat.apply([], [1,2,3,4,5,6,7,8,9].map(function(n){ return ENGLISH_LEVELS[n]; }));
+
   function buildEnglishProblem(level){
-    var pool = ENGLISH_POOL[level];
+    var pool = ENGLISH_LEVELS[level];
     var entry, guard = 0;
     do {
       entry = pool[pick(0, pool.length - 1)];
@@ -2058,7 +1912,8 @@
   }
 
   function buildEnglishCandidates(level, correctEntry, questionType){
-    var pool = ENGLISH_POOL[level];
+    // words sharing a meaning (eye/snow = 눈) would make two choices correct
+    var pool = ENGLISH_LEVELS[level].filter(function(e){ return e.en === correctEntry.en || e.ko !== correctEntry.ko; });
     var sameCat = pool.filter(function(e){ return e.cat === correctEntry.cat && e.en !== correctEntry.en; });
     var others = pool.filter(function(e){ return e.en !== correctEntry.en; });
     var source = sameCat.length >= 2 ? sameCat : others;
@@ -2081,7 +1936,7 @@
 
   // Characters already asked, kept across games (and reloads) so every
   // character in a level comes up once before any repeats.
-  var HANJA_SEEN_KEY = 'yuho-hanja-seen';
+  var HANJA_SEEN_KEY = 'yuho-hanja-seen-v2';
   var hanjaSeen = {};
   try { hanjaSeen = JSON.parse(localStorage.getItem(HANJA_SEEN_KEY)) || {}; } catch(e){ hanjaSeen = {}; }
   function saveHanjaSeen(){
@@ -2089,7 +1944,7 @@
   }
 
   function buildHanjaProblem(level){
-    var pool = HANJA_POOL[level];
+    var pool = HANJA_LEVELS[level];
     var seen = hanjaSeen[level] || [];
     var fresh = pool.filter(function(e){
       return seen.indexOf(e.ch) === -1 && !state.used.has(level + ':' + e.ch);
@@ -2118,7 +1973,8 @@
   }
 
   function buildHanjaCandidates(level, correctEntry, questionType){
-    var pool = HANJA_POOL[level];
+    // a wrong choice must not read the same as the answer (복습 단계 mixes all grades)
+    var pool = HANJA_LEVELS[level].filter(function(e){ return e.ch === correctEntry.ch || e.hun + e.eum !== correctEntry.hun + correctEntry.eum; });
     var sameCat = pool.filter(function(e){ return e.cat === correctEntry.cat && e.ch !== correctEntry.ch; });
     var others = pool.filter(function(e){ return e.ch !== correctEntry.ch; });
     var source = sameCat.length >= 2 ? sameCat : others;
@@ -2218,20 +2074,12 @@
     state.used = new Set();
     state.locked = false;
     state.wrongCount = 0;
-    if(gameType === 'math'){
-      state.difficulty = level;
-      state.opSequence = buildOpSequence();
-    } else if(gameType === 'english'){
-      state.englishLevel = level;
-    } else if(gameType === 'spot'){
+    if(gameType === 'spot'){
       state.spotDifficulty = level;
-    } else if(gameType === 'divmul'){
-      state.divmulDifficulty = level;
-    } else if(gameType === 'clock' || gameType === 'money' || gameType === 'dict' || gameType === 'pattern'){
-      state.quizDifficulty = level;
     } else {
-      state.hanjaLevel = level;
+      state.level = level;
     }
+    if(gameType === 'math'){ state.opSequence = buildOpSequence(); }
     if(gameType === 'spot'){
       showScreen('spot');
       renderSpotStage();
@@ -2266,26 +2114,26 @@
 
     var promptText, answer, candidates;
     if(state.gameType === 'hanja'){
-      var hp = buildHanjaProblem(state.hanjaLevel);
+      var hp = buildHanjaProblem(state.level);
       promptText = hp.promptText;
       answer = hp.answer;
-      candidates = buildHanjaCandidates(state.hanjaLevel, hp.entry, hp.questionType);
+      candidates = buildHanjaCandidates(state.level, hp.entry, hp.questionType);
       if(hp.questionType === 'reading'){ equationBanner.classList.add('hanja-char'); }
     } else if(state.gameType === 'english'){
-      var ep = buildEnglishProblem(state.englishLevel);
+      var ep = buildEnglishProblem(state.level);
       promptText = ep.promptText;
       answer = ep.answer;
-      candidates = buildEnglishCandidates(state.englishLevel, ep.entry, ep.questionType);
+      candidates = buildEnglishCandidates(state.level, ep.entry, ep.questionType);
       if(ep.questionType === 'meaning'){
         bannerSpeakBtn.classList.add('show');
       } else {
         plateSpeakBtns.forEach(function(btn){ btn.classList.add('show'); });
       }
     } else {
-      var problem = buildProblem(state.difficulty);
+      var problem = buildProblem(Number(state.level));
       promptText = problem.text;
       answer = String(problem.answer);
-      candidates = buildCandidates(problem.answer).map(String);
+      candidates = buildCandidates(problem.answer, Number(state.level)).map(String);
     }
 
     state.current = { answer: String(answer) };
@@ -2523,7 +2371,7 @@
   }
 
   function renderDivmulStage(){
-    var p = dmBuildProblem(state.divmulDifficulty);
+    var p = dmBuildProblem(Number(state.level));
     dmState.problem = p;
     dmState.layout = dmBuildLayout(p);
     dmState.busy = false;
@@ -2698,18 +2546,53 @@
       + '<circle r="12" fill="#FF7FA6"/></svg>';
   }
 
-  function clockMinuteFor(diff){
-    if(diff === 'easy') return 0;
-    if(diff === 'normal') return Math.random() < 0.6 ? 30 : 0;
+  function clockMinuteFor(level){
+    if(level === 1) return 0;
+    if(level === 2) return 30;
+    if(level === 3) return Math.random() < 0.5 ? 30 : 0;
+    if(level === 4) return Math.random() < 0.5 ? 15 : 45;
+    if(level === 5) return pick(1, 5) * 5;
+    if(level === 6) return pick(1, 11) * 5;
     var m;
-    do { m = pick(1, 11) * 5; } while(m === 30 && Math.random() < 0.7);
+    do { m = pick(1, 59); } while(m % 5 === 0);
     return m;
   }
 
-  function clockBuildProblem(diff){
-    var h, m, guard = 0;
-    do { h = pick(1, 12); m = clockMinuteFor(diff); guard++; } while(state.used.has('c' + h + ':' + m) && guard < 100);
-    state.used.add('c' + h + ':' + m);
+  function clockAfter(start, minutes){
+    var total = (start.h % 12) * 60 + start.m + minutes;
+    return { h:Math.floor(total / 60) % 12 || 12, m:total % 60 };
+  }
+
+  // two clocks: how long between them?
+  function clockElapsedProblem(){
+    var start, dur, key, guard = 0;
+    do {
+      start = { h:pick(1, 12), m:pick(0, 11) * 5 }; dur = pick(2, 11) * 5;
+      key = 'e' + start.h + ':' + start.m + '+' + dur; guard++;
+    } while(state.used.has(key) && guard < 100);
+    state.used.add(key);
+    var wrong = spotShuffle([dur + 5, dur - 5, dur + 10, dur - 10].filter(function(v){ return v > 0; })).slice(0, 2);
+    var choices = spotShuffle(wrong.concat([dur]));
+    return { kind:'clock', type:'elapsed', start:start, end:clockAfter(start, dur), dur:dur, choices:choices, answerIdx:choices.indexOf(dur) };
+  }
+
+  function clockBuildProblem(level){
+    if(level === 10) return clockElapsedProblem();
+    var h, m, start = null, dur = 0, key, guard = 0;
+    do {
+      if(level === 8 || level === 9){
+        start = { h:pick(1, 12), m:level === 8 ? pick(0, 1) * 30 : pick(0, 11) * 5 };
+        dur = level === 8 ? pick(1, 5) * 60 : pick(2, 8) * 5;
+        var t = clockAfter(start, dur);
+        h = t.h; m = t.m;
+        key = 'a' + start.h + ':' + start.m + '+' + dur;
+      } else {
+        h = pick(1, 12); m = clockMinuteFor(level);
+        key = 'c' + h + ':' + m;
+      }
+      guard++;
+    } while(state.used.has(key) && guard < 100);
+    state.used.add(key);
     var cands = [];
     function add(hh, mm){
       hh = ((hh - 1) % 12 + 12) % 12 + 1; mm = ((mm % 60) + 60) % 60;
@@ -2717,7 +2600,11 @@
       if(cands.some(function(c){ return c.h === hh && c.m === mm; })) return;
       cands.push({ h:hh, m:mm });
     }
-    if(diff === 'easy'){
+    if(level === 8){
+      add(h + 1, m); add(h - 1, m); add(h + 2, m); add(h, m + 30);
+    } else if(level === 9){
+      add(h, m + 5); add(h, m - 5); add(h, m + 10); add(h, m - 10); add(h - 1, m); add(h + 1, m);
+    } else if(level === 1){
       add(h + 1, 0); add(h - 1, 0); add(h + 2, 0); add(h - 3, 0);
     } else if(m === 30){
       add(h + 1, 30); add(h, 0); add(h - 1, 30); add(h + 1, 0);
@@ -2725,16 +2612,32 @@
       add(h, 30); add(h + 1, 0); add(h - 1, 0); add(h - 1, 30);
     } else {
       add(h + 1, m); add(h, m + 5); add(h, m - 5); add(h, m + 10);
-      if(m / 5 >= 1 && m / 5 <= 12){ add(m / 5, h * 5); }
+      if(level === 7){ add(h, m + 1); add(h, m - 1); }
+      if(m / 5 >= 1 && m / 5 <= 12 && m % 5 === 0){ add(m / 5, h * 5); }
     }
     var wrong = spotShuffle(cands).slice(0, 2);
     var choices = spotShuffle(wrong.concat([{ h:h, m:m }]));
-    var type = diff !== 'easy' && Math.random() < 0.35 ? 'pick' : 'read';
-    return { kind:'clock', h:h, m:m, type:type, choices:choices, answerIdx:choices.findIndex(function(c){ return c.h === h && c.m === m; }) };
+    var type = start ? 'after' : level >= 3 && Math.random() < 0.35 ? 'pick' : 'read';
+    return { kind:'clock', h:h, m:m, type:type, level:level, start:start, dur:dur, choices:choices, answerIdx:choices.findIndex(function(c){ return c.h === h && c.m === m; }) };
   }
 
   function clockRender(p){
-    if(p.type === 'read'){
+    if(p.type === 'elapsed'){
+      quizQuestionEl.textContent = '왼쪽 시계에서 오른쪽 시계까지 몇 분이 지났을까요?';
+      quizSvgEl.innerHTML = '<g transform="translate(105,130) scale(0.8)">' + clockFaceMarkup(p.start.h, p.start.m) + '</g>'
+        + '<g transform="translate(295,130) scale(0.8)">' + clockFaceMarkup(p.end.h, p.end.m) + '</g>'
+        + '<text x="200" y="142" text-anchor="middle" font-size="34" font-family="Do Hyeon, sans-serif" fill="#5B4B7A">→</text>';
+      quizChoicesEl.innerHTML = p.choices.map(function(v, i){
+        return '<button class="dm-choice" data-idx="' + i + '">' + v + '분</button>';
+      }).join('');
+    } else if(p.type === 'after'){
+      var later = p.dur >= 60 ? (p.dur / 60) + '시간' : p.dur + '분';
+      quizQuestionEl.textContent = '지금은 ' + clockText(p.start.h, p.start.m) + (p.start.m === 0 ? '예요. ' : '이에요. ') + later + ' 뒤는 몇 시일까요?';
+      quizSvgEl.innerHTML = '<g transform="translate(200,130) scale(1.16)">' + clockFaceMarkup(p.start.h, p.start.m) + '</g>';
+      quizChoicesEl.innerHTML = p.choices.map(function(c, i){
+        return '<button class="dm-choice" data-idx="' + i + '">' + clockText(c.h, c.m) + '</button>';
+      }).join('');
+    } else if(p.type === 'read'){
       quizQuestionEl.textContent = '시계가 몇 시를 가리키고 있나요?';
       quizSvgEl.innerHTML = '<g transform="translate(200,130) scale(1.16)">' + clockFaceMarkup(p.h, p.m) + '</g>';
       quizChoicesEl.innerHTML = p.choices.map(function(c, i){
@@ -2753,8 +2656,14 @@
   }
 
   function clockExplain(p){
+    if(p.type === 'elapsed'){
+      return '<span class="dm-eq">' + p.dur + '분</span><span class="dm-ex">' + clockText(p.start.h, p.start.m) + ' → ' + clockText(p.end.h, p.end.m) + '</span>';
+    }
+    if(p.type === 'after'){
+      return '<span class="dm-eq">' + clockText(p.h, p.m) + '</span><span class="dm-ex">' + clockText(p.start.h, p.start.m) + '에서 ' + (p.dur >= 60 ? (p.dur / 60) + '시간' : p.dur + '분') + ' 뒤예요</span>';
+    }
     var hourPart = p.m === 0 ? '짧은 바늘: ' + p.h : '짧은 바늘: ' + p.h + '~' + (p.h % 12 + 1) + ' 사이';
-    var minPart = p.m === 0 ? '긴 바늘: 12 (정각)' : '긴 바늘: ' + (p.m / 5) + ' (' + p.m + '분)';
+    var minPart = p.m === 0 ? '긴 바늘: 12 (정각)' : p.m % 5 ? '긴 바늘: ' + p.m + '분 자리' : '긴 바늘: ' + (p.m / 5) + ' (' + p.m + '분)';
     return '<span class="dm-eq">' + clockText(p.h, p.m) + '</span><span class="dm-ex">' + hourPart + ' · ' + minPart + '</span>';
   }
 
@@ -2779,12 +2688,12 @@
       + '<text y="' + (c.r * 0.32).toFixed(1) + '" text-anchor="middle" font-size="' + (c.r * 0.82).toFixed(1) + '" font-family="Do Hyeon, sans-serif" fill="' + QUIZ_INK + '">' + v + '</text>'
       + '</g>';
   }
-  function billMarkup(x, y){
+  function billMarkup(x, y, amount){
     return '<g transform="translate(' + x + ',' + y + ') scale(1.3)">'
       + '<rect x="-48" y="-26" width="96" height="52" rx="6" fill="#9CCFF0" stroke="' + QUIZ_INK + '" stroke-width="2.5"/>'
       + '<rect x="-42" y="-20" width="84" height="40" rx="4" fill="none" stroke="#fff" stroke-width="1.5"/>'
-      + '<circle cx="22" cy="0" r="12" fill="#CFE8F8" stroke="#5E9CC4" stroke-width="1.5"/>'
-      + '<text x="-12" y="7" text-anchor="middle" font-size="18" font-family="Do Hyeon, sans-serif" fill="' + QUIZ_INK + '">1000원</text>'
+      + '<circle cx="31" cy="0" r="8" fill="#CFE8F8" stroke="#5E9CC4" stroke-width="1.5"/>'
+      + '<text x="-12" y="7" text-anchor="middle" font-size="18" font-family="Do Hyeon, sans-serif" fill="' + QUIZ_INK + '">' + (amount || 1000) + '원</text>'
       + '</g>';
   }
   function moneyBadgeIconSVG(){
@@ -2797,63 +2706,108 @@
 
   function moneyCoinsTotal(coins){ return coins.reduce(function(s, v){ return s + v; }, 0); }
 
-  function moneyBuildProblem(diff){
-    var guard = 0, coins, total, key;
-    if(diff === 'hard'){
-      var item, price;
-      do { item = MONEY_ITEMS[pick(0, MONEY_ITEMS.length - 1)]; price = pick(2, 19) * 50; key = 'm' + item.name + price; guard++; } while(state.used.has(key) && guard < 100);
-      state.used.add(key);
-      var change = 1000 - price;
-      var cands = [change + 100, change - 100, change + 50, change - 50, price].filter(function(v){ return v > 0 && v !== change; });
-      var choices = spotShuffle(spotShuffle(cands).slice(0, 2).concat([change]));
-      return { kind:'money', type:'change', item:item, price:price, answer:change, choices:choices, answerIdx:choices.indexOf(change) };
-    }
+  function moneyPickChoices(answer, offsets){
+    var cands = offsets.map(function(d){ return answer + d; }).filter(function(v, i, a){ return v > 0 && v !== answer && a.indexOf(v) === i; });
+    var choices = spotShuffle(spotShuffle(cands).slice(0, 2).concat([answer]));
+    return { choices:choices, answerIdx:choices.indexOf(answer) };
+  }
+
+  function moneyChangeProblem(paid, step, maxPrice, offsets){
+    var guard = 0, item, price, key;
     do {
-      coins = [];
-      if(diff === 'easy'){
-        var n100 = pick(1, 4), n10 = pick(1, 5);
-        for(var i=0;i<n100;i++) coins.push(100);
-        for(var j=0;j<n10;j++) coins.push(10);
-      } else {
-        var counts = { 500:pick(0,1), 100:pick(0,3), 50:pick(0,2), 10:pick(0,4) };
-        Object.keys(counts).forEach(function(v){ for(var k=0;k<counts[v];k++) coins.push(Number(v)); });
-      }
+      item = MONEY_ITEMS[pick(0, MONEY_ITEMS.length - 1)];
+      price = pick(1, maxPrice / step) * step;
+      key = 'm' + item.name + price; guard++;
+    } while((state.used.has(key) || price >= paid) && guard < 100);
+    state.used.add(key);
+    var change = paid - price, picked = moneyPickChoices(change, offsets.concat([price - change]));
+    return { kind:'money', type:'change', item:item, price:price, paid:paid, answer:change, choices:picked.choices, answerIdx:picked.answerIdx };
+  }
+
+  function moneySumProblem(){
+    var guard = 0, a, b, pa, pb, key;
+    do {
+      var items = spotShuffle(MONEY_ITEMS.slice());
+      a = items[0]; b = items[1]; pa = pick(2, 9) * 50; pb = pick(2, 9) * 50;
+      key = 's' + a.name + pa + b.name + pb; guard++;
+    } while(state.used.has(key) && guard < 100);
+    state.used.add(key);
+    var total = pa + pb, picked = moneyPickChoices(total, [50, -50, 100, -100, 200]);
+    return { kind:'money', type:'sum', a:a, b:b, pa:pa, pb:pb, answer:total, choices:picked.choices, answerIdx:picked.answerIdx };
+  }
+
+  function moneyCoinsFor(level){
+    var counts;
+    if(level === 1){ counts = Math.random() < 0.5 ? { 100:pick(2, 9) } : { 10:pick(2, 9) }; }
+    else if(level === 2){ counts = { 100:pick(1, 4), 10:pick(1, 5) }; }
+    else if(level === 3){ counts = { 50:pick(1, 4), 10:pick(1, 5) }; }
+    else if(level === 4){ counts = { 100:pick(1, 3), 50:pick(1, 2), 10:pick(1, 3) }; }
+    else if(level === 5){ counts = { 500:pick(0, 1), 100:pick(0, 3), 50:pick(0, 2), 10:pick(0, 4) }; }
+    else { counts = { 1000:pick(1, 3), 500:pick(0, 1), 100:pick(0, 2), 50:pick(0, 1), 10:pick(0, 1) }; }
+    var coins = [];
+    Object.keys(counts).forEach(function(v){ for(var k=0;k<counts[v];k++) coins.push(Number(v)); });
+    return coins;
+  }
+
+  function moneyBuildProblem(level){
+    if(level === 7) return moneySumProblem();
+    if(level === 8) return moneyChangeProblem(1000, 100, 900, [100, -100, 200, -200]);
+    if(level === 9) return moneyChangeProblem(1000, 50, 950, [100, -100, 50, -50]);
+    if(level === 10) return moneyChangeProblem(5000, 50, 4900, [100, -100, 500, -500, 1000]);
+    var guard = 0, coins, total, key, kinds, small;
+    do {
+      coins = moneyCoinsFor(level);
       total = moneyCoinsTotal(coins);
-      var kinds = coins.filter(function(v, idx, a){ return a.indexOf(v) === idx; }).length;
+      kinds = coins.filter(function(v, idx, a){ return a.indexOf(v) === idx; }).length;
+      small = coins.filter(function(v){ return v !== 1000; }).length;
       key = 'm' + coins.join(',');
       guard++;
-    } while((coins.length < 2 || coins.length > 9 || total > 1000 || (diff !== 'easy' && kinds < 2) || state.used.has(key)) && guard < 200);
+    } while((coins.length < 2 || coins.length > 9 || small > 4 && level === 6 || (level !== 6 && total > 1000) || (level !== 1 && kinds < 2) || state.used.has(key)) && guard < 200);
     state.used.add(key);
-    var c10 = coins.filter(function(v){ return v === 10; }).length, c100 = coins.filter(function(v){ return v === 100; }).length;
-    var candsM = [total + 100, total - 100, total + 10, total - 10, total + 50, total - 50];
-    if(diff === 'easy'){ candsM.push(c10 * 100 + c100 * 10); }
-    else if(coins.indexOf(500) !== -1){ candsM.push(total - 400); }
-    candsM = candsM.filter(function(v, idx, a){ return v > 0 && v !== total && a.indexOf(v) === idx; });
-    var choicesM = spotShuffle(spotShuffle(candsM).slice(0, 2).concat([total]));
-    return { kind:'money', type:'count', coins:coins.sort(function(a, b){ return b - a; }), answer:total, choices:choicesM, answerIdx:choicesM.indexOf(total) };
+    var offsets = level === 1 && total >= 200 && total % 100 === 0 ? [100, -100, 200, -200] : [100, -100, 10, -10, 50, -50];
+    if(level === 2){
+      var c10 = coins.filter(function(v){ return v === 10; }).length, c100 = coins.filter(function(v){ return v === 100; }).length;
+      offsets.push(c10 * 100 + c100 * 10 - total);
+    }
+    if(coins.indexOf(500) !== -1){ offsets.push(-400); }
+    var picked = moneyPickChoices(total, offsets);
+    return { kind:'money', type:'count', coins:coins.sort(function(a, b){ return b - a; }), answer:total, choices:picked.choices, answerIdx:picked.answerIdx };
   }
 
   function moneyRender(p){
     var svg = '';
     if(p.type === 'change'){
       var nm = p.item.name;
-      quizQuestionEl.textContent = p.price + '원짜리 ' + nm + (hasBatchim(nm) ? '을' : '를') + ' 사고 1000원을 냈어요. 거스름돈은 얼마일까요?';
+      quizQuestionEl.textContent = p.price + '원짜리 ' + nm + (hasBatchim(nm) ? '을' : '를') + ' 사고 ' + p.paid + '원을 냈어요. 거스름돈은 얼마일까요?';
       svg += '<rect x="34" y="40" width="140" height="180" rx="20" fill="#fff" stroke="' + QUIZ_INK + '" stroke-width="4"/>'
         + '<text x="104" y="135" text-anchor="middle" font-size="76">' + p.item.emoji + '</text>'
         + '<rect x="54" y="160" width="100" height="40" rx="12" fill="#FFE14D" stroke="' + QUIZ_INK + '" stroke-width="3"/>'
         + '<text x="104" y="188" text-anchor="middle" font-size="22" font-family="Do Hyeon, sans-serif" fill="' + QUIZ_INK + '">' + p.price + '원</text>'
         + '<text x="212" y="140" text-anchor="middle" font-size="34" font-family="Do Hyeon, sans-serif" fill="#5B4B7A">←</text>'
-        + billMarkup(300, 130)
+        + billMarkup(300, 130, p.paid)
         + '<text x="300" y="196" text-anchor="middle" font-size="16" font-weight="700" fill="#5B4B7A" font-family="Apple SD Gothic Neo, Malgun Gothic, sans-serif">낸 돈</text>';
+    } else if(p.type === 'sum'){
+      quizQuestionEl.textContent = p.a.name + (hasBatchim(p.a.name) ? '과 ' : '와 ') + p.b.name + (hasBatchim(p.b.name) ? '을' : '를') + ' 샀어요. 모두 얼마일까요?';
+      [[p.a, p.pa, 104], [p.b, p.pb, 296]].forEach(function(row){
+        svg += '<rect x="' + (row[2] - 70) + '" y="40" width="140" height="180" rx="20" fill="#fff" stroke="' + QUIZ_INK + '" stroke-width="4"/>'
+          + '<text x="' + row[2] + '" y="135" text-anchor="middle" font-size="76">' + row[0].emoji + '</text>'
+          + '<rect x="' + (row[2] - 50) + '" y="160" width="100" height="40" rx="12" fill="#FFE14D" stroke="' + QUIZ_INK + '" stroke-width="3"/>'
+          + '<text x="' + row[2] + '" y="188" text-anchor="middle" font-size="22" font-family="Do Hyeon, sans-serif" fill="' + QUIZ_INK + '">' + row[1] + '원</text>';
+      });
+      svg += '<text x="200" y="142" text-anchor="middle" font-size="40" font-family="Do Hyeon, sans-serif" fill="#5B4B7A">+</text>';
     } else {
-      quizQuestionEl.textContent = '동전이 모두 얼마일까요?';
-      var perRow = p.coins.length > 5 ? Math.ceil(p.coins.length / 2) : p.coins.length;
-      var rows = Math.ceil(p.coins.length / perRow), gap = 76;
-      p.coins.forEach(function(v, i){
+      var bills = p.coins.filter(function(v){ return v === 1000; }), small = p.coins.filter(function(v){ return v !== 1000; });
+      quizQuestionEl.textContent = bills.length ? '돈이 모두 얼마일까요?' : '동전이 모두 얼마일까요?';
+      bills.forEach(function(v, i){
+        svg += billMarkup(200 + (i - (bills.length - 1) / 2) * 130, small.length ? 62 : 130);
+      });
+      var perRow = small.length > 5 ? Math.ceil(small.length / 2) : small.length;
+      var rows = perRow ? Math.ceil(small.length / perRow) : 0, gap = 76;
+      small.forEach(function(v, i){
         var row = Math.floor(i / perRow), col = i % perRow;
-        var inRow = Math.min(perRow, p.coins.length - row * perRow);
+        var inRow = Math.min(perRow, small.length - row * perRow);
         var x = 200 + (col - (inRow - 1) / 2) * gap;
-        var y = 130 + (row - (rows - 1) / 2) * 92;
+        var y = (bills.length ? 180 : 130) + (row - (rows - 1) / 2) * 92;
         svg += coinMarkup(v, x, y);
       });
     }
@@ -2865,11 +2819,14 @@
 
   function moneyExplain(p){
     if(p.type === 'change'){
-      return '<span class="dm-eq">1000 - ' + p.price + ' = ' + p.answer + '</span><span class="dm-ex">거스름돈은 ' + p.answer + '원이에요</span>';
+      return '<span class="dm-eq">' + p.paid + ' - ' + p.price + ' = ' + p.answer + '</span><span class="dm-ex">거스름돈은 ' + p.answer + '원이에요</span>';
     }
-    var parts = [500, 100, 50, 10].map(function(v){
+    if(p.type === 'sum'){
+      return '<span class="dm-eq">' + p.pa + ' + ' + p.pb + ' = ' + p.answer + '</span><span class="dm-ex">모두 ' + p.answer + '원이에요</span>';
+    }
+    var parts = [1000, 500, 100, 50, 10].map(function(v){
       var n = p.coins.filter(function(c){ return c === v; }).length;
-      return n ? v + '원 ' + n + '개' : '';
+      return n ? v + '원 ' + n + (v === 1000 ? '장' : '개') : '';
     }).filter(Boolean);
     return '<span class="dm-eq">' + p.answer + '원</span><span class="dm-ex">' + parts.join(' + ') + '</span>';
   }
@@ -2905,13 +2862,14 @@
 
   function patternSameItem(a, b){ return a.shape === b.shape && a.color === b.color; }
 
-  function patternEasy(){
-    var layouts = [
-      { unit:[0,1], rule:'두 가지가 번갈아 나와요' },
-      { unit:[0,1,2], rule:'세 가지가 차례로 반복돼요' },
-      { unit:[0,0,1], rule:'두 개, 한 개씩 반복돼요' },
-      { unit:[0,1,1], rule:'한 개, 두 개씩 반복돼요' }
-    ];
+  var PATTERN_LAYOUTS = {
+    1:[{ unit:[0,1], rule:'두 가지가 번갈아 나와요' }],
+    2:[{ unit:[0,1,2], rule:'세 가지가 차례로 반복돼요' }, { unit:[0,0,1], rule:'두 개, 한 개씩 반복돼요' }, { unit:[0,1,1], rule:'한 개, 두 개씩 반복돼요' }],
+    3:[{ unit:[0,1,2,3], rule:'네 가지가 차례로 반복돼요' }, { unit:[0,1,0,2], rule:'네 칸씩 반복돼요' }, { unit:[0,0,1,1], rule:'두 개씩 묶여서 반복돼요' }]
+  };
+
+  function patternPictures(level){
+    var layouts = PATTERN_LAYOUTS[level];
     var layout = layouts[pick(0, layouts.length - 1)];
     var shapes = spotShuffle(PATTERN_SHAPES.slice()), colors = spotShuffle(PATTERN_COLORS.slice());
     var kinds = [0,1,2,3].map(function(i){ return { shape:shapes[i], color:colors[i] }; });
@@ -2932,18 +2890,18 @@
     };
   }
 
-  function patternNormal(){
-    var step = [1,2,3,5,10][pick(0, 4)], down = Math.random() < 0.3, seq = [], n = 6;
+  function patternSteps(steps, downChance, middleChance){
+    var step = steps[pick(0, steps.length - 1)], down = Math.random() < downChance, seq = [], n = 6;
     var start = down ? step * (n - 1) + pick(1, 20) : pick(1, 20);
     for(var i=0;i<n;i++){ seq.push(start + (down ? -step : step) * i); }
-    var blankAt = Math.random() < 0.3 ? pick(2, 4) : n - 1;
+    var blankAt = Math.random() < middleChance ? pick(1, 4) : n - 1;
     var answer = seq[blankAt];
     return patternNumberProblem(seq, step + '씩 ' + (down ? '작아져요' : '커져요'), blankAt,
       [answer + 1, answer - 1, answer + step + 1, answer - step - 1, answer + 2, answer - 2]);
   }
 
-  function patternHard(){
-    var kind = pick(0, 3), seq = [], i, answer;
+  function patternHard(kind){
+    var seq = [], i, answer;
     if(kind === 0){
       var v = pick(1, 6);
       for(i=0;i<6;i++){ seq.push(v); v += i + 1; }
@@ -2975,10 +2933,21 @@
     };
   }
 
-  function patternBuildProblem(diff){
-    var build = diff === 'easy' ? patternEasy : diff === 'normal' ? patternNormal : patternHard, p, key;
+  function patternForLevel(level){
+    if(level <= 3) return patternPictures(level);
+    if(level === 4) return patternSteps([1,2], 0, 0);
+    if(level === 5) return patternSteps([5,10], 0, 0);
+    if(level === 6) return patternSteps([1,2,5,10], 1, 0);
+    if(level === 7) return patternSteps([2,3,4,5,10], 0.3, 1);
+    if(level === 8) return patternHard(0);
+    if(level === 9) return patternHard(pick(1, 2));
+    return patternHard(pick(0, 3));
+  }
+
+  function patternBuildProblem(level){
+    var p, key;
     for(var tries=0; tries<20; tries++){
-      p = build();
+      p = patternForLevel(level);
       key = JSON.stringify(p.items);
       if(!state.used.has(key) && p.wrong.length === 2) break;
     }
@@ -3008,8 +2977,9 @@
   }
 
   function renderQuizStage(){
-    var p = state.gameType === 'clock' ? clockBuildProblem(state.quizDifficulty)
-      : state.gameType === 'money' ? moneyBuildProblem(state.quizDifficulty) : patternBuildProblem(state.quizDifficulty);
+    var level = Number(state.level);
+    var p = state.gameType === 'clock' ? clockBuildProblem(level)
+      : state.gameType === 'money' ? moneyBuildProblem(level) : patternBuildProblem(level);
     quizState.problem = p;
     quizState.locked = false;
     if(p.kind === 'clock'){ clockRender(p); } else if(p.kind === 'money'){ moneyRender(p); } else { patternRender(p); }
@@ -3056,9 +3026,16 @@
 
   /* ============ dictation: hear a word, tap its syllables in order ============ */
   var DICT_WORDS = {
-    easy:['나비','바다','사과','우유','포도','기차','모자','오리','하마','아기','치마','도토리','코끼리','바나나','토마토','구두','버스','피아노','라디오','고구마','거미','나무','다리','자두','두부','가수','소리','노래','여우','호랑이'],
-    normal:['학교','친구','연필','책상','가방','사람','강아지','고양이','선생님','운동장','눈사람','자전거','냉장고','컴퓨터','동생','할머니','할아버지','음식','공룡','딸기','수박','옥수수','시금치','색종이','풍선','그림책','놀이터','장난감','손가락','발가락'],
-    hard:['같이','굳이','해돋이','국물','닭','값','많이','좋아요','꽃잎','옷걸이','깨끗이','설거지','며칠','어떻게','괜찮아','훌륭해','맛있어','재미있어','앉아요','없어요','닮았어요','학년','입학','신라','달님','읽어요','넓어요','끓여요','빛나요','부엌']
+    1:['나비','바다','우유','포도','기차','모자','오리','하마','아기','치마','구두','버스','거미','나무','다리','자두','두부','가수','소리','노래','여우'],
+    2:['도토리','코끼리','바나나','토마토','피아노','라디오','고구마','미나리','너구리','개구리','메뚜기','지우개','아버지','어머니','오소리'],
+    3:['토끼','까치','꼬리','뿌리','아빠','오빠','찌개','쓰레기','꼬마','따로','어깨','머리띠','아저씨','아가씨','꾀꼬리'],
+    4:['학교','친구','연필','책상','가방','사람','동생','음식','공룡','딸기','수박','풍선','눈썹','달력','우산'],
+    5:['강아지','고양이','선생님','운동장','눈사람','자전거','냉장고','컴퓨터','할머니','할아버지','옥수수','시금치','색종이','그림책','장난감','손가락','발가락'],
+    6:['개미','베개','과자','의자','사과','병원','샤워','왜가리','괴물','귀신','쥐','회사','돼지','화가','매미','세수'],
+    7:['음악','국어','얼음','웃음','놀이터','목욕','발음','일요일','금요일','어린이','단어','문어','직업','먹이','밥알'],
+    8:['같이','굳이','해돋이','국물','학년','입학','신라','달님','꽃잎','옷걸이','앞니','콧물','좋아요','놓아요','국민','식물'],
+    9:['닭','값','많이','앉아요','없어요','닮았어요','읽어요','넓어요','끓여요','여덟','짧아요','젊어요','삶','흙','밟아요'],
+    10:['며칠','어떻게','괜찮아','훌륭해','맛있어','재미있어','깨끗이','설거지','빛나요','부엌','왠지','됐어요','일찍이','곰곰이','희망']
   };
   var DICT_JONG_GROUPS = [[1,2,24,9,3],[4,5,6,21],[7,19,20,22,23,25,27],[8,11,12,13,15],[16,10,21],[17,18,26,14]];
   var DICT_JONG_DOUBLE = [3,5,6,9,10,11,12,13,14,15,18];
@@ -3125,7 +3102,7 @@
   }
 
   function renderDictStage(){
-    var pool = DICT_WORDS[state.quizDifficulty].filter(function(w){ return !state.used.has(w); });
+    var pool = DICT_WORDS[state.level].filter(function(w){ return !state.used.has(w); });
     var word = pool[pick(0, pool.length - 1)];
     state.used.add(word);
     dict = { word:word, syllables:word.split(''), filled:0, locked:false };
@@ -3133,7 +3110,7 @@
     updateDots(dictDotsWrap);
     dictFeedbackEl.textContent = '';
     dictSlotsEl.innerHTML = dict.syllables.map(function(){ return '<span class="dict-slot"></span>'; }).join('');
-    var extra = state.quizDifficulty === 'easy' ? 2 : 3;
+    var extra = Number(state.level) <= 2 ? 2 : 3;
     dictTilesEl.innerHTML = dictBuildTiles(dict.syllables, extra).map(function(s){
       return '<button class="dict-tile">' + s + '</button>';
     }).join('');
@@ -3319,7 +3296,6 @@
   document.getElementById('parent-reopen').addEventListener('click', function(){
     clearedLevels = {};
     saveClearedLevels();
-    refreshClearedLevels();
     parentMsgEl.textContent = '모든 단계를 다시 열었어요.';
   });
 
