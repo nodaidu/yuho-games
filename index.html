@@ -355,6 +355,36 @@
   }
   #break-next-level-btn:active{ transform:translateY(4px); box-shadow:1px 1px 0 var(--ink); }
 
+  /* ---------- LEARNING RECORDS (parents) ---------- */
+  #screen-records{
+    justify-content:flex-start; overflow-y:auto; padding:72px 16px 24px; background:#fff; color:var(--ink);
+    font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  }
+  .rec-inner{ width:min(560px,100%); display:flex; flex-direction:column; gap:14px; flex-shrink:0; }
+  .rec-inner h3{ margin:0 0 8px; font-size:17px; }
+  .rec-note{ margin:0; font-size:13px; color:#6A6A7A; line-height:1.5; }
+  .rec-summary{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .rec-stat{ background:#F4F4F8; border-radius:14px; padding:10px; text-align:center; font-size:12px; color:#6A6A7A; }
+  .rec-stat b{ display:block; font-size:22px; color:var(--ink); }
+  .rec-section{ border:2px solid #E4E4EC; border-radius:16px; padding:12px; }
+  .rec-table{ width:100%; border-collapse:collapse; font-size:13px; }
+  .rec-table th{ font-weight:700; color:#6A6A7A; text-align:right; padding:4px; font-size:12px; }
+  .rec-table td{ text-align:right; padding:6px 4px; border-top:1px solid #EEE; }
+  .rec-table th:first-child, .rec-table td:first-child{ text-align:left; }
+  .rec-day{ margin:10px 0 4px; font-weight:700; font-size:14px; }
+  .rec-day:first-of-type{ margin-top:0; }
+  .rec-line{ display:flex; justify-content:space-between; gap:10px; padding:5px 0; font-size:13px; border-top:1px solid #EEE; }
+  .rec-line span:last-child{ color:#6A6A7A; white-space:nowrap; }
+  .rec-empty{ margin:0; font-size:13px; color:#6A6A7A; }
+  .rec-btn{
+    width:100%; padding:12px 8px; margin-top:8px; border:3px solid var(--ink); border-radius:14px; background:#fff; color:var(--ink);
+    font-size:15px; font-weight:800; font-family:inherit;
+  }
+  #rec-export{ background:#FFE14D; }
+  #rec-clear{ border-color:#C0392B; color:#C0392B; }
+  #rec-msg{ min-height:20px; margin:8px 0 0; font-size:13px; font-weight:700; color:#1F8F52; }
+  #rec-file{ display:none; }
+
   /* ---------- GAME-OVER OVERLAY ---------- */
   .game-over{
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
@@ -769,6 +799,26 @@
     </div>
   </section>
 
+  <!-- LEARNING RECORDS (parents) -->
+  <section class="screen" id="screen-records">
+    <button class="back-btn" id="records-back">← 나가기</button>
+    <div class="rec-inner">
+      <div class="rec-summary" id="rec-summary"></div>
+      <div class="rec-section"><h3>게임별 기록</h3><div id="rec-games"></div></div>
+      <div class="rec-section"><h3>자주 틀린 문제</h3><div id="rec-missed"></div></div>
+      <div class="rec-section"><h3>날짜별 기록 (최근 14일)</h3><div id="rec-days"></div></div>
+      <div class="rec-section">
+        <h3>기록 보관</h3>
+        <p class="rec-note" id="rec-backup-note"></p>
+        <button class="rec-btn" id="rec-export">📤 백업 파일 저장</button>
+        <button class="rec-btn" id="rec-import">📥 백업 파일 불러오기</button>
+        <button class="rec-btn" id="rec-clear">🗑 학습 기록 지우기</button>
+        <input type="file" id="rec-file" accept="application/json,.json">
+        <p id="rec-msg"></p>
+      </div>
+    </div>
+  </section>
+
   <!-- PARENT CHECK -->
   <div class="parent-modal" id="parent-modal">
     <div class="parent-card">
@@ -780,6 +830,7 @@
       </div>
       <div id="parent-menu">
         <button class="parent-action" id="parent-rest">🎮 쉬어가는 게임 더 하기</button>
+        <button class="parent-action" id="parent-records">📊 학습 기록 보기</button>
         <button class="parent-action" id="parent-reopen">🔓 학습 단계 모두 다시 열기</button>
       </div>
       <button class="parent-action" id="parent-close">닫기</button>
@@ -2074,6 +2125,8 @@
     state.used = new Set();
     state.locked = false;
     state.wrongCount = 0;
+    state.wrongs = [];
+    state.startedAt = Date.now();
     if(gameType === 'spot'){
       state.spotDifficulty = level;
     } else {
@@ -2171,6 +2224,7 @@
     } else {
       playBuzz();
       state.wrongCount++;
+      logWrong(bannerTextEl.textContent, state.current.answer);
       pickBtns[idx].classList.add('wrong');
       feedbackMsg.textContent = '다시 한번 생각해볼까요? 🙂';
       setTrackedTimeout(function(){
@@ -2201,6 +2255,7 @@
 
   function finishLearning(){
     markLevelCleared();
+    recordPlay();
     showBreak(true);
   }
 
@@ -2464,6 +2519,7 @@
       if(dmState.solved){ finish(); } else { dmPlaySolve(finish); }
     } else {
       state.wrongCount++;
+      logWrong(p.type === 'multiply' ? p.M + ' × ' + p.K : p.N + ' ÷ ' + (p.type === 'share' ? p.M : p.K), p.r ? p.answer + ' (나머지 ' + p.r + ')' : String(p.answer));
       playBuzz();
       btn.classList.add('wrong');
       btn.disabled = true;
@@ -3001,6 +3057,28 @@
     }, 450);
   }
 
+  // how a missed question reads in the parents' records
+  function quizMissedItem(p){
+    if(p.kind === 'pattern'){
+      var numbers = p.items.some(function(it){ return it.num !== undefined; });
+      return numbers
+        ? { q:p.items.map(function(it){ return it.blank ? '?' : it.num; }).join(', '), a:String(p.answer.num) }
+        : { q:'그림 규칙', a:p.rule };
+    }
+    if(p.kind === 'clock'){
+      if(p.type === 'elapsed'){ return { q:clockText(p.start.h, p.start.m) + ' → ' + clockText(p.end.h, p.end.m), a:p.dur + '분' }; }
+      if(p.type === 'after'){ return { q:clockText(p.start.h, p.start.m) + '에서 ' + (p.dur >= 60 ? (p.dur / 60) + '시간' : p.dur + '분') + ' 뒤', a:clockText(p.h, p.m) }; }
+      return { q:'시계 읽기', a:clockText(p.h, p.m) };
+    }
+    if(p.type === 'change'){ return { q:p.paid + '원 - ' + p.price + '원', a:p.answer + '원' }; }
+    if(p.type === 'sum'){ return { q:p.pa + '원 + ' + p.pb + '원', a:p.answer + '원' }; }
+    var parts = [1000, 500, 100, 50, 10].map(function(v){
+      var n = p.coins.filter(function(c){ return c === v; }).length;
+      return n ? v + '원 ' + n + (v === 1000 ? '장' : '개') : '';
+    }).filter(Boolean);
+    return { q:parts.join(' + '), a:p.answer + '원' };
+  }
+
   quizChoicesEl.addEventListener('click', function(e){
     var btn = e.target.closest('.dm-choice');
     if(!btn || btn.disabled || quizState.locked) return;
@@ -3013,6 +3091,8 @@
       setTrackedTimeout(advanceQuizStage, 1800);
     } else {
       state.wrongCount++;
+      var missed = quizMissedItem(p);
+      logWrong(missed.q, missed.a);
       playBuzz();
       btn.classList.add('wrong');
       btn.disabled = true;
@@ -3123,6 +3203,7 @@
     if(!tile || dict.locked) return;
     if(tile.textContent !== dict.syllables[dict.filled]){
       state.wrongCount++;
+      logWrong('받아쓰기', dict.word);
       playBuzz();
       tile.classList.remove('wrong');
       void tile.offsetWidth;
@@ -3239,6 +3320,203 @@
     });
   });
 
+  /* ============ learning records: kept on this device only, with a backup file ============ */
+  var RECORDS_KEY = 'yuho-learning-records-v1';
+  var RECORDS_MAX_PLAYS = 3000, RECORD_MAX_MISSED = 20, RECORD_MAX_SECONDS = 3600;
+  var records = { plays:[], backupAt:0 };
+  try {
+    var savedRecords = JSON.parse(localStorage.getItem(RECORDS_KEY));
+    if(savedRecords && Array.isArray(savedRecords.plays)){ records = savedRecords; }
+  } catch(e){}
+
+  function saveRecords(){
+    for(var tries=0; tries<4; tries++){
+      try { localStorage.setItem(RECORDS_KEY, JSON.stringify(records)); return true; }
+      catch(e){ records.plays = records.plays.slice(Math.floor(records.plays.length / 2)); }  // storage full: drop the oldest half
+    }
+    return false;
+  }
+
+  function logWrong(q, a){
+    var found = state.wrongs.filter(function(m){ return m.q === q && m.a === a; })[0];
+    if(found){ found.c++; }
+    else if(state.wrongs.length < RECORD_MAX_MISSED){ state.wrongs.push({ q:q, a:a, c:1 }); }
+  }
+
+  function recordPlay(){
+    if(!LEVEL_INFO[state.gameType]) return;
+    records.plays.push({
+      t:Date.now(), g:state.gameType, l:state.level, w:state.wrongCount,
+      s:Math.min(RECORD_MAX_SECONDS, Math.round((Date.now() - state.startedAt) / 1000)), m:state.wrongs
+    });
+    if(records.plays.length > RECORDS_MAX_PLAYS){ records.plays = records.plays.slice(-RECORDS_MAX_PLAYS); }
+    saveRecords();
+  }
+
+  function recEsc(text){
+    return String(text).replace(/[&<>"']/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; });
+  }
+  function recMinutes(seconds){
+    if(seconds < 60) return '1분 미만';
+    var m = Math.round(seconds / 60);
+    return m >= 60 ? Math.floor(m / 60) + '시간 ' + (m % 60) + '분' : m + '분';
+  }
+  function recDay(t){
+    var d = new Date(t);
+    return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+  }
+  function recDayLabel(t){
+    var d = new Date(t);
+    return (d.getMonth() + 1) + '월 ' + d.getDate() + '일 (' + '일월화수목금토'.charAt(d.getDay()) + ')';
+  }
+
+  function renderRecords(){
+    var plays = records.plays;
+    var problems = plays.length * state.totalStages;
+    var wrong = plays.reduce(function(sum, p){ return sum + p.w; }, 0);
+    var seconds = plays.reduce(function(sum, p){ return sum + p.s; }, 0);
+    document.getElementById('rec-summary').innerHTML = [
+      ['끝낸 학습', plays.length + '번'], ['푼 문제', problems + '개'], ['틀린 횟수', wrong + '번'], ['학습 시간', plays.length ? recMinutes(seconds) : '0분']
+    ].map(function(row){ return '<div class="rec-stat"><b>' + row[1] + '</b>' + row[0] + '</div>'; }).join('');
+
+    document.getElementById('rec-games').innerHTML = '<table class="rec-table"><tr><th>게임</th><th>통과 단계</th><th>끝낸 횟수</th><th>한 판당 틀림</th></tr>'
+      + Object.keys(LEVEL_INFO).map(function(game){
+        var mine = plays.filter(function(p){ return p.g === game; });
+        var missed = mine.reduce(function(sum, p){ return sum + p.w; }, 0);
+        return '<tr><td>' + LEVEL_INFO[game].title + '</td><td>' + Object.keys(clearedLevels[game] || {}).length + ' / 10</td><td>' + mine.length + '번</td><td>'
+          + (mine.length ? (missed / mine.length).toFixed(1) + '번' : '-') + '</td></tr>';
+      }).join('') + '</table>';
+
+    var tally = {};
+    plays.forEach(function(p){
+      p.m.forEach(function(m){
+        var key = p.g + '|' + m.q + '|' + m.a;
+        if(!tally[key]){ tally[key] = { g:p.g, q:m.q, a:m.a, c:0, t:0 }; }
+        tally[key].c += m.c;
+        tally[key].t = Math.max(tally[key].t, p.t);
+      });
+    });
+    var top = Object.keys(tally).map(function(k){ return tally[k]; }).sort(function(a, b){ return b.c - a.c || b.t - a.t; }).slice(0, 10);
+    document.getElementById('rec-missed').innerHTML = top.length ? top.map(function(m){
+      return '<div class="rec-line"><span>' + recEsc(m.q) + ' → <b>' + recEsc(m.a) + '</b></span><span>' + LEVEL_INFO[m.g].title + ' · ' + m.c + '번</span></div>';
+    }).join('') : '<p class="rec-empty">아직 틀린 문제 기록이 없어요.</p>';
+
+    var cutoff = Date.now() - 14 * 24 * 3600 * 1000, html = '', lastDay = '';
+    plays.filter(function(p){ return p.t >= cutoff; }).sort(function(a, b){ return b.t - a.t; }).forEach(function(p){
+      if(recDay(p.t) !== lastDay){
+        lastDay = recDay(p.t);
+        html += '<div class="rec-day">' + recDayLabel(p.t) + '</div>';
+      }
+      html += '<div class="rec-line"><span>' + LEVEL_INFO[p.g].title + ' ' + p.l + '단계</span><span>틀림 ' + p.w + '번 · ' + recMinutes(p.s) + '</span></div>';
+    });
+    document.getElementById('rec-days').innerHTML = html || '<p class="rec-empty">최근 14일 동안 끝낸 학습이 없어요.</p>';
+
+    document.getElementById('rec-backup-note').textContent = '기록은 이 기기의 이 브라우저에만 저장돼요. 브라우저 데이터를 지우거나 기기를 바꾸면 사라지니 가끔 백업해 주세요. '
+      + (records.backupAt ? '마지막 백업: ' + recDayLabel(records.backupAt) : '아직 백업한 적이 없어요.');
+  }
+
+  var recClearArmed = false;
+  function recDisarmClear(){
+    recClearArmed = false;
+    document.getElementById('rec-clear').textContent = '🗑 학습 기록 지우기';
+  }
+  function openRecords(){
+    document.getElementById('rec-msg').textContent = '';
+    recDisarmClear();
+    renderRecords();
+    showScreen('records');
+    document.getElementById('screen-records').scrollTop = 0;
+  }
+  document.getElementById('records-back').addEventListener('click', function(){ showScreen('lobby'); });
+
+  document.getElementById('rec-export').addEventListener('click', function(){
+    var now = new Date();
+    var pad = function(n){ return (n < 10 ? '0' : '') + n; };
+    var name = 'baeumnara-backup-' + now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) + '.json';
+    var body = JSON.stringify({ app:'baeumnara', version:1, savedAt:now.getTime(), plays:records.plays, cleared:clearedLevels });
+    var url = URL.createObjectURL(new Blob([body], { type:'application/json' }));
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = name;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 10000);
+    records.backupAt = now.getTime();
+    saveRecords();
+    renderRecords();
+    document.getElementById('rec-msg').textContent = name + ' 파일을 저장했어요.';
+  });
+
+  // a backup file comes from outside the app, so only well-formed entries get in
+  function recCleanPlay(p){
+    if(!p || typeof p !== 'object' || !LEVEL_INFO.hasOwnProperty(p.g) || LEVEL_KEYS.indexOf(p.l) === -1) return null;
+    if(!(p.t > 0) || !(p.w >= 0) || !(p.s >= 0) || !Array.isArray(p.m)) return null;
+    return {
+      t:Number(p.t), g:p.g, l:p.l, w:Number(p.w), s:Math.min(RECORD_MAX_SECONDS, Number(p.s)),
+      m:p.m.slice(0, RECORD_MAX_MISSED).filter(function(m){ return m && typeof m.q === 'string' && typeof m.a === 'string' && m.c > 0; })
+        .map(function(m){ return { q:m.q.slice(0, 80), a:m.a.slice(0, 80), c:Number(m.c) }; })
+    };
+  }
+
+  document.getElementById('rec-import').addEventListener('click', function(){ document.getElementById('rec-file').click(); });
+  document.getElementById('rec-file').addEventListener('change', function(e){
+    var file = e.target.files[0], msg = document.getElementById('rec-msg');
+    e.target.value = '';
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onerror = function(){ msg.textContent = '파일을 읽지 못했어요.'; };
+    reader.onload = function(){
+      var data = null;
+      try { data = JSON.parse(reader.result); } catch(err){}
+      if(!data || data.app !== 'baeumnara' || !Array.isArray(data.plays)){
+        msg.textContent = '이 게임의 백업 파일이 아니에요.';
+        return;
+      }
+      // merged rather than replaced, so importing never loses what is already here
+      var known = {}, added = 0;
+      records.plays.forEach(function(p){ known[p.t + p.g + p.l] = true; });
+      data.plays.forEach(function(raw){
+        var p = recCleanPlay(raw);
+        if(!p || known[p.t + p.g + p.l]) return;
+        known[p.t + p.g + p.l] = true;
+        records.plays.push(p);
+        added++;
+      });
+      records.plays.sort(function(a, b){ return a.t - b.t; });
+      if(data.cleared && typeof data.cleared === 'object'){
+        Object.keys(LEVEL_INFO).forEach(function(game){
+          var levels = data.cleared[game];
+          if(!levels || typeof levels !== 'object') return;
+          LEVEL_KEYS.forEach(function(level){
+            if(levels[level] === true){
+              clearedLevels[game] = clearedLevels[game] || {};
+              clearedLevels[game][level] = true;
+            }
+          });
+        });
+        saveClearedLevels();
+      }
+      saveRecords();
+      renderRecords();
+      msg.textContent = '기록 ' + added + '개를 불러왔어요.';
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById('rec-clear').addEventListener('click', function(){
+    if(!recClearArmed){
+      recClearArmed = true;
+      this.textContent = '정말 지울까요? 한 번 더 누르세요';
+      return;
+    }
+    records = { plays:[], backupAt:records.backupAt };
+    saveRecords();
+    recDisarmClear();
+    renderRecords();
+    document.getElementById('rec-msg').textContent = '학습 기록을 지웠어요. 잠긴 단계는 그대로예요.';
+  });
+
   /* ============ parent check: reopens levels or allows another rest game ============ */
   var parentModalEl = document.getElementById('parent-modal');
   var parentQuizEl = document.getElementById('parent-quiz');
@@ -3289,6 +3567,10 @@
   document.getElementById('parent-btn').addEventListener('click', parentOpen);
   document.getElementById('ending-more-btn').addEventListener('click', parentOpen);
   document.getElementById('parent-close').addEventListener('click', parentClose);
+  document.getElementById('parent-records').addEventListener('click', function(){
+    parentClose();
+    openRecords();
+  });
   document.getElementById('parent-rest').addEventListener('click', function(){
     parentClose();
     showBreak(false);
